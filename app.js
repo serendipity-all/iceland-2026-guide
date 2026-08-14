@@ -534,8 +534,12 @@ function setupMisc() {
   const cloudSyncBtn = document.getElementById('cloud-sync-btn');
   if (cloudSyncBtn) {
     cloudSyncBtn.onclick = () => {
+      const token = prompt('請輸入 GitHub Personal Access Token（僅此次使用，不會儲存）：');
+      if (!token || !token.startsWith('ghp_')) {
+        alert('⚠️ 未輸入有效 Token，同步已取消。');
+        return;
+      }
       alert('正同步將全隊最新行程寫回 GitHub 雲端伺服器...');
-      const token = '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';
       const repo = 'serendipity-all/iceland-2026-guide';
       const path = 'index.html';
       const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;

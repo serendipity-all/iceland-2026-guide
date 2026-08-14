@@ -1,6 +1,6 @@
 import os, json, base64, urllib.request, time
 
-TOKEN = "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"
+TOKEN = "YOUR_GITHUB_TOKEN_HERE"
 REPO = "serendipity-all/iceland-2026-guide"
 BRANCH = "main"
 

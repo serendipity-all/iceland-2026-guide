@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>2026 冰島環島夢幻探索行程地圖</name>
+    <description>2026年9月23日-10月3日 11天10夜冰島專屬包車旅遊景點清單</description>
+
+    <!-- Day 1 Folder -->
+    <Folder>
+      <name>Day 1 (09/23): 抵達雷克雅維克 &amp; 藍湖</name>
+      <Placemark>
+        <name>藍湖溫泉 (Blue Lagoon)</name>
+        <description>停留 2-2.5 小時。富含矽泥與地熱海水，舒緩飛行疲勞。</description>
+        <Point><coordinates>-22.4495,63.8804,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>哈爾格林姆教堂 (Hallgrímskirkja)</name>
+        <description>停留 45 分鐘。雷克雅維克玄武岩幾何地標教堂，可登頂俯瞰彩虹屋頂。</description>
+        <Point><coordinates>-21.9266,64.1420,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+
+    <!-- Day 2 Folder -->
+    <Folder>
+      <name>Day 2 (09/24): 南岸瀑布 &amp; 黑沙灘 &amp; 冰河湖</name>
+      <Placemark>
+        <name>水簾洞瀑布 (Seljalandsfoss)</name>
+        <description>停留 1 小時。可繞至瀑布後方水幕，必穿全套防水衣褲。</description>
+        <Point><coordinates>-19.9885,63.6156,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>彩虹瀑布 (Skógafoss)</name>
+        <description>停留 1 小時。氣勢磅礡，大晴天極易拍到濃郁雙彩虹。</description>
+        <Point><coordinates>-19.5113,63.5321,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>黑沙灘 (Reynisfjara)</name>
+        <description>停留 1.5 小時。壯觀六角玄武岩牆與海蝕柱。🚨 防瘋狗浪警告！</description>
+        <Point><coordinates>-19.0716,63.4057,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>羽毛峽谷 (Fjaðrárgljúfur)</name>
+        <description>停留 1 小時。形成於冰河時期，深達100米的夢幻綠苔巨龍峽谷。</description>
+        <Point><coordinates>-18.1718,63.7713,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>傑古沙龍冰河湖 (Jökulsárlón)</name>
+        <description>停留 2 小時。瓦特納冰川脫落的藍色巨型千年浮冰湖。</description>
+        <Point><coordinates>-16.2306,64.0784,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>鑽石沙灘 (Diamond Beach)</name>
+        <description>停留 1 小時。浮冰被浪潮沖上純黑火山沙灘，閃耀如晶瑩鑽石。</description>
+        <Point><coordinates>-16.1775,64.0440,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+
+    <!-- Day 3 Folder -->
+    <Folder>
+      <name>Day 3 (09/25): 阿克雷利小鎮風光</name>
+      <Placemark>
+        <name>阿克雷利小鎮 (Akureyri)</name>
+        <description>北部首都，特色「愛心紅綠燈」與美麗埃亞峽灣景色。</description>
+        <Point><coordinates>-18.0878,65.6835,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>百年 Brynja 冰淇淋</name>
+        <description>冰島最著名古法軟冰淇淋。</description>
+        <Point><coordinates>-18.0898,65.6766,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+
+    <!-- Day 4 Folder -->
+    <Folder>
+      <name>Day 4 (09/26): 鑽石圈 &amp; 黛堤瀑布 &amp; 米湖地熱</name>
+      <Placemark>
+        <name>眾神瀑布 (Goðafoss)</name>
+        <description>停留 1 小時。半月形神聖瀑布，冰島改信基督教歷史聖地。</description>
+        <Point><coordinates>-17.5502,65.6828,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>黛堤瀑布 (Dettifoss)</name>
+        <description>停留 1 小時。全歐洲水流量最大瀑布，《普羅米修斯》開場取景地。</description>
+        <Point><coordinates>-16.3846,65.8147,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>克拉夫拉火山 Viti 火口湖 (Krafla)</name>
+        <description>停留 45 分鐘。直徑 300 米寶藍色火口湖。</description>
+        <Point><coordinates>-16.7576,65.7171,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>米湖 Hverir 地熱區</name>
+        <description>停留 1 小時。沸騰泥漿池與強烈硫磺蒸氣，宛如火星異世界。</description>
+        <Point><coordinates>-16.8073,65.6415,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+
+    <!-- Day 5 Folder -->
+    <Folder>
+      <name>Day 5 (09/27): 峽灣賞鯨</name>
+      <Placemark>
+        <name>西格夫德 (Siglufjörður)</name>
+        <description>色彩鮮豔的鯡魚漁港小鎮，峽灣景色壯麗。</description>
+        <Point><coordinates>-18.9100,66.1508,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>峽灣出海賞鯨 (Whale Watching)</name>
+        <description>停留 3 小時。觀賞座頭鯨拍水與打尾擺。</description>
+        <Point><coordinates>-18.0878,65.6835,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+
+    <!-- Day 6 Folder -->
+    <Folder>
+      <name>Day 6 (09/28): 埃伊斯塔德 &amp; 水怪湖</name>
+      <Placemark>
+        <name>埃伊斯塔德 (Egilsstaðir)</name>
+        <description>冰島東部樞紐城鎮。</description>
+        <Point><coordinates>-14.3948,65.2669,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>拉加爾湖 (Lagarfljót Lake)</name>
+        <description>停留 1 小時。傳說有水怪棲息的靜謐狹長湖泊。</description>
+        <Point><coordinates>-14.5833,65.1833,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+
+    <!-- Day 7 Folder -->
+    <Folder>
+      <name>Day 7 (09/29): 白日夢冒險王小鎮 &amp; 金字塔山</name>
+      <Placemark>
+        <name>塞濟斯菲厄澤 (Seyðisfjörður)</name>
+        <description>電影《白日夢冒險王》滑板場景小鎮，彩虹步道與藍教堂。</description>
+        <Point><coordinates>-14.0101,65.2598,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>金字塔山 (Búlandstindur)</name>
+        <description>停留 45 分鐘。陡峭角錐型玄武岩山峰。</description>
+        <Point><coordinates>-14.2808,64.6644,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+
+    <!-- Day 8 Folder -->
+    <Folder>
+      <name>Day 8 (09/30): 市區人文探索</name>
+      <Placemark>
+        <name>太陽航行者 (Sun Voyager)</name>
+        <description>停留 30 分鐘。海岸邊維京船鋼雕藝術品。</description>
+        <Point><coordinates>-21.9223,64.1476,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Harpa 音樂廳 (Harpa)</name>
+        <description>停留 1 小時。蜂巢幾何彩色玻璃帷幕建築。</description>
+        <Point><coordinates>-21.9327,64.1504,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>百年羊肉熱狗 (Bæjarins Beztu Pylsur)</name>
+        <description>柯林頓總統也加持過的冰島平價美食。</description>
+        <Point><coordinates>-21.9378,64.1484,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+
+    <!-- Day 9 Folder -->
+    <Folder>
+      <name>Day 9 (10/01): 經典黃金圈</name>
+      <Placemark>
+        <name>辛格韋德利國家公園 (Þingvellir)</name>
+        <description>歐亞與北美板塊大裂谷，世界第一個國會誕生地。《權力的遊戲》血門。</description>
+        <Point><coordinates>-21.1297,64.2559,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>史托克間歇泉 (Strokkur Geysir)</name>
+        <description>停留 45 分鐘。每6-10分鐘爆發20-30米水藍色沸騰水柱。</description>
+        <Point><coordinates>-20.3024,64.3104,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>黃金瀑布 (Gullfoss)</name>
+        <description>停留 1 小時。兩段式傾瀉入32米峽谷的史詩大瀑布。</description>
+        <Point><coordinates>-20.1199,64.3271,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>Kerið 火口湖</name>
+        <description>停留 45 分鐘。鮮紅火山岩包圍的寶石綠火山湖。</description>
+        <Point><coordinates>-20.8851,64.0413,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+
+    <!-- Day 10 Folder -->
+    <Folder>
+      <name>Day 10 (10/02): 天空之鏡 &amp; 教堂山</name>
+      <Placemark>
+        <name>天空之鏡地熱溫泉 (Sky Lagoon)</name>
+        <description>停留 2.5 小時。無邊際北大西洋海景池與7步養生儀式。</description>
+        <Point><coordinates>-21.9486,64.1186,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
+        <name>教堂山與瀑布 (Kirkjufell)</name>
+        <description>獨立草帽造型角錐山峰，《權力的遊戲》箭頭山取景地。</description>
+        <Point><coordinates>-23.3072,64.9275,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+
+    <!-- Day 11 Folder -->
+    <Folder>
+      <name>Day 11 (10/03): 滿載回憶返鄉</name>
+      <Placemark>
+        <name>凱夫拉維克國際機場 (KEF)</name>
+        <description>07:40 清晨班機，建議 04:30 抵達辦理托運與退稅。</description>
+        <Point><coordinates>-22.6056,63.9850,0</coordinates></Point>
+      </Placemark>
+    </Folder>
+
+  </Document>
+</kml>

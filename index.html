@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101820" />
+  <title>2026 冰島夢幻之旅 旅遊指南手冊 | Iceland Travel Guide 2026</title>
+  <meta name="description" content="2026/09/23–10/03 冰島專屬包車旅遊手冊：含 11 日行程、25 大真實景點照片、今日模式、Leaflet 互動地圖、行前準備清單、行李清單與全隊雲端同步。" />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Inter:wght@400;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet" />
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Sticky Glass Topbar -->
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="回到頁首">
+      <span class="brand-mark">◒</span>
+      <span>ICELAND · 2026</span>
+    </a>
+    <nav class="nav">
+      <a href="#today">今日模式</a>
+      <a href="#route">地圖</a>
+      <a href="#days">每日行程</a>
+      <a href="#prep">行前準備</a>
+      <a href="#packing">行李清單</a>
+      <a href="#notes">待確認</a>
+    </nav>
+    <div class="topbar-actions">
+      <button id="reset-data-btn" class="edit-mode-btn" title="重新加載完整預設行程"><i class="fa-solid fa-rotate-right"></i> 🔄 重設行程</button>
+      <button id="edit-mode-toggle" class="edit-mode-btn"><i class="fa-solid fa-pen-to-square"></i> ✏️ 編輯模式</button>
+      <button id="cloud-sync-btn" class="cloud-sync-btn"><i class="fa-solid fa-cloud-arrow-up"></i> ☁️ 同步全隊</button>
+      <button id="themeBtn" class="icon-btn" aria-label="切換深色模式">☾</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="開啟選單"><i class="fa-solid fa-bars"></i> <span>選單</span></button>
+    </div>
+  </header>
+
+  <!-- Mobile Slide-Down Drawer Menu -->
+  <div id="mobileDrawer" class="mobile-drawer">
+    <nav class="mobile-drawer-nav">
+      <a href="#today" class="drawer-link">⚡ 今日模式 <span>↗</span></a>
+      <a href="#route" class="drawer-link">🗺️ 全程地圖 <span>↗</span></a>
+      <a href="#days" class="drawer-link">📅 每日行程 <span>↗</span></a>
+      <a href="#prep" class="drawer-link">📋 行前準備清單 <span>↗</span></a>
+      <a href="#packing" class="drawer-link">🧳 行李打包清單 <span>↗</span></a>
+      <a href="#notes" class="drawer-link">📌 待確認事項 <span>↗</span></a>
+    </nav>
+    <div class="mobile-drawer-actions">
+      <button id="mobile-edit-btn" class="edit-mode-btn"><i class="fa-solid fa-pen-to-square"></i> ✏️ 編輯模式</button>
+      <button id="mobile-sync-btn" class="cloud-sync-btn"><i class="fa-solid fa-cloud-arrow-up"></i> ☁️ 同步全隊</button>
+      <button id="mobile-reset-btn" class="edit-mode-btn" style="grid-column: 1 / -1;"><i class="fa-solid fa-rotate-right"></i> 🔄 重設預設行程與照片</button>
+    </div>
+  </div>
+
+  <!-- Edit Mode Banner -->
+  <div class="edit-banner">
+    <i class="fa-solid fa-pen-to-square"></i> 編輯模式已開啟！您可以直接修改文字、點擊「⬆️/⬇️」調整景點順序、或點擊「📷更換照片 / 🔍維基匹配」自訂照片，完成後點擊右上角「☁️同步全隊」！
+  </div>
+
+  <main id="top">
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">SEP 23 — OCT 03 · 2026</div>
+        <h1>冰島<br><span>十一日環島旅遊書</span></h1>
+        <p>專屬包車旅遊互動指南。以「有熟悉當地的帶隊者與司機」為前提，把每日看點、注意事項、景點裝備、實境地圖與旅行中真正的動態資訊放在同一個畫面。</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#days">開始看行程</a>
+          <button class="btn secondary" id="focusMapBtn">打開全程地圖</button>
+        </div>
+        <div class="mini-stats">
+          <div><strong>11</strong><span>天</span></div>
+          <div><strong id="spotCount">25</strong><span>景點</span></div>
+          <div><strong id="countdown">—</strong><span>距出發</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="aurora"></div>
+        <div class="hero-card">
+          <span>旅行節奏</span>
+          <strong>公路風景 × 輕步行 × 極光等待</strong>
+          <small>專車隨行；戶外強度以觀光步道與經典自然美景為主。</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ticker Marquee -->
+    <section class="ticker" aria-label="旅行重點">
+      <div>防風防水優先</div>
+      <div>黑沙灘注意瘋狗浪</div>
+      <div>極光日保留彈性</div>
+      <div>長車程日預留休息</div>
+      <div>司機帶隊 · 不需自駕</div>
+    </section>
+
+    <!-- Today Mode (Travel Mode) -->
+    <section id="today" class="section today-section">
+      <div class="section-head stack-on-mobile">
+        <div>
+          <div class="eyebrow">TRAVEL MODE</div>
+          <h2>今日模式</h2>
+          <p class="lead">旅行當天打開這裡：今天去哪、要帶什麼、有哪些風險，一頁看完。</p>
+        </div>
+        <select id="todaySelect" class="day-select" aria-label="選擇行程日期"></select>
+      </div>
+      <div id="todayPanel"></div>
+    </section>
+
+    <!-- Route Overview (Leaflet Interactive Map) -->
+    <section id="route" class="section map-section">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">ROUTE OVERVIEW</div>
+          <h2>一眼看懂全程位置</h2>
+        </div>
+        <div class="map-controls">
+          <button class="chip active" data-map-filter="all">全部</button>
+          <button class="chip" data-map-filter="nature">自然</button>
+          <button class="chip" data-map-filter="city">城鎮</button>
+          <button class="chip" data-map-filter="spa">溫泉</button>
+        </div>
+      </div>
+      <div class="map-wrap">
+        <div id="map" aria-label="冰島行程互動地圖"></div>
+        <aside class="map-panel">
+          <div class="map-panel-title">路線閱讀方式</div>
+          <p>標記顏色代表每日行程；虛線是「行程順序示意」，不是導航路線。點擊任何標記可直接跳到景點卡。</p>
+          <div id="mapLegend" class="legend"></div>
+          <div class="warning-card">
+            <strong>⚑ 長距離提醒</strong>
+            <p>本行程有熟悉當地的帶隊者＋專車司機，但仍會把長距離跨區移動的日期標示出來，方便與司機確認休息節奏。</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Day By Day Section -->
+    <section id="days" class="section">
+      <div class="section-head stack-on-mobile">
+        <div>
+          <div class="eyebrow">DAY BY DAY</div>
+          <h2>每日行程</h2>
+        </div>
+        <div class="filters" id="dayFilters">
+          <button class="chip active" data-filter="all">全部</button>
+          <button class="chip" data-filter="easy">輕鬆</button>
+          <button class="chip" data-filter="walk">步行較多</button>
+          <button class="chip" data-filter="longdrive">長車程</button>
+          <button class="chip" data-filter="aurora">極光</button>
+        </div>
+      </div>
+      <div id="dayList" class="day-list"></div>
+    </section>
+
+    <!-- Pre-Trip Preparation Checklist -->
+    <section id="prep" class="section prep-section">
+      <div class="section-head stack-on-mobile">
+        <div>
+          <div class="eyebrow">PRE-TRIP CHECKLIST</div>
+          <h2>行前準備清單</h2>
+          <p class="lead">出發前幾週／幾個月需先採購與辦理的事項；提前確認，打包時才不會手忙腳亂。</p>
+        </div>
+        <button class="chip" id="resetPrep">清除勾選</button>
+      </div>
+
+      <div class="prep-progress-wrap">
+        <div class="prep-progress-bar">
+          <div id="prepProgressFill" class="prep-progress-fill"></div>
+        </div>
+        <div id="prepProgressText" class="prep-progress-text">0 / 20 已完成 (0%)</div>
+      </div>
+
+      <div id="prepGrid" class="packing-grid"></div>
+    </section>
+
+    <!-- Packing Checklist -->
+    <section id="packing" class="section packing-section">
+      <div class="section-head stack-on-mobile">
+        <div>
+          <div class="eyebrow">PACKING CHECKLIST</div>
+          <h2>行李打包清單</h2>
+          <p class="lead">以 11 天冰島秋季行程為基礎；勾選狀態會自動存於這台裝置的瀏覽器中。</p>
+        </div>
+        <button class="chip" id="resetPacking">清除勾選</button>
+      </div>
+      <div id="packingGrid" class="packing-grid"></div>
+      <div class="packing-note">
+        <strong>夫妻／旅伴分裝技巧</strong>
+        <p>若有兩件托運行李，建議交叉放置每人 1–2 天衣物。即使其中一件延誤，也不會只有一個人完全沒有換洗衣物。</p>
+      </div>
+    </section>
+
+    <!-- To Confirm Section -->
+    <section id="notes" class="section notes-section">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">TO CONFIRM</div>
+          <h2>目前版本先保留的疑問</h2>
+        </div>
+      </div>
+      <div class="note-grid">
+        <article class="note-card">
+          <span>01</span>
+          <h3>9/27 賞鯨出船港</h3>
+          <p>行程表寫「西格芙德峽灣賞鯨」，目前先以 Siglufjörður 標記；之後有船公司或實際港口，可一鍵精準更新。</p>
+        </article>
+        <article class="note-card">
+          <span>02</span>
+          <h3>9/29 金字塔山</h3>
+          <p>判斷為東部 Djúpivogur 附近的 Búlandstindur；它與「白日夢冒險王小鎮」同區域邏輯較順，待確認。</p>
+        </article>
+        <article class="note-card">
+          <span>03</span>
+          <h3>10/2 彈性日順序</h3>
+          <p>Sky Lagoon 與 Kirkjufell 地理位置跨度較大。現在先全部保留，待確認當天實際優先順序後再做最佳化。</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Live Links -->
+    <section class="section source-section">
+      <div class="source-box">
+        <div>
+          <div class="eyebrow">LIVE LINKS</div>
+          <h2>出發後每天會看的三個網站</h2>
+        </div>
+        <div class="source-links">
+          <a href="https://en.vedur.is/" target="_blank" rel="noreferrer">Vedur 天氣 ↗</a>
+          <a href="https://safetravel.is/" target="_blank" rel="noreferrer">SafeTravel ↗</a>
+          <a href="https://umferdin.is/en" target="_blank" rel="noreferrer">道路狀況 ↗</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>ICELAND 2026 · interactive travel book v0.4</span>
+    <span>Today mode · Pre-trip · Packing · Interactive map · Live Editor & Cloud Sync</span>
+  </footer>
+
+  <!-- Spot Detail Dialog Modal -->
+  <dialog id="spotDialog" class="spot-dialog">
+    <button class="dialog-close" aria-label="關閉">×</button>
+    <div id="spotDialogBody"></div>
+  </dialog>
+
+  <!-- Photo Upload Modal Overlay -->
+  <div id="photo-modal" class="photo-modal-overlay">
+    <div class="photo-modal-card">
+      <h3><i class="fa-solid fa-image"></i> 📷 手動更換景點照片</h3>
+      <div class="modal-input-group">
+        <label><i class="fa-solid fa-upload"></i> 從手機 / 電腦選擇照片上傳：</label>
+        <input type="file" id="modal-photo-file" accept="image/*">
+      </div>
+      <div class="modal-input-group">
+        <label><i class="fa-solid fa-link"></i> 或貼上網路圖片網址 (URL)：</label>
+        <input type="text" id="modal-photo-url" placeholder="https://example.com/photo.jpg">
+      </div>
+      <div class="modal-btn-row">
+        <button id="modal-cancel-photo" class="chip">取消</button>
+        <button id="modal-save-photo" class="btn primary"><i class="fa-solid fa-check"></i> 確認套用</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Spot Search Dialog -->
+  <div id="add-spot-modal" class="photo-modal-overlay">
+    <div class="photo-modal-card" style="max-width:520px;">
+      <h3><i class="fa-solid fa-map-location-dot"></i> 新增景點</h3>
+      <div class="modal-input-group">
+        <label><i class="fa-solid fa-magnifying-glass"></i> 搜尋景點名稱（中文或英文）：</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="add-spot-query" placeholder="例：Dyrhólaey、冰川健行、Mývatn..." style="flex:1;">
+          <button id="add-spot-search-btn" class="btn primary" style="white-space:nowrap;"><i class="fa-solid fa-search"></i> 搜尋</button>
+        </div>
+      </div>
+      <div id="add-spot-results" style="max-height:260px;overflow-y:auto;margin-top:8px;display:flex;flex-direction:column;gap:8px;"></div>
+      <div id="add-spot-manual" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px;display:none;">
+        <p style="font-size:13px;color:var(--muted);margin:0 0 8px;">或手動填寫：</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <input type="text" id="add-spot-name" placeholder="景點中文名稱" style="padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);">
+          <input type="text" id="add-spot-en" placeholder="English name" style="padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);">
+          <input type="text" id="add-spot-lat" placeholder="緯度 (lat)" style="padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);">
+          <input type="text" id="add-spot-lng" placeholder="經度 (lng)" style="padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);">
+        </div>
+        <button id="add-spot-manual-confirm" class="btn primary" style="margin-top:8px;width:100%;"><i class="fa-solid fa-plus"></i> 手動新增</button>
+      </div>
+      <div class="modal-btn-row" style="margin-top:12px;">
+        <button id="add-spot-toggle-manual" class="chip"><i class="fa-solid fa-pen"></i> 手動填寫</button>
+        <button id="add-spot-cancel" class="chip">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  
+  <!-- Embedded Fully Self-Contained Trip Data -->
+  <script>
+  const tripData = {
+    start: '2026-09-23T00:00:00+00:00',
+    days: [
+      {
+        day: 1, date: '2026-09-23', label: '抵達・藍湖・雷克雅維克', intensity: 'easy', tags:['spa','city'], longDrive:false, aurora:false,
+        summary: '15:25 抵達冰島。以藍湖放鬆開場，再進雷克雅維克、寄放行李與城市散步。',
+        wear: '排汗長袖＋薄中層＋DryVent 外殼；泡湯衣物獨立防水袋。',
+        tips: ['藍湖前先確認預約時段與入場方案。','長途飛行後第一天不要排太滿。','Hallgrímskirkja 若上塔，可視抵達時間與體力彈性。'],
+        spots:[
+          {id:'blue-lagoon', name:'藍湖溫泉', en:'Blue Lagoon (Bláa Lónið)', type:'spa', lat:63.8804, lng:-22.4495, img:'images/blue_lagoon.jpg', wiki:'Blue_Lagoon_(Iceland)', highlight:'乳藍色地熱海水、黑色熔岩地貌；第一天用來舒緩飛行疲勞很合適。', gear:'泳衣、防水袋、保暖外套（離池後）', caution:'泡湯前後補水；頭髮先抹護髮並盡量避免長時間泡在礦物水中。'},
+          {id:'hallgrimskirkja', name:'哈爾格林姆教堂', en:'Hallgrímskirkja', type:'city', lat:64.1417, lng:-21.9266, img:'images/hallgrimskirkja.jpg', wiki:'Hallgrímskirkja', highlight:'雷克雅維克地標，外型取材自冰島玄武岩柱；塔頂城市視野很漂亮。', gear:'防風外套、好走的鞋', caution:'風大時塔頂體感低；開放時間依當日公告。'}
+        ]
+      },
+      {
+        day: 2, date: '2026-09-24', label: '南岸經典大滿貫', intensity: 'walk', tags:['nature'], longDrive:true, aurora:false,
+        summary: '瀑布、黑沙灘、峽谷、冰河湖與鑽石沙灘，是全程景點密度最高的一天。',
+        wear: '防水鞋＋羊毛襪＋DryVent；雨褲放日用包，瀑布與大風時直接套上。',
+        tips: ['這天不是高強度健行，但上下車次數多、景點密度很高。','黑沙灘務必遵守現場警示燈與安全線。','冰河湖與鑽石沙灘風通常比想像中冷。'],
+        spots:[
+          {id:'seljalandsfoss', name:'水簾洞瀑布', en:'Seljalandsfoss', type:'nature', lat:63.6156, lng:-19.9886, img:'images/seljalandsfoss.jpg', wiki:'Seljalandsfoss', highlight:'可從瀑布後方環繞觀看，是冰島最具沉浸感的瀑布之一。', gear:'防水外套、防水褲、防水鞋', caution:'步道濕滑且一定會被水氣噴濕；防水外套、鞋非常有感。'},
+          {id:'skogafoss', name:'彩虹瀑布', en:'Skógafoss', type:'nature', lat:63.5321, lng:-19.5114, img:'images/skogafoss.jpg', wiki:'Skógafoss', highlight:'水量大、視野開闊；晴天水霧常形成雙彩虹。', gear:'防水外套、防水鞋；走階梯可帶手套', caution:'若走右側階梯上觀景台，會比平地多一些腿力。'},
+          {id:'reynisfjara', name:'黑沙灘', en:'Reynisfjara Black Sand Beach', type:'nature', lat:63.4040, lng:-19.0453, img:'images/reynisfjara.jpg', wiki:'Reynisfjara', highlight:'黑色火山砂、玄武岩柱、海蝕洞與 Reynisdrangar 海蝕柱。', gear:'防風防水外套、防水鞋、毛帽', caution:'最重要：Sneaker waves 瘋狗浪。不要背對海、不要追浪、依現場警示燈行動。'},
+          {id:'fjadrargljufur', name:'羽毛峽谷', en:'Fjaðrárgljúfur', type:'nature', lat:63.7713, lng:-18.1718, img:'images/fjadrargljufur.jpg', wiki:'Fjaðrárgljúfur', highlight:'蜿蜒峽谷與苔原景觀，觀景步道本身不算難。', gear:'防風外套、防水鞋；雨天加防水褲', caution:'雨後泥濘、風大；遵守步道封閉範圍保護脆弱植被。'},
+          {id:'jokulsarlon', name:'傑古沙龍冰河湖', en:'Jökulsárlón Glacier Lagoon', type:'nature', lat:64.0784, lng:-16.2306, img:'images/jokulsarlon.jpg', wiki:'Jökulsárlón', highlight:'漂浮冰山與冰川潟湖，是這趟最值得慢慢看的景點之一。', gear:'防風外套、保暖中層、毛帽、手套', caution:'岸邊風很強；常有海豹在冰山棲息。'},
+          {id:'diamond-beach', name:'鑽石沙灘', en:'Diamond Beach (Breiðamerkursandur)', type:'nature', lat:64.0439, lng:-16.1771, img:'images/diamond_beach.jpg', wiki:'Breiðamerkursandur', highlight:'冰塊被海浪推上黑沙，光線好時像散落的水晶。', gear:'防風外套、防水鞋、毛帽、手套', caution:'同樣屬海岸環境，不靠近浪區；冰塊不要攀爬。'}
+        ]
+      },
+      {
+        day: 3, date: '2026-09-25', label: '前往阿克雷里・北部小鎮', intensity: 'longdrive', tags:['city'], longDrive:true, aurora:false,
+        summary: '移動到北部核心城市 Akureyri，以小鎮散步和熟悉後續鑽石圈為主。',
+        wear: '舒適長褲＋中層；車上採洋蔥式穿法，避免穿太厚。',
+        tips: ['依目前行程表，這是明顯長移動日。','建議跟司機確認中途停靠點與用餐安排。'],
+        spots:[
+          {id:'akureyri', name:'阿克雷里小鎮', en:'Akureyri', type:'city', lat:65.6835, lng:-18.0878, img:'images/akureyri.jpg', wiki:'Akureyri', highlight:'北冰島最大城鎮之一，地標愛心紅綠燈、彩虹步道與 Brynja 冰淇淋。', gear:'防風外套、舒適步行鞋', caution:'傍晚後溫度下降快，晚餐後若還想散步記得帶手套。'}
+        ]
+      },
+      {
+        day: 4, date: '2026-09-26', label: '鑽石圈・米湖地熱', intensity: 'walk', tags:['nature'], longDrive:false, aurora:false,
+        summary: '眾神瀑布、黛提瀑布、Krafla 火山與 Mývatn 地熱景觀，地貌變化非常大。',
+        wear: '防水鞋＋防風外殼；硫磺地熱區以不怕沾氣味的衣物為佳。',
+        tips: ['地熱區不要跨越封鎖線，地表可能很薄。','瀑布觀景區碎石與濕滑路面較多。'],
+        spots:[
+          {id:'godafoss', name:'眾神瀑布', en:'Goðafoss', type:'nature', lat:65.6828, lng:-17.5502, img:'images/godafoss.jpg', wiki:'Goðafoss', highlight:'弧形瀑布群與冰島歷史故事，是北部代表性景觀。', gear:'防風防水外套、防水鞋', caution:'兩岸都有視角，時間有限時依司機建議選一側即可。'},
+          {id:'dettifoss', name:'黛提瀑布', en:'Dettifoss', type:'nature', lat:65.8147, lng:-16.3844, img:'images/dettifoss.jpg', wiki:'Dettifoss', highlight:'以全歐最大水流量聞名，現場的聲音與震動感比照片更震撼。', gear:'防風防水外套、防水鞋、毛帽／手套', caution:'水霧、碎石、強風；鞋底抓地力重要。'},
+          {id:'krafla', name:'克拉夫拉火山 & Viti火口湖', en:'Krafla Volcano & Viti Crater', type:'nature', lat:65.7170, lng:-16.7540, img:'images/krafla_viti.jpg', wiki:'Krafla', highlight:'火山口、熔岩與地熱活動構成典型北冰島寶藍湖水地景。', gear:'防風外套、防水鞋', caution:'只走開放步道；天氣差時能見度變化快。'},
+          {id:'myvatn', name:'米湖 Hverir 地熱區', en:'Hverir Geothermal Area (Mývatn)', type:'nature', lat:65.6039, lng:-17.0000, img:'images/hverir.jpg', wiki:'Hverir', highlight:'湖泊、火山地貌、蒸氣孔與泥漿池集中在很小範圍，如火星表面。', gear:'防風外套、防水鞋', caution:'地熱硫磺味明顯；眼睛敏感可縮短停留。'}
+        ]
+      },
+      {
+        day: 5, date: '2026-09-27', label: '西格芙德峽灣・賞鯨', intensity: 'easy', tags:['nature','city'], longDrive:false, aurora:false,
+        summary: '前往北部峽灣小鎮並安排賞鯨體驗。出海出船港口體驗。',
+        wear: '比陸地多一層：羊毛襪＋保暖中層＋防風外殼；毛帽與手套一定放身上。',
+        tips: ['海上體感會顯著低於陸地。','容易暈船者依醫囑提前使用暈船藥。','船公司若提供連身保暖衣，建議穿。'],
+        spots:[
+          {id:'siglufjordur', name:'峽灣出海賞鯨', en:'Siglufjörður Whale Watching', type:'nature', lat:66.1518, lng:-18.9097, img:'images/whale_watching.jpg', wiki:'Whale_watching', highlight:'北部狹長峽灣出海，經常能近距離看到座頭鯨與小鬚鯨擺尾。', gear:'保暖中層、防風外套、毛帽、手套、羊毛襪；易暈者備暈船用品', caution:'⚑ 出海前 30 分鐘服暈船藥；風浪大時請握緊船欄。'}
+        ]
+      },
+      {
+        day: 6, date: '2026-09-28', label: '東部峽灣・Egilsstaðir・等極光', intensity: 'longdrive', tags:['city','aurora'], longDrive:true, aurora:true,
+        summary: '移動到東部 Egilsstaðir，沿途以峽灣、拉加爾湖風光為主，晚上開始保留極光時間。',
+        wear: '白天車程以舒適分層；晚上追加羽絨、毛帽、手套、保暖底層。',
+        tips: ['極光不是固定節目：雲量比 KP 指數更重要。','晚上等極光時「站著不動」會比白天更冷。'],
+        spots:[
+          {id:'lagarfljot', name:'拉加爾湖', en:'Lagarfljót Lake', type:'nature', lat:65.2674, lng:-14.3948, img:'images/lagarfljot.jpg', wiki:'Lagarfljót', highlight:'東冰島狹長湖泊，傳說棲息著水怪，周圍有罕見的綠色森林。', gear:'白天防風外套；等極光加保暖中層、毛帽、手套', caution:'當晚以天氣與雲量決定是否追極光，不要把固定時間排太滿。'}
+        ]
+      },
+      {
+        day: 7, date: '2026-09-29', label: '金字塔山・白日夢小鎮・極光', intensity: 'easy', tags:['nature','city','aurora'], longDrive:false, aurora:true,
+        summary: '東部 Búlandstindur 金字塔山＋《白日夢冒險王》彩虹小鎮；晚上追極光。',
+        wear: '拍照日：功能衣物為底，外層可選拍照好看的防風外套；晚上再疊羽絨。',
+        tips: ['Seyðisfjörður 山路受天候影響較大，交給熟悉當地的司機判斷最合適。'],
+        spots:[
+          {id:'seydisfjordur', name:'塞濟斯菲厄澤小鎮', en:'Seyðisfjörður', type:'city', lat:65.2609, lng:-14.0090, img:'images/seydisfjordur.jpg', wiki:'Seyðisfjörður', highlight:'彩虹地磚步道、藍色木造教堂與峽灣公路；《白日夢冒險王》滑板場景。', gear:'防風外套、防水鞋', caution:'狹長峽灣地形風速變化快。'},
+          {id:'bulandstindur', name:'金字塔山', en:'Búlandstindur', type:'nature', lat:64.6806, lng:-14.3768, img:'images/bulandstindur.jpg', wiki:'Búlandstindur', highlight:'東部 Djúpivogur 附近的金字塔形陡峭玄武岩山體。', gear:'防風外套、防水鞋', caution:'路邊停車拍照注意安全。'}
+        ]
+      },
+      {
+        day: 8, date: '2026-09-30', label: '回雷克雅維克・城市休息日', intensity: 'longdrive', tags:['city'], longDrive:true, aurora:false,
+        summary: '回到雷克雅維克休息，安排 Sun Voyager 與 Harpa，讓前幾天的自然景觀切換成城市節奏。',
+        wear: '城市休閒穿搭即可，但海港風大，外殼仍建議帶著。',
+        tips: ['如果移動時間長，城市景點以「有餘裕再逛」為原則。','Harpa 室內很適合當雨備。'],
+        spots:[
+          {id:'sun-voyager', name:'太陽航行者', en:'Sun Voyager (Sólfar)', type:'city', lat:64.1476, lng:-21.9220, img:'images/sun_voyager.jpg', wiki:'Sun_Voyager', highlight:'海濱不鏽鋼幾何維京船鋼雕，日落、藍調與遠方山景極佳。', gear:'防風外套、毛帽（風大時）', caution:'海邊風勢常比市中心強。'},
+          {id:'harpa', name:'Harpa 音樂廳', en:'Harpa Concert Hall', type:'city', lat:64.1500, lng:-21.9326, img:'images/harpa.jpg', wiki:'Harpa_(concert_hall)', highlight:'幾何蜂巢狀彩色玻璃外牆，大太陽與日光折射下極具視覺衝擊美學。', gear:'一般城市穿著即可', caution:'室內設有咖啡廳與紀念品店。'}
+        ]
+      },
+      {
+        day: 9, date: '2026-10-01', label: '黃金圈經典一日遊', intensity: 'walk', tags:['nature'], longDrive:false, aurora:false,
+        summary: 'Þingvellir、Geysir、Gullfoss、Kerið：冰島地質、歷史與瀑布的經典濃縮版。',
+        wear: '防風外殼＋防水鞋；雨褲依降雨決定。',
+        tips: ['Geysir 區不要跨越繩線，地熱水極燙。','Gullfoss 水霧＋風容易讓體感驟降。'],
+        spots:[
+          {id:'thingvellir', name:'辛格韋德利國家公園', en:'Þingvellir National Park', type:'nature', lat:64.2559, lng:-21.1296, img:'images/thingvellir.jpg', wiki:'Þingvellir', highlight:'歐亞與北美板塊大裂谷地貌與冰島古老議會歷史交會。', gear:'防風外套、防水鞋', caution:'步道好走，但風雨天仍需防滑。'},
+          {id:'geysir', name:'史托克間歇泉', en:'Strokkur Geysir', type:'nature', lat:64.3104, lng:-20.3024, img:'images/strokkur.jpg', wiki:'Strokkur', highlight:'每 6-10 分鐘規律爆發 20-30 米高沸騰水柱。', gear:'防風外套、防水鞋', caution:'熱泉周圍水溫極高，不離開步道。'},
+          {id:'gullfoss', name:'黃金瀑布', en:'Gullfoss Waterfall', type:'nature', lat:64.3271, lng:-20.1199, img:'images/gullfoss.jpg', wiki:'Gullfoss', highlight:'雙層梯級大瀑布傾瀉入 32 米深峽谷，水量與氣勢驚人。', gear:'防風防水外套、防水鞋', caution:'水氣大，護目鏡/眼鏡要常擦。'},
+          {id:'kerid', name:'Kerið 火口湖', en:'Kerið Crater Lake', type:'nature', lat:64.0413, lng:-20.8851, img:'images/kerid.jpg', wiki:'Kerið', highlight:'紅褐色火山岩壁與寶石綠水形成鮮明對比。', gear:'防風外套、防水鞋', caution:'繞火口一圈注意邊緣風速。'}
+        ]
+      },
+      {
+        day: 10, date: '2026-10-02', label: '天空之鏡溫泉・教堂山（彈性備案）', intensity: 'longdrive', tags:['city','spa','nature','aurora'], longDrive:true, aurora:true,
+        summary: '依天氣彈性調度：Sky Lagoon 海景地熱溫泉與 Kirkjufell 教堂山美景。',
+        wear: '依當日實際版本切換；若跑 Kirkjufell，仍以防風防水裝備為主。',
+        tips: ['Kirkjufell 與雷克雅維克並不在同一區，若當天都做會是長行程。','Sky Lagoon 建議把乾淨換洗衣物單獨打包。'],
+        spots:[
+          {id:'sky-lagoon', name:'天空之鏡地熱溫泉', en:'Sky Lagoon', type:'spa', lat:64.1176, lng:-21.9290, img:'images/sky_lagoon.jpg', wiki:'Sky_Lagoon', highlight:'面海無邊際地熱池與 7-Step 冰島身體養生儀式。', gear:'泳衣、防水袋、乾淨換洗衣物', caution:'預約制；泡湯後不要把極緊湊的長車程排在後面。'},
+          {id:'kirkjufell', name:'教堂山與瀑布', en:'Kirkjufell & Kirkjufellsfoss', type:'nature', lat:64.9417, lng:-23.3069, img:'images/kirkjufell.jpg', wiki:'Kirkjufell', highlight:'獨立草帽角錐山峰與 Kirkjufellsfoss 瀑布組合，為冰島經典攝影神山。', gear:'防風防水外套、防水鞋、毛帽、手套', caution:'⚑ 與 Reykjavik / Sky Lagoon 距離較遠，這天務必依天氣與司機判斷是否成行。'}
+        ]
+      },
+      {
+        day: 11, date: '2026-10-03', label: '清晨班機・返程返鄉', intensity: 'easy', tags:['city'], longDrive:false, aurora:false,
+        summary: '07:40 清晨飛機，前一晚以收行李、補眠、確認接送為主。',
+        wear: '飛行舒適穿搭＋外套放手提行李，不托運。',
+        tips: ['前一晚就完成退稅/行李重量整理規劃。','護照、藥品、行動電源與一套換洗衣物留隨身。'],
+        spots:[
+          {id:'kef', name:'凱夫拉維克國際機場', en:'Keflavík International Airport', type:'city', lat:63.9850, lng:-22.6056, img:'images/blue_lagoon.jpg', wiki:'Keflavík_International_Airport', highlight:'11 天冰島極光驚喜之旅劃下美好句點。', gear:'舒適飛行穿著；外套留隨身', caution:'清晨航班，接送時間務必前一晚確認。'}
+        ]
+      }
+    ],
+    prep: {
+      admin: [
+        '檢查護照效期（需在回程起算 6 個月以上：2027 年 4 月以後過期）',
+        '投保申根醫療保險（含海外突發疾病、急難救助金額）',
+        '信用卡開通海外刷卡與預借現金 4 位數 PIN 碼（冰島刷卡極普及）',
+        '準備機票、保單與護照影本（實體影本與手機/雲端各存一份）',
+        '國際駕照／台灣駕照正本準備（以備不時之需）'
+      ],
+      bookings: [
+        '藍湖溫泉 (Blue Lagoon) 預約門票與入場時段確認',
+        '天空之鏡溫泉 (Sky Lagoon) 預約門票與 7-Step 體驗',
+        '西格芙德峽灣出海賞鯨船票確認',
+        '包車司機每日集合點、車程與司機住宿安排確認',
+        '全程 10 晚飯店 / 民宿預訂確認與入住憑證'
+      ],
+      gear: [
+        'Gore-Tex / DryVent 專用防風防水衝鋒衣與防水褲採購',
+        '高筒防水登山鞋（黃金大底 Vibram，出發前試穿磨合）',
+        '美麗諾羊毛排汗底層衣褲 3–4 套（切勿帶純棉衛生衣）',
+        '防風保暖毛帽、保暖手套、防風圍脖與厚羊毛襪採購',
+        '簡易瀑布防滑冰爪與保溫瓶 (500ml-1000ml)'
+      ],
+      tech: [
+        '歐規雙腳圓柱轉接頭 (Type C/F) 2–3 個',
+        '大容量行動電源（需有標示 Wh 容量，隨身攜帶）',
+        '冰島 4G/5G 上網卡 (SIM / eSIM) 或電信漫遊開通',
+        '相機記憶卡清理、備用電池與相機腳架準備',
+        '個人常備藥（感冒藥、腸胃藥、止痛藥、暈船藥）'
+      ]
+    },
+    packing: {
+      carry: [
+        '護照、登機資料、信用卡（已開通 4 位數 PIN 碼）與少量現金','手機、耳機、充電線','大容量行動電源（不可托運）','相機、備用電池與穩固腳架','常用／必要常備藥與暈船藥','護唇膏、保濕乳液、面紙、濕紙巾','毛帽、手套或薄保暖層（抵達即可取用）','空水瓶／保溫瓶（安檢後裝水）'
+      ],
+      cabin: [
+        '每人 1–2 天換洗衣物','一雙備用羊毛襪與內著','基本盥洗與保養（液體符合登機規定）','歐規雙腳圓柱轉接頭與充電頭','拭鏡布與重要電子用品','托運延誤時仍會需要的個人物品'
+      ],
+      checked: [
+        '美麗諾羊毛排汗內層 3–4 件','抓絨 Fleece / 輕羽絨保暖中層 2 件','Gore-Tex 防風防水衝鋒外套 1 件','防水防風保暖褲（加刷毛） 2 件','高筒防水登山鞋（黃金大底 Vibram） 1 雙','厚羊毛襪 4–5 雙','簡易瀑布防滑冰爪 1 雙','泳衣/泳褲與防水袋（藍湖 & Sky Lagoon）','防風毛帽、手套、防風圍脖','個人常備藥（感冒、腸胃、高保濕乳液）','高容量保溫瓶 (500ml-1000ml)'
+      ],
+      shared: [
+        '兩件托運行李交叉放夫妻各 1–2 天衣物','共用萬國轉接頭／多孔充電頭','簡易急救藥包與暈船用品','行李 AirTag 追蹤器','拍極光專用相機腳架'
+      ]
+    }
+  };
+  </script>
+
+  <!-- Embedded Interactive Logic & Cloud Sync -->
+  <script>
+  /* ==========================================================================
+     ICELAND 2026 - EDITORIAL INTERACTIVE LOGIC & CLOUD SYNC
+     ========================================================================== */
+
+  const dayColors = ['#ff5a36','#f89e3d','#c36ff0','#5b93e5','#2fae84','#6e8d4a','#cf6b8b','#7b6fe0','#e0b438','#2f9ea4','#71808a'];
+  let map, markerLayer, routeLine;
+  const allMarkers = [];
+  let activeSpotImgTarget = null;
+
+  function fmtDate(s) {
+    return new Intl.DateTimeFormat('zh-TW', { month: 'numeric', day: 'numeric', weekday: 'short' }).format(new Date(s + 'T12:00:00'));
+  }
+
+  function intensityLabel(d) {
+    if (d.intensity === 'walk') return '步行較多';
+    if (d.intensity === 'longdrive' || d.longDrive) return '長車程';
+    return '輕鬆';
+  }
+
+  function wikiUrl(slug) {
+    return `https://en.wikipedia.org/wiki/${encodeURIComponent(slug || '')}`;
+  }
+
+  async function wikiThumb(slug, imgEl) {
+    if (!slug) return;
+    try {
+      const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`);
+      if (!r.ok) throw new Error();
+      const data = await r.json();
+      const src = data.originalimage?.source || data.thumbnail?.source;
+      if (src) {
+        imgEl.src = src;
+        imgEl.hidden = false;
+      }
+    } catch (e) {}
+  }
+
+  function spotCard(spot, day) {
+    const el = document.createElement('article');
+    el.className = 'spot-card';
+    el.id = `spot-${spot.id}`;
+    
+    const imgSrc = spot.img ? `${spot.img}?v=20260813` : '';
+    
+    el.innerHTML = `
+      <img src="${imgSrc}" alt="${spot.name}" loading="lazy" onerror="this.hidden=true;">
+      
+      <div class="spot-edit-bar">
+        <button class="spot-edit-btn btn-move-up" title="上移"><i class="fa-solid fa-arrow-up"></i></button>
+        <button class="spot-edit-btn btn-move-down" title="下移"><i class="fa-solid fa-arrow-down"></i></button>
+        <button class="spot-edit-btn btn-wiki-match" title="維基匹配"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <button class="spot-edit-btn btn-change-photo" title="更換照片"><i class="fa-solid fa-camera"></i></button>
+        <button class="spot-edit-btn delete btn-delete-spot" title="刪除"><i class="fa-solid fa-trash"></i></button>
+      </div>
+
+      <div class="spot-content">
+        <div class="spot-kicker" contenteditable="true">${spot.en}</div>
+        <h4 contenteditable="true">${spot.name}</h4>
+        <p contenteditable="true">${spot.highlight}</p>
+        <div class="spot-gear">⌁ <span contenteditable="true">${spot.gear || '一般旅遊裝備'}</span></div>
+      </div>
+    `;
+
+    const imgEl = el.querySelector('img');
+    if (!spot.img && spot.wiki) {
+      wikiThumb(spot.wiki, imgEl);
+    } else if (imgSrc) {
+      imgEl.hidden = false;
+    }
+
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.spot-edit-bar') || e.target.getAttribute('contenteditable') === 'true') return;
+      showSpot(spot, day);
+    });
+
+    return el;
+  }
+
+  function renderDays() {
+    const wrap = document.getElementById('dayList');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+
+    tripData.days.forEach(d => {
+      const card = document.createElement('article');
+      card.className = 'day-card';
+      card.dataset.filter = [d.intensity, d.longDrive ? 'longdrive' : '', d.aurora ? 'aurora' : ''].join(' ');
+      card.id = `day-${d.day}`;
+
+      const badges = [`<span class="badge">${intensityLabel(d)}</span>`];
+      if (d.longDrive) badges.push('<span class="badge warn">長距離移動</span>');
+      if (d.aurora) badges.push('<span class="badge aurora">極光彈性</span>');
+
+      card.innerHTML = `
+        <div class="day-top">
+          <div>
+            <div class="day-num">${String(d.day).padStart(2, '0')}</div>
+            <div class="day-date">${fmtDate(d.date)}</div>
+          </div>
+          <div class="day-title">
+            <h3 contenteditable="true">${d.label}</h3>
+            <p contenteditable="true">${d.summary}</p>
+          </div>
+          <div class="badges">${badges.join('')}</div>
+        </div>
+        <div class="day-body">
+          <div class="spot-grid"></div>
+          <aside class="day-side">
+            <div class="info-box">
+              <strong>注意事項</strong>
+              <ul class="tip-list">
+                ${d.tips.map(x => `<li contenteditable="true">${x}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="day-actions">
+              <button class="small-btn save-btn">♡ 收藏這天</button>
+              <button class="small-btn map-btn">⌖ 地圖定位</button>
+              <button class="small-btn add-spot btn-add-spot"><i class="fa-solid fa-plus"></i> 新增景點</button>
+            </div>
+          </aside>
+        </div>
+      `;
+
+      const sg = card.querySelector('.spot-grid');
+      d.spots.forEach(s => sg.appendChild(spotCard(s, d)));
+
+      const save = card.querySelector('.save-btn');
+      const key = `iceland-save-day-${d.day}`;
+      if (localStorage.getItem(key)) {
+        save.classList.add('saved');
+        save.textContent = '♥ 已收藏';
+      }
+      save.onclick = () => {
+        if (localStorage.getItem(key)) {
+          localStorage.removeItem(key);
+          save.classList.remove('saved');
+          save.textContent = '♡ 收藏這天';
+        } else {
+          localStorage.setItem(key, '1');
+          save.classList.add('saved');
+          save.textContent = '♥ 已收藏';
+        }
+      };
+
+      card.querySelector('.map-btn').onclick = () => focusDay(d);
+
+      card.querySelector('.btn-add-spot').onclick = () => {
+        openAddSpotModal(d, sg);
+      };
+
+      wrap.appendChild(card);
+    });
+  }
+
+  // ─── Add Spot Modal: Wikipedia Geo + OSM dual-engine search ─────────────
+  let _addSpotDay = null, _addSpotGrid = null;
+
+  function openAddSpotModal(day, spotGrid) {
+    _addSpotDay = day;
+    _addSpotGrid = spotGrid;
+    const modal = document.getElementById('add-spot-modal');
+    const q = document.getElementById('add-spot-query');
+    const results = document.getElementById('add-spot-results');
+    const manual = document.getElementById('add-spot-manual');
+    if (q) q.value = '';
+    if (results) results.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0;">請輸入景點名稱後按搜尋 🔍</p>';
+    if (manual) manual.style.display = 'none';
+    if (modal) modal.classList.add('active');
+    setTimeout(() => q?.focus(), 80);
+  }
+
+  function commitAddSpot(spot) {
+    if (!_addSpotDay || !_addSpotGrid) return;
+    _addSpotDay.spots.push(spot);
+    _addSpotGrid.appendChild(spotCard(spot, _addSpotDay));
+    saveItineraryToLocal();
+    refreshMap();
+    const spotCountEl = document.getElementById('spotCount');
+    if (spotCountEl) spotCountEl.textContent = tripData.days.reduce((n, d) => n + d.spots.length, 0);
+    document.getElementById('add-spot-modal').classList.remove('active');
+  }
+
+  function initAddSpotModal() {
+    const modal = document.getElementById('add-spot-modal');
+    const cancelBtn = document.getElementById('add-spot-cancel');
+    const searchBtn = document.getElementById('add-spot-search-btn');
+    const queryInput = document.getElementById('add-spot-query');
+    const resultsEl = document.getElementById('add-spot-results');
+    const manualEl = document.getElementById('add-spot-manual');
+    const toggleManualBtn = document.getElementById('add-spot-toggle-manual');
+    const manualConfirmBtn = document.getElementById('add-spot-manual-confirm');
+
+    if (cancelBtn) cancelBtn.onclick = () => modal.classList.remove('active');
+    if (toggleManualBtn) toggleManualBtn.onclick = () => {
+      const visible = manualEl.style.display !== 'none';
+      manualEl.style.display = visible ? 'none' : 'block';
+    };
+
+    if (manualConfirmBtn) manualConfirmBtn.onclick = () => {
+      const name = document.getElementById('add-spot-name')?.value.trim();
+      const en = document.getElementById('add-spot-en')?.value.trim() || name;
+      const lat = parseFloat(document.getElementById('add-spot-lat')?.value) || (_addSpotDay?.spots[0]?.lat || 64.14);
+      const lng = parseFloat(document.getElementById('add-spot-lng')?.value) || (_addSpotDay?.spots[0]?.lng || -21.92);
+      if (!name) { alert('請輸入景點名稱'); return; }
+      commitAddSpot({
+        id: `spot-new-${Date.now()}`, name, en, type: 'nature', lat, lng,
+        img: '', wiki: '', highlight: '（點擊此處輸入景點特色說明）',
+        gear: '防風防水外套、好走的鞋', caution: '請留意現場天氣與安全指示。'
+      });
+    };
+
+    const doSearch = async () => {
+      const q = queryInput?.value.trim();
+      if (!q) return;
+      resultsEl.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0;"><i class="fa-solid fa-spinner fa-spin"></i> 搜尋中...</p>';
+
+      try {
+        // Engine 1: Wikipedia Geo search (Chinese + English)
+        const [zhRes, enRes] = await Promise.allSettled([
+          fetch(`https://zh.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=10000&gslimit=5&gscoord=65|−18&format=json&origin=*&gspage=${encodeURIComponent(q)}`),
+          fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=5&srnamespace=0&format=json&origin=*`)
+        ]);
+
+        // Engine 2: OSM Nominatim
+        const osmRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&accept-language=zh-TW,en`);
+        const osmData = await osmRes.json();
+
+        // Wikipedia text search (most reliable for named spots)
+        const wikiSearchRes = await fetch(`https://zh.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=6&srnamespace=0&format=json&origin=*`);
+        const wikiSearchData = await wikiSearchRes.json();
+        const wikiHits = wikiSearchData?.query?.search || [];
+
+        // Fetch coords + summary for wiki hits
+        const candidates = [];
+        await Promise.allSettled(wikiHits.slice(0, 4).map(async (hit) => {
+          try {
+            const r = await fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(hit.title)}`);
+            const d = await r.json();
+            if (d.coordinates) {
+              candidates.push({
+                name: d.displaytitle || hit.title,
+                en: d.title || hit.title,
+                lat: d.coordinates.lat,
+                lng: d.coordinates.lon,
+                img: d.originalimage?.source || d.thumbnail?.source || '',
+                wiki: hit.title,
+                highlight: d.extract ? d.extract.slice(0, 120) + '…' : '',
+                type: 'nature'
+              });
+            }
+          } catch(e) {}
+        }));
+
+        // Also add OSM results
+        osmData.slice(0, 3).forEach(item => {
+          if (!candidates.find(c => Math.abs(c.lat - parseFloat(item.lat)) < 0.01)) {
+            candidates.push({
+              name: item.display_name.split(',')[0],
+              en: item.display_name.split(',')[0],
+              lat: parseFloat(item.lat),
+              lng: parseFloat(item.lon),
+              img: '',
+              wiki: '',
+              highlight: item.display_name,
+              type: item.type === 'hot_spring' ? 'spa' : item.type === 'city' ? 'city' : 'nature'
+            });
+          }
+        });
+
+        if (candidates.length === 0) {
+          resultsEl.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0;">⚠️ 找不到相關景點，請試試其他關鍵字或手動填寫。</p>';
+          return;
+        }
+
+        resultsEl.innerHTML = '';
+        candidates.forEach(c => {
+          const card = document.createElement('div');
+          card.style.cssText = 'display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--surface);transition:background 0.15s;';
+          card.onmouseenter = () => card.style.background = 'var(--bg)';
+          card.onmouseleave = () => card.style.background = 'var(--surface)';
+          card.innerHTML = `
+            ${c.img ? `<img src="${c.img}" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:52px;height:52px;border-radius:8px;background:var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;">📍</div>`}
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.highlight || c.en}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">${c.lat.toFixed(4)}, ${c.lng.toFixed(4)}</div>
+            </div>
+            <button class="btn primary" style="flex-shrink:0;padding:6px 14px;font-size:13px;"><i class="fa-solid fa-plus"></i> 新增</button>
+          `;
+          card.querySelector('button').onclick = (e) => {
+            e.stopPropagation();
+            commitAddSpot({
+              id: `spot-new-${Date.now()}`,
+              name: c.name, en: c.en, type: c.type,
+              lat: c.lat, lng: c.lng,
+              img: c.img, wiki: c.wiki,
+              highlight: c.highlight || '',
+              gear: '防風防水外套、好走的鞋',
+              caution: '請留意現場天氣與安全指示。'
+            });
+          };
+          resultsEl.appendChild(card);
+        });
+      } catch(err) {
+        resultsEl.innerHTML = `<p style="color:var(--muted);font-size:13px;padding:8px 0;">⚠️ 搜尋失敗：${err.message}</p>`;
+      }
+    };
+
+    if (searchBtn) searchBtn.onclick = doSearch;
+    if (queryInput) queryInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+    // Close modal when clicking backdrop
+    if (modal) modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+  }
+
+  function showSpot(spot, day) {
+    const dialog = document.getElementById('spotDialog');
+    const body = document.getElementById('spotDialogBody');
+    if (!dialog || !body) return;
+
+    const imgSrc = spot.img ? `${spot.img}?v=20260813` : '';
+
+    body.innerHTML = `
+      <div class="dialog-hero">
+        <img src="${imgSrc}" alt="${spot.name}" onerror="this.hidden=true;">
+      </div>
+      <div class="dialog-content">
+        <div class="spot-kicker">DAY ${day.day} · ${spot.en}</div>
+        <h3>${spot.name}</h3>
+        <p>${spot.highlight}</p>
+        <div class="dialog-grid">
+          <div class="dialog-info">
+            <strong>建議裝備</strong>
+            <p>${spot.gear || '一般旅遊裝備'}</p>
+          </div>
+          <div class="dialog-info">
+            <strong>注意事項</strong>
+            <p>${spot.caution || '依現場天氣與公告調整。'}</p>
+          </div>
+        </div>
+        <div class="dialog-links">
+          <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name + ' Iceland')}" target="_blank" rel="noreferrer"><i class="fa-solid fa-location-arrow"></i> Google Maps 導航 ↗</a>
+          <a href="${wikiUrl(spot.wiki)}" target="_blank" rel="noreferrer"><i class="fa-solid fa-book-atlas"></i> 維基百科背景 ↗</a>
+          <a href="#route" class="dialog-map-link"><i class="fa-solid fa-map-pin"></i> 在全程地圖查看</a>
+        </div>
+      </div>
+    `;
+
+    if (!spot.img && spot.wiki) {
+      wikiThumb(spot.wiki, body.querySelector('img'));
+    }
+
+    body.querySelector('.dialog-map-link').onclick = (e) => {
+      e.preventDefault();
+      dialog.close();
+      document.getElementById('route')?.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        map.setView([spot.lat, spot.lng], 10, { animate: true });
+        const m = allMarkers.find(x => x.spot.id === spot.id);
+        if (m) m.marker.openPopup();
+      }, 450);
+    };
+
+    dialog.showModal();
+  }
+
+  function focusDay(day) {
+    document.getElementById('route')?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      const pts = day.spots.map(s => [s.lat, s.lng]);
+      if (pts.length > 0) {
+        map.fitBounds(pts, { padding: [55, 55], maxZoom: 9 });
+      }
+    }, 450);
+  }
+
+  function initMap() {
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer) return;
+
+    // Guard: only create L.map once
+    if (!map) {
+      map = L.map('map', { zoomControl: true, scrollWheelZoom: false }).setView([64.85, -18.8], 6);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      markerLayer = L.layerGroup().addTo(map);
+    }
+
+    refreshMap();
+
+    document.querySelectorAll('[data-map-filter]').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('[data-map-filter]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.mapFilter;
+        const filtered = allMarkers.filter(x => f === 'all' || x.spot.type === f);
+        markerLayer.clearLayers();
+        filtered.forEach(x => x.marker.addTo(markerLayer));
+        // Update route polyline to only show filtered spots
+        if (routeLine) map.removeLayer(routeLine);
+        const pts = filtered.map(x => [x.spot.lat, x.spot.lng]);
+        if (pts.length > 1) {
+          routeLine = L.polyline(pts, { color: '#18242d', weight: 2, opacity: 0.5, dashArray: '5 8' }).addTo(map);
+        }
+      };
+    });
+  }
+
+  // Safely redraw all markers + route polyline from tripData (can be called multiple times)
+  function refreshMap() {
+    if (!map || !markerLayer) return;
+    markerLayer.clearLayers();
+    if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+    allMarkers.length = 0;
+    const legend = document.getElementById('mapLegend');
+    if (legend) legend.innerHTML = '';
+
+    const route = [];
+    tripData.days.forEach((d, i) => {
+      d.spots.forEach(s => {
+        route.push([s.lat, s.lng]);
+        const icon = L.divIcon({
+          className: 'custom-marker',
+          html: `<div class="marker-dot" style="background:${dayColors[i % dayColors.length]}"></div>`,
+          iconSize: [18, 18],
+          iconAnchor: [9, 9]
+        });
+        const marker = L.marker([s.lat, s.lng], { icon })
+          .bindPopup(`<strong>Day ${d.day} · ${s.name}</strong><br><span>${s.en}</span><br><a class="popup-link" href="#spot-${s.id}">查看景點卡 ↓</a>`);
+        marker.on('popupopen', () => {
+          document.querySelector('.leaflet-popup-content a')?.addEventListener('click', () => {
+            document.getElementById(`spot-${s.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+        });
+        marker.addTo(markerLayer);
+        allMarkers.push({ marker, spot: s, day: d });
+      });
+    });
+
+    if (route.length > 1) {
+      routeLine = L.polyline(route, { color: '#18242d', weight: 2, opacity: 0.5, dashArray: '5 8' }).addTo(map);
+    }
+    if (legend) {
+      tripData.days.forEach((d, i) => {
+        legend.insertAdjacentHTML('beforeend', `<div class="legend-item"><span class="legend-dot" style="background:${dayColors[i % dayColors.length]}"></span><span>D${d.day} ${fmtDate(d.date)} · ${d.label}</span></div>`);
+      });
+    }
+  }
+
+  function renderPrep() {
+    const grid = document.getElementById('prepGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const groups = [
+      ['admin', '📄 證件與手續', '3–6 個月前確認'],
+      ['bookings', '🎟️ 預約與訂單', '1–3 個月前預訂'],
+      ['gear', '🧥 裝備與衣物採購', '1 個月前試穿磨合'],
+      ['tech', '🔌 電源、通網與藥品', '2 週前確認']
+    ];
+
+    let totalItems = 0;
+    let checkedItems = 0;
+
+    groups.forEach(([key, title, sub]) => {
+      const items = tripData.prep[key] || [];
+      totalItems += items.length;
+
+      const card = document.createElement('article');
+      card.className = 'packing-card';
+      card.innerHTML = `<div class="packing-head"><div><h3>${title}</h3><p>${sub}</p></div><span>${items.length} 項</span></div><div class="check-list"></div>`;
+      const list = card.querySelector('.check-list');
+
+      items.forEach((item, i) => {
+        const id = `prep-${key}-${i}`;
+        const isChecked = Boolean(localStorage.getItem(id));
+        if (isChecked) checkedItems++;
+
+        const row = document.createElement('label');
+        row.className = 'check-row';
+        row.innerHTML = `<input type="checkbox" ${isChecked ? 'checked' : ''}><span>${item}</span>`;
+        row.querySelector('input').onchange = e => {
+          if (e.target.checked) {
+            localStorage.setItem(id, '1');
+          } else {
+            localStorage.removeItem(id);
+          }
+          updatePrepProgress();
+        };
+        list.appendChild(row);
+      });
+
+      grid.appendChild(card);
+    });
+
+    const updatePrepProgress = () => {
+      let currentChecked = 0;
+      let total = 0;
+      groups.forEach(([key]) => {
+        (tripData.prep[key] || []).forEach((_, i) => {
+          total++;
+          if (localStorage.getItem(`prep-${key}-${i}`)) currentChecked++;
+        });
+      });
+      const pct = total ? Math.round((currentChecked / total) * 100) : 0;
+      const fill = document.getElementById('prepProgressFill');
+      const text = document.getElementById('prepProgressText');
+      if (fill) fill.style.width = `${pct}%`;
+      if (text) text.textContent = `${currentChecked} / ${total} 已完成 (${pct}%)`;
+    };
+
+    updatePrepProgress();
+
+    const resetBtn = document.getElementById('resetPrep');
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        Object.keys(localStorage).filter(k => k.startsWith('prep-')).forEach(k => localStorage.removeItem(k));
+        document.querySelectorAll('#prepGrid input').forEach(x => x.checked = false);
+        updatePrepProgress();
+      };
+    }
+  }
+
+  function renderPacking() {
+    const grid = document.getElementById('packingGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const groups = [
+      ['carry', '隨身包包', '證件、貴重物品與途中隨時會用到'],
+      ['cabin', '手提行李', '托運延誤時仍能撐 1–2 天'],
+      ['checked', '托運行李', '主要衣物與旅行用品'],
+      ['shared', '共用／分裝', '夫妻或旅伴一起準備']
+    ];
+
+    groups.forEach(([key, title, sub]) => {
+      const card = document.createElement('article');
+      card.className = 'packing-card';
+      card.innerHTML = `<div class="packing-head"><div><h3>${title}</h3><p>${sub}</p></div><span>${tripData.packing[key].length} 項</span></div><div class="check-list"></div>`;
+      const list = card.querySelector('.check-list');
+      
+      tripData.packing[key].forEach((item, i) => {
+        const id = `pack-${key}-${i}`;
+        const row = document.createElement('label');
+        row.className = 'check-row';
+        row.innerHTML = `<input type="checkbox" ${localStorage.getItem(id) ? 'checked' : ''}><span>${item}</span>`;
+        row.querySelector('input').onchange = e => e.target.checked ? localStorage.setItem(id, '1') : localStorage.removeItem(id);
+        list.appendChild(row);
+      });
+
+      grid.appendChild(card);
+    });
+
+    const resetBtn = document.getElementById('resetPacking');
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        Object.keys(localStorage).filter(k => k.startsWith('pack-')).forEach(k => localStorage.removeItem(k));
+        document.querySelectorAll('#packingGrid input').forEach(x => x.checked = false);
+      };
+    }
+  }
+
+  function setupFilters() {
+    document.querySelectorAll('#dayFilters [data-filter]').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('#dayFilters [data-filter]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+        document.querySelectorAll('.day-card').forEach(c => {
+          c.style.display = (f === 'all' || c.dataset.filter.includes(f)) ? '' : 'none';
+        });
+      };
+    });
+  }
+
+  function renderToday() {
+    const select = document.getElementById('todaySelect');
+    if (!select) return;
+
+    tripData.days.forEach(d => {
+      select.insertAdjacentHTML('beforeend', `<option value="${d.day}">Day ${d.day} · ${fmtDate(d.date)} · ${d.label}</option>`);
+    });
+
+    const now = new Date();
+    const todayISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    let active = tripData.days.find(d => d.date === todayISO) || tripData.days.find(d => new Date(d.date + 'T23:59:59') >= now) || tripData.days[tripData.days.length - 1];
+    select.value = active.day;
+
+    const draw = (d) => {
+      const gear = [...new Set(d.spots.flatMap(s => (s.gear || '').split(/[、；]/).map(x => x.trim()).filter(Boolean)))].slice(0, 6);
+      document.getElementById('todayPanel').innerHTML = `
+        <article class="today-card">
+          <div class="today-main">
+            <div class="today-copy">
+              <div class="today-date">DAY ${d.day} · ${fmtDate(d.date)}</div>
+              <h3>${d.label}</h3>
+              <p class="today-summary">${d.summary}</p>
+              <div class="today-route">
+                ${d.spots.map(s => `<div class="route-stop">${s.name}</div>`).join('')}
+              </div>
+            </div>
+            <aside class="today-side">
+              <div>
+                <h4>今天記得帶</h4>
+                <p>${gear.length ? gear.join(' · ') : '依天氣準備基本防風保暖裝備'}</p>
+              </div>
+              <div>
+                <h4>今天最重要</h4>
+                <ul>
+                  ${d.tips.slice(0, 3).map(x => `<li>${x}</li>`).join('')}
+                </ul>
+              </div>
+              <div class="today-actions">
+                <button id="todayMap"><i class="fa-solid fa-location-crosshairs"></i> 看今天地圖</button>
+                <a href="https://en.vedur.is/" target="_blank" rel="noreferrer">Vedur 天氣 ↗</a>
+                <a href="https://safetravel.is/" target="_blank" rel="noreferrer">SafeTravel ↗</a>
+              </div>
+            </aside>
+          </div>
+          <div class="daily-checks">
+            <div class="daily-check"><strong>出門前</strong><span>手機 · 錢包 · 行充 · 水</span></div>
+            <div class="daily-check"><strong>戶外</strong><span>風雨層隨身，不放大行李</span></div>
+            <div class="daily-check"><strong>晚上</strong><span>${d.aurora ? '保留極光彈性 · 毛帽手套' : '確認隔日集合與天氣'}</span></div>
+            <div class="daily-check"><strong>照片</strong><span>電池 · 鏡頭布 · 儲存空間</span></div>
+          </div>
+        </article>
+      `;
+      document.getElementById('todayMap').onclick = () => focusDay(d);
+    };
+
+    draw(active);
+    select.onchange = () => draw(tripData.days.find(d => d.day === Number(select.value)));
+  }
+
+  function setupMisc() {
+    const spotCountEl = document.getElementById('spotCount');
+    if (spotCountEl) spotCountEl.textContent = tripData.days.reduce((n, d) => n + d.spots.length, 0);
+
+    const days = Math.ceil((new Date(tripData.start) - new Date()) / 86400000);
+    const countdownEl = document.getElementById('countdown');
+    if (countdownEl) countdownEl.textContent = days > 0 ? `${days} 天` : days === 0 ? '今天' : '已出發';
+
+    const focusMapBtn = document.getElementById('focusMapBtn');
+    if (focusMapBtn) {
+      focusMapBtn.onclick = () => {
+        document.getElementById('route')?.scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => map.fitBounds([[63.3, -24], [66.5, -13.2]], { padding: [25, 25] }), 400);
+      };
+    }
+
+    const themeBtn = document.getElementById('themeBtn');
+    if (themeBtn) {
+      themeBtn.onclick = () => {
+        document.body.classList.toggle('dark');
+        themeBtn.textContent = document.body.classList.contains('dark') ? '☀' : '☾';
+        setTimeout(() => map && map.invalidateSize(), 50);
+      };
+    }
+
+    // Mobile Drawer Toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    if (mobileMenuBtn && mobileDrawer) {
+      mobileMenuBtn.onclick = () => {
+        mobileDrawer.classList.toggle('active');
+        const isActive = mobileDrawer.classList.contains('active');
+        mobileMenuBtn.innerHTML = isActive 
+          ? '<i class="fa-solid fa-xmark"></i> <span>關閉</span>'
+          : '<i class="fa-solid fa-bars"></i> <span>選單</span>';
+      };
+
+      document.querySelectorAll('.drawer-link').forEach(link => {
+        link.onclick = () => {
+          mobileDrawer.classList.remove('active');
+          mobileMenuBtn.innerHTML = '<i class="fa-solid fa-bars"></i> <span>選單</span>';
+        };
+      });
+    }
+
+    // Reset Data Action (Desktop & Mobile)
+    const handleResetData = () => {
+      if (confirm('確定要清理瀏覽器快取，重新載入預設 11 天完整行程與照片嗎？')) {
+        localStorage.removeItem('iceland_2026_editorial_days');
+        localStorage.removeItem('iceland_2026_edited_itinerary');
+        localStorage.removeItem('iceland_2026_trip_data');
+        // Reload tripData from the embedded default
+        Object.assign(tripData, window._defaultTripData);
+        renderDays();
+        refreshMap();
+        alert('✅ 已重設並加載完整 11 天行程與 25 大景點照片！');
+      }
+    };
+    document.getElementById('reset-data-btn')?.addEventListener('click', handleResetData);
+    document.getElementById('mobile-reset-btn')?.addEventListener('click', handleResetData);
+
+    // Edit Mode Toggle Action (Desktop & Mobile)
+    const handleEditToggle = () => {
+      document.body.classList.toggle('edit-active');
+      const isActive = document.body.classList.contains('edit-active');
+      const label = isActive 
+        ? '<i class="fa-solid fa-check"></i> 完成退出' 
+        : '<i class="fa-solid fa-pen-to-square"></i> ✏️ 編輯模式';
+      const desktopBtn = document.getElementById('edit-mode-toggle');
+      const mobileBtn = document.getElementById('mobile-edit-btn');
+      if (desktopBtn) desktopBtn.innerHTML = label;
+      if (mobileBtn) mobileBtn.innerHTML = label;
+    };
+    document.getElementById('edit-mode-toggle')?.addEventListener('click', handleEditToggle);
+    document.getElementById('mobile-edit-btn')?.addEventListener('click', handleEditToggle);
+
+    // Cloud Sync Action (Desktop & Mobile)
+    const handleCloudSync = () => {
+      const token = prompt('請輸入 GitHub Personal Access Token（僅此次使用，不會儲存）：');
+      if (!token || !token.startsWith('ghp_')) {
+        alert('⚠️ 未輸入有效 Token，同步已取消。');
+        return;
+      }
+      alert('正同步將全隊最新行程寫回 GitHub 雲端伺服器...');
+      const repo = 'serendipity-all/iceland-2026-guide';
+      const path = 'index.html';
+      const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const base64Content = btoa(unescape(encodeURIComponent(fullHtml)));
+
+      fetch(`https://api.github.com/repos/${repo}/contents/${path}?ref=main`, {
+        headers: { 'Authorization': `token ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        const sha = data.sha;
+        return fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: 'Update Iceland 2026 Editorial Itinerary via Web',
+            content: base64Content,
+            sha: sha,
+            branch: 'main'
+          })
+        });
+      })
+      .then(res => res.json())
+      .then(() => alert('🎉 成功！全隊最新行程與照片已全數同步至 GitHub 雲端！隊友開啟網頁即可同步更新！'))
+      .catch(err => alert('⚠️ 雲端同步失敗：' + err));
+    };
+    document.getElementById('cloud-sync-btn')?.addEventListener('click', handleCloudSync);
+    document.getElementById('mobile-sync-btn')?.addEventListener('click', handleCloudSync);
+
+    // Helper: find which tripData day and spot index a spot card belongs to
+    function findSpotInData(spotCardEl) {
+      const spotId = spotCardEl.id.replace('spot-', '');
+      for (const d of tripData.days) {
+        const idx = d.spots.findIndex(s => s.id === spotId);
+        if (idx !== -1) return { day: d, idx };
+      }
+      return null;
+    }
+
+    // Helper: sync tripData.days[n].spots order from DOM after a move
+    function syncSpotsOrderFromDOM(dayCard) {
+      const spotCards = [...dayCard.querySelectorAll('.spot-card')];
+      const dayNum = parseInt(dayCard.id.replace('day-', ''));
+      const day = tripData.days.find(d => d.day === dayNum);
+      if (!day) return;
+      const idOrder = spotCards.map(sc => sc.id.replace('spot-', ''));
+      day.spots.sort((a, b) => idOrder.indexOf(a.id) - idOrder.indexOf(b.id));
+    }
+
+    // Edit Controls Event Delegation
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.btn-move-up')) {
+        const spotCardEl = e.target.closest('.spot-card');
+        if (spotCardEl && spotCardEl.previousElementSibling?.classList.contains('spot-card')) {
+          spotCardEl.parentNode.insertBefore(spotCardEl, spotCardEl.previousElementSibling);
+          syncSpotsOrderFromDOM(spotCardEl.closest('.day-card'));
+          saveItineraryToLocal();
+          refreshMap();
+        }
+      }
+      if (e.target.closest('.btn-move-down')) {
+        const spotCardEl = e.target.closest('.spot-card');
+        if (spotCardEl && spotCardEl.nextElementSibling?.classList.contains('spot-card')) {
+          spotCardEl.parentNode.insertBefore(spotCardEl.nextElementSibling, spotCardEl);
+          syncSpotsOrderFromDOM(spotCardEl.closest('.day-card'));
+          saveItineraryToLocal();
+          refreshMap();
+        }
+      }
+      if (e.target.closest('.btn-delete-spot')) {
+        const spotCardEl = e.target.closest('.spot-card');
+        if (spotCardEl && confirm('確定要刪除這個景點嗎？')) {
+          const found = findSpotInData(spotCardEl);
+          if (found) found.day.spots.splice(found.idx, 1);
+          spotCardEl.remove();
+          saveItineraryToLocal();
+          refreshMap();
+          // Update spot count
+          const spotCountEl = document.getElementById('spotCount');
+          if (spotCountEl) spotCountEl.textContent = tripData.days.reduce((n, d) => n + d.spots.length, 0);
+        }
+      }
+      if (e.target.closest('.btn-wiki-match')) {
+        const spotCardEl = e.target.closest('.spot-card');
+        const spotTitle = spotCardEl.querySelector('h4').innerText.trim();
+        const query = encodeURIComponent(spotTitle.split(/\s/)[0]);
+        fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}`)
+          .then(r => r.json())
+          .then(data => {
+            const src = data.originalimage?.source || data.thumbnail?.source;
+            if (src) {
+              const img = spotCardEl.querySelector('img');
+              img.src = src;
+              img.hidden = false;
+              // Also update tripData
+              const found = findSpotInData(spotCardEl);
+              if (found) found.day.spots[found.idx].img = src;
+              saveItineraryToLocal();
+            } else {
+              alert(`⚠️ 維基百科未找到「${spotTitle}」的封面照片，請手動更換照片。`);
+            }
+          })
+          .catch(err => alert(`⚠️ 搜尋失敗：${err}`));
+      }
+      if (e.target.closest('.btn-change-photo')) {
+        const spotCardEl = e.target.closest('.spot-card');
+        activeSpotImgTarget = spotCardEl.querySelector('img');
+        activeSpotImgTarget._spotCardEl = spotCardEl;
+        const photoModal = document.getElementById('photo-modal');
+        const modalUrlInput = document.getElementById('modal-photo-url');
+        if (photoModal) {
+          modalUrlInput.value = activeSpotImgTarget.src;
+          photoModal.classList.add('active');
+        }
+      }
+    });
+
+    const modalCancelBtn = document.getElementById('modal-cancel-photo');
+    const modalSaveBtn = document.getElementById('modal-save-photo');
+    const photoModal = document.getElementById('photo-modal');
+    const modalFileInput = document.getElementById('modal-photo-file');
+    const modalUrlInput = document.getElementById('modal-photo-url');
+
+    if (modalCancelBtn) {
+      modalCancelBtn.onclick = () => photoModal.classList.remove('active');
+    }
+
+    if (modalSaveBtn) {
+      modalSaveBtn.onclick = () => {
+        if (activeSpotImgTarget) {
+          const applyImg = (src) => {
+            activeSpotImgTarget.src = src;
+            activeSpotImgTarget.hidden = false;
+            // Sync to tripData
+            const sc = activeSpotImgTarget._spotCardEl || activeSpotImgTarget.closest?.('.spot-card');
+            if (sc) {
+              const found = findSpotInData(sc);
+              if (found) found.day.spots[found.idx].img = src;
+            }
+            photoModal.classList.remove('active');
+            saveItineraryToLocal();
+          };
+          if (modalFileInput && modalFileInput.files && modalFileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => applyImg(e.target.result);
+            reader.readAsDataURL(modalFileInput.files[0]);
+          } else if (modalUrlInput && modalUrlInput.value.trim()) {
+            applyImg(modalUrlInput.value.trim());
+          }
+        }
+      };
+    }
+  }
+
+  // Save the entire tripData object as JSON (source of truth)
+  function saveItineraryToLocal() {
+    try {
+      localStorage.setItem('iceland_2026_trip_data', JSON.stringify(tripData));
+    } catch(e) { console.warn('saveItineraryToLocal failed:', e); }
+  }
+
+  // Load saved tripData JSON, merge into live tripData, then re-render
+  function loadItineraryFromLocal() {
+    try {
+      const saved = localStorage.getItem('iceland_2026_trip_data');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
+          // Merge into live tripData so all references stay valid
+          tripData.days = parsed.days;
+          if (parsed.title) tripData.title = parsed.title;
+          return true;
+        }
+      }
+    } catch(e) { console.warn('loadItineraryFromLocal failed:', e); }
+    return false;
+  }
+
+  // Save a snapshot of the original embedded data for reset
+  window._defaultTripData = JSON.parse(JSON.stringify(tripData));
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Load saved data into tripData FIRST, then render
+    loadItineraryFromLocal();
+    renderDays();
+    renderPrep();
+    renderPacking();
+    renderToday();
+    initMap();
+    setupFilters();
+    setupMisc();
+    initAddSpotModal();
+
+    const dialog = document.getElementById('spotDialog');
+    const dialogClose = document.querySelector('#spotDialog .dialog-close');
+    if (dialogClose && dialog) {
+      dialogClose.onclick = () => dialog.close();
+    }
+  });
+  </script>
+</body>
+</html>

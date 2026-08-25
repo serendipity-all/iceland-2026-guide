@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101820" />
+  <title>簡易行程表 | 2026 冰島夢幻之旅</title>
+  <meta name="description" content="2026 冰島 11 天簡易行程總覽，9/23 出發至 10/3 返鄉，含每日景點與活動摘要。" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Inter:wght@400;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet" />
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* ── Page-specific styles ───────────────────────── */
+
+    .itin-hero {
+      padding: 56px clamp(18px, 5vw, 78px) 0;
+    }
+
+    .itin-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .itin-title-cn {
+      font-family: Georgia, "Noto Serif TC", serif;
+      font-size: clamp(52px, 9vw, 96px);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #9b59b6, #6c3483, #c39bd3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .itin-title-sub {
+      font-family: Georgia, "Noto Serif TC", serif;
+      font-size: clamp(20px, 3vw, 32px);
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    /* Hero photo grid */
+    .itin-photos {
+      display: grid;
+      grid-template-columns: 1fr 0.65fr 0.65fr;
+      grid-template-rows: 200px 200px;
+      gap: 4px;
+      border-radius: 20px;
+      overflow: hidden;
+      height: 404px;
+    }
+
+    .itin-photos img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .itin-photos .photo-main {
+      grid-row: 1 / 3;
+    }
+
+    /* Table section */
+    .itin-table-section {
+      padding: 40px clamp(18px, 5vw, 78px) 80px;
+    }
+
+    .itin-table-wrap {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 40px rgba(16, 24, 32, 0.07);
+    }
+
+    .itin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+
+    .itin-table thead tr {
+      background: #e07b20;
+    }
+
+    .itin-table thead th {
+      padding: 14px 20px;
+      color: white;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      text-align: center;
+    }
+
+    .itin-table thead th:last-child {
+      text-align: center;
+    }
+
+    .itin-table tbody tr {
+      border-bottom: 1px solid var(--line);
+      transition: background 0.15s ease;
+    }
+
+    .itin-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .itin-table tbody tr:hover {
+      background: rgba(224, 123, 32, 0.06);
+    }
+
+    .itin-table tbody tr:nth-child(even) {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .itin-table tbody tr:nth-child(even):hover {
+      background: rgba(224, 123, 32, 0.06);
+    }
+
+    .itin-table td {
+      padding: 15px 20px;
+      vertical-align: middle;
+      color: var(--ink);
+    }
+
+    .td-date {
+      width: 130px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+      border-right: 1px solid var(--line);
+    }
+
+    .td-date .day-label {
+      font-size: 11px;
+      color: #e07b20;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .td-content {
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .td-content .spots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .spot-tag {
+      background: rgba(224, 123, 32, 0.1);
+      color: #9b4a0a;
+      border: 1px solid rgba(224, 123, 32, 0.2);
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .td-special {
+      font-weight: 700;
+      color: #6c3483;
+    }
+
+    .td-depart {
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .td-aurora {
+      color: #1a6b5a;
+      font-weight: 600;
+    }
+
+    /* Back link & print btn */
+    .itin-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 0 clamp(18px, 5vw, 78px) 32px;
+      flex-wrap: wrap;
+    }
+
+    .print-btn {
+      background: var(--dark);
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .print-btn:hover { background: #1a2a38; transform: translateY(-1px); }
+
+    /* Dark mode overrides */
+    body.dark .itin-table thead tr { background: #c06a10; }
+    body.dark .itin-table tbody tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+    body.dark .itin-table tbody tr:hover { background: rgba(224, 123, 32, 0.1); }
+    body.dark .itin-table tbody tr:nth-child(even):hover { background: rgba(224, 123, 32, 0.1); }
+    body.dark .td-date { color: #8a9299; }
+    body.dark .spot-tag { background: rgba(224,123,32,0.15); color: #f0a060; border-color: rgba(224,123,32,0.3); }
+    body.dark .td-special { color: #c39bd3; }
+
+    /* Print styles */
+    @media print {
+      .topbar, .itin-actions { display: none !important; }
+      .itin-table-section { padding: 20px 0; }
+      .itin-photos { height: 300px; }
+    }
+
+    /* Mobile */
+    @media (max-width: 700px) {
+      .itin-photos {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 160px 120px;
+        height: auto;
+      }
+      .itin-photos .photo-main { grid-row: 1 / 1; grid-column: 1 / 3; }
+      .td-date { width: 90px; font-size: 12px; }
+      .itin-table { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Glass Topbar -->
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="回到手冊首頁">
+      <span class="brand-mark">◒</span>
+      <span>ICELAND · 2026</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html#today">今日模式</a>
+      <a href="index.html#route">地圖</a>
+      <a href="index.html#days">每日行程</a>
+      <a href="itinerary.html" style="color:var(--accent);font-weight:800;">簡易行程表</a>
+      <a href="index.html#prep">行前準備</a>
+      <a href="index.html#packing">行李清單</a>
+    </nav>
+    <div class="topbar-actions">
+      <button id="themeBtn" class="icon-btn" aria-label="切換深色模式">☾</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="開啟選單"><i class="fa-solid fa-bars"></i> <span>選單</span></button>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div id="mobileDrawer" class="mobile-drawer">
+    <nav class="mobile-drawer-nav">
+      <a href="index.html#today" class="drawer-link">⚡ 今日模式 <span>↗</span></a>
+      <a href="index.html#route" class="drawer-link">🗺️ 全程地圖 <span>↗</span></a>
+      <a href="index.html#days" class="drawer-link">📅 每日行程 <span>↗</span></a>
+      <a href="itinerary.html" class="drawer-link" style="color:var(--accent);">📋 簡易行程表 <span>↗</span></a>
+      <a href="index.html#prep" class="drawer-link">📋 行前準備清單 <span>↗</span></a>
+      <a href="index.html#packing" class="drawer-link">🧳 行李打包清單 <span>↗</span></a>
+    </nav>
+  </div>
+
+  <main id="top">
+
+    <!-- Hero: Title + Photos -->
+    <section class="itin-hero">
+      <div class="itin-header">
+        <div class="itin-title-cn">冰島</div>
+        <div class="itin-title-sub">簡易行程表</div>
+      </div>
+
+      <div class="itin-photos">
+        <!-- Main left: Reykjavik cityscape -->
+        <img class="photo-main" src="images/hallgrimskirkja.jpg" alt="雷克雅維克城市風光">
+        <!-- Top right: Blue Lagoon -->
+        <img src="images/blue_lagoon.jpg" alt="藍湖溫泉">
+        <!-- Mid right: Northern lights -->
+        <img src="images/jokulsarlon.jpg" alt="冰河湖極光">
+        <!-- Bottom right: Waterfall sunset -->
+        <img src="images/godafoss.jpg" alt="眾神瀑布">
+        <!-- Far right: Aurora landscape -->
+        <img src="images/kirkjufell.jpg" alt="教堂山極光">
+      </div>
+    </section>
+
+    <!-- Action Bar -->
+    <div class="itin-actions">
+      <a href="index.html" class="btn secondary" style="font-size:13px; padding:10px 20px;">
+        <i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i> 回到完整手冊
+      </a>
+      <button class="print-btn" onclick="window.print()">
+        <i class="fa-solid fa-print"></i> 列印 / 儲存 PDF
+      </button>
+    </div>
+
+    <!-- Itinerary Table -->
+    <section class="itin-table-section">
+      <div class="itin-table-wrap">
+        <table class="itin-table">
+          <thead>
+            <tr>
+              <th style="width:130px;">日期</th>
+              <th>行程</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr>
+              <td class="td-date">
+                <span class="day-label">Day 1</span>
+                23 Sep 2026
+              </td>
+              <td class="td-content">
+                15:25 抵達冰島，前往藍湖溫泉放鬆，旅社寄放行李，散步哈爾格林姆教堂
+                <div class="spots">
+                  <span class="spot-tag">藍湖溫泉</span>
+                  <span class="spot-tag">哈爾格林姆教堂</span>
+                  <span class="spot-tag">雷克雅維克市區</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="td-date">
+                <span class="day-label">Day 2</span>
+                24 Sep 2026
+              </td>
+              <td class="td-content">
+                南岸大滿貫一日遊
+                <div class="spots">
+                  <span class="spot-tag">水簾洞瀑布</span>
+                  <span class="spot-tag">彩虹瀑布</span>
+                  <span class="spot-tag">黑沙灘</span>
+                  <span class="spot-tag">海蝕洞</span>
+                  <span class="spot-tag">羽毛峽谷</span>
+                  <span class="spot-tag">冰河湖</span>
+                  <span class="spot-tag">鑽石沙灘</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="td-date">
+                <span class="day-label">Day 3</span>
+                25 Sep 2026
+              </td>
+              <td class="td-content">
+                北上前往阿克雷里，小鎮風光散步，熟悉鑽石圈周邊
+                <div class="spots">
+                  <span class="spot-tag">阿克雷里小鎮</span>
+                  <span class="spot-tag">愛心紅綠燈</span>
+                  <span class="spot-tag">Brynja 冰淇淋</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="td-date">
+                <span class="day-label">Day 4</span>
+                26 Sep 2026
+              </td>
+              <td class="td-content">
+                鑽石圈火山地貌探索
+                <div class="spots">
+                  <span class="spot-tag">眾神瀑布</span>
+                  <span class="spot-tag">黛提瀑布</span>
+                  <span class="spot-tag">克拉夫火山</span>
+                  <span class="spot-tag">米湖地熱區</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="td-date">
+                <span class="day-label">Day 5</span>
+                27 Sep 2026
+              </td>
+              <td class="td-content td-special">
+                <i class="fa-solid fa-water" style="margin-right:6px;opacity:0.7;"></i>
+                西格芙德峽灣賞鯨
+                <div class="spots">
+                  <span class="spot-tag">賞鯨出海</span>
+                  <span class="spot-tag">Siglufjörður 港口</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="td-date">
+                <span class="day-label">Day 6</span>
+                28 Sep 2026
+              </td>
+              <td class="td-content">
+                東進埃伊爾斯塔德，峽灣湖風光，夜間等待極光
+                <div class="spots">
+                  <span class="spot-tag">峽灣湖風光</span>
+                  <span class="spot-tag">Egilsstaðir</span>
+                  <span class="spot-tag td-aurora">🌌 極光機會</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="td-date">
+                <span class="day-label">Day 7</span>
+                29 Sep 2026
+              </td>
+              <td class="td-content">
+                東部秘境探索，夜間等待極光
+                <div class="spots">
+                  <span class="spot-tag">金字塔山 Búlandstindur</span>
+                  <span class="spot-tag">白日夢冒險王小鎮</span>
+                  <span class="spot-tag td-aurora">🌌 極光機會</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="td-date">
+                <span class="day-label">Day 8</span>
+                30 Sep 2026
+              </td>
+              <td class="td-content">
+                返回雷克雅維克歇息，城市輕鬆遊
+                <div class="spots">
+                  <span class="spot-tag">維京船骨架</span>
+                  <span class="spot-tag">Harpa 音樂廳</span>
+                  <span class="spot-tag">雷克雅維克市區</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="td-date">
+                <span class="day-label">Day 9</span>
+                1 Oct 2026
+              </td>
+              <td class="td-content">
+                黃金圈一日遊
+                <div class="spots">
+                  <span class="spot-tag">辛格韋德利國家公園</span>
+                  <span class="spot-tag">間歇泉 Strokkur</span>
+                  <span class="spot-tag">古佛斯瀑布</span>
+                  <span class="spot-tag">克里德火口湖</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="td-date">
+                <span class="day-label">Day 10</span>
+                2 Oct 2026
+              </td>
+              <td class="td-content" style="color:var(--muted);">
+                <i class="fa-solid fa-cloud-sun" style="margin-right:6px;"></i>
+                彈性日（依天氣調整順序）
+                <div class="spots">
+                  <span class="spot-tag">特寧湖</span>
+                  <span class="spot-tag">天空藍湖 Sky Lagoon</span>
+                  <span class="spot-tag">教堂山 Kirkjufell</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="td-date">
+                <span class="day-label">Day 11</span>
+                3 Oct 2026
+              </td>
+              <td class="td-content td-depart">
+                <i class="fa-solid fa-plane-departure" style="margin-right:8px;"></i>
+                07:40 清晨搭機，準備返鄉 ✈️
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>ICELAND 2026 · 簡易行程表</span>
+    <span>2026/09/23 – 10/03 · 11 天 10 夜</span>
+  </footer>
+
+  <script>
+    // Theme toggle
+    const themeBtn = document.getElementById('themeBtn');
+    if (themeBtn) {
+      themeBtn.onclick = () => {
+        document.body.classList.toggle('dark');
+        themeBtn.textContent = document.body.classList.contains('dark') ? '☀' : '☾';
+      };
+    }
+
+    // Mobile drawer
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    if (mobileMenuBtn && mobileDrawer) {
+      mobileMenuBtn.onclick = () => {
+        mobileDrawer.classList.toggle('active');
+        const isActive = mobileDrawer.classList.contains('active');
+        mobileMenuBtn.innerHTML = isActive
+          ? '<i class="fa-solid fa-xmark"></i> <span>關閉</span>'
+          : '<i class="fa-solid fa-bars"></i> <span>選單</span>';
+      };
+    }
+  </script>
+</body>
+</html>

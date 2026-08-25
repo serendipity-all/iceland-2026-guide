@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>伴手禮清單 | 2026 冰島夢幻之旅</title>
+  <meta name="description" content="2026 冰島必買、必逛、伴手禮清單，含購買地點與行程連結。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, #2d1a3a 0%, #4a2060 50%, #1a2a3a 100%);
+      padding: 80px clamp(18px,5vw,78px) 48px;
+      color: white;
+    }
+    .page-hero h1 { font-size: clamp(28px,5vw,52px); font-weight:900; margin:0 0 8px; }
+    .page-hero p { color: rgba(255,255,255,0.6); font-size:15px; margin:0; }
+
+    /* Budget bar */
+    .budget-bar {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      padding: 20px clamp(18px,5vw,78px);
+      border-bottom: 1px solid var(--line);
+    }
+    .budget-stat { text-align: center; }
+    .budget-stat .num { font-size: 28px; font-weight: 900; color: var(--accent); line-height: 1; }
+    .budget-stat .lbl { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: 0.06em; margin-top: 2px; }
+    .budget-divider { width: 1px; height: 40px; background: var(--line); }
+
+    /* Filter tabs */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      padding: 20px clamp(18px,5vw,78px) 0;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--ink);
+      transition: all 0.15s;
+    }
+    .filter-btn:hover { background: var(--line); }
+    .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* Shopping grid */
+    .shopping-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+      padding: 24px clamp(18px,5vw,78px) 60px;
+    }
+
+    .shop-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .shop-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.08); transform: translateY(-1px); }
+    .shop-card.bought { opacity: 0.55; }
+    .shop-card.bought .shop-name { text-decoration: line-through; }
+
+    .shop-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .shop-check {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--line);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      font-size: 12px;
+    }
+    .shop-check.checked { background: #2fae84; border-color: #2fae84; color: white; }
+
+    .cat-badge {
+      font-size: 11px; font-weight: 800;
+      padding: 3px 9px; border-radius: 999px;
+      letter-spacing: 0.04em;
+    }
+    .cat-food  { background: rgba(224,123,32,0.12); color: #9b4a0a; border:1px solid rgba(224,123,32,0.25); }
+    .cat-craft { background: rgba(108,52,131,0.12); color: #5a2076; border:1px solid rgba(108,52,131,0.25); }
+    .cat-store { background: rgba(47,174,132,0.12); color: #1a7a5a; border:1px solid rgba(47,174,132,0.25); }
+
+    .shop-name { font-size: 15px; font-weight: 800; margin: 0 0 4px; }
+    .shop-name-en { font-size: 11px; color: var(--muted); margin: 0 0 8px; }
+    .shop-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0 0 12px; }
+
+    .shop-meta { display: flex; flex-direction: column; gap: 5px; }
+    .shop-meta-row {
+      display: flex; align-items: flex-start; gap: 7px;
+      font-size: 12px; color: var(--muted);
+    }
+    .shop-meta-row i { flex-shrink: 0; margin-top: 1px; width: 14px; text-align: center; }
+    .shop-meta-row .price { font-weight: 700; color: var(--accent); }
+
+    .day-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(224,123,32,0.1);
+      border: 1px solid rgba(224,123,32,0.2);
+      border-radius: 999px;
+      padding: 2px 9px;
+      text-decoration: none;
+      margin-top: 8px;
+      transition: all 0.15s;
+    }
+    .day-link-btn:hover { background: rgba(224,123,32,0.2); }
+
+    /* Done banner */
+    .done-banner {
+      display: none;
+      position: absolute;
+      top: 12px; right: 14px;
+      background: #2fae84;
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .shop-card.bought .done-banner { display: block; }
+
+    /* section headers */
+    .section-header {
+      padding: 24px clamp(18px,5vw,78px) 0;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    body.dark .cat-food  { background: rgba(224,123,32,0.2); color: #f0a060; }
+    body.dark .cat-craft { background: rgba(108,52,131,0.2); color: #c39bd3; }
+    body.dark .cat-store { background: rgba(47,174,132,0.2); color: #6fcfb0; }
+    body.dark .shop-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.3); }
+
+    @media (max-width:600px) {
+      .shopping-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="回到手冊首頁">
+      <span class="brand-mark">◒</span>
+      <span>ICELAND · 2026</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html#today">今日模式</a>
+      <a href="index.html#days">每日行程</a>
+      <a href="itinerary.html">簡易行程表</a>
+      <a href="accommodation.html">🏠 住宿</a>
+      <a href="transport.html">✈️ 交通票</a>
+      <a href="shopping.html" style="color:var(--accent);font-weight:800;">🛋️ 伴手禮</a>
+      <a href="index.html#prep">行前準備</a>
+    </nav>
+    <div class="topbar-actions">
+      <button id="themeBtn" class="icon-btn" aria-label="切換深色模式">☾</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="開啟選單"><i class="fa-solid fa-bars"></i> <span>選單</span></button>
+    </div>
+  </header>
+
+  <div id="mobileDrawer" class="mobile-drawer">
+    <nav class="mobile-drawer-nav">
+      <a href="index.html#today" class="drawer-link">⚡ 今日模式 <span>↗</span></a>
+      <a href="index.html#days" class="drawer-link">📅 每日行程 <span>↗</span></a>
+      <a href="accommodation.html" class="drawer-link">🏠 住宿資訊 <span>↗</span></a>
+      <a href="transport.html" class="drawer-link">✈️ 交通票 <span>↗</span></a>
+      <a href="shopping.html" class="drawer-link" style="color:var(--accent);">🛋️ 伴手禮清單 <span>↗</span></a>
+    </nav>
+  </div>
+
+  <main>
+    <div class="page-hero">
+      <h1>🛋️ 伴手禮 &amp; 必買清單</h1>
+      <p>食品 · 手工藝品 · 必逛店家 — 勾選已購買，自動計算進度</p>
+    </div>
+
+    <!-- Budget / Progress bar -->
+    <div class="budget-bar">
+      <div class="budget-stat">
+        <div class="num" id="stat-bought">0</div>
+        <div class="lbl">已購買</div>
+      </div>
+      <div class="budget-divider"></div>
+      <div class="budget-stat">
+        <div class="num" id="stat-total">12</div>
+        <div class="lbl">清單總數</div>
+      </div>
+      <div class="budget-divider"></div>
+      <div class="budget-stat">
+        <div class="num" id="stat-pct">0%</div>
+        <div class="lbl">完成率</div>
+      </div>
+    </div>
+
+    <!-- Filter buttons -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-cat="all" onclick="filterCards('all', this)">🛒 全部</button>
+      <button class="filter-btn" data-cat="food" onclick="filterCards('food', this)">🍫 食品</button>
+      <button class="filter-btn" data-cat="craft" onclick="filterCards('craft', this)">🧣 紀念品</button>
+      <button class="filter-btn" data-cat="store" onclick="filterCards('store', this)">🏪 必逛店家</button>
+    </div>
+
+    <!-- Shopping grid (rendered by JS) -->
+    <div class="shopping-grid" id="shopping-grid"></div>
+
+    <div style="padding: 0 clamp(18px,5vw,78px) 60px; display:flex; gap:12px; flex-wrap:wrap;">
+      <a href="index.html" class="btn secondary" style="font-size:13px;padding:10px 20px;"><i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i> 回到完整手冊</a>
+      <button class="btn secondary" onclick="window.print()" style="font-size:13px;padding:10px 20px;"><i class="fa-solid fa-print" style="margin-right:6px;"></i> 列印清單</button>
+    </div>
+  </main>
+
+  <footer>
+    <span>ICELAND 2026 · 伴手禮清單</span>
+    <span>點擊卡片勾選已購買</span>
+  </footer>
+
+  <script>
+    // Theme / mobile menu
+    const themeBtn = document.getElementById('themeBtn');
+    if (themeBtn) themeBtn.onclick = () => {
+      document.body.classList.toggle('dark');
+      themeBtn.textContent = document.body.classList.contains('dark') ? '☀' : '☾';
+    };
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    if (mobileMenuBtn) mobileMenuBtn.onclick = () => {
+      mobileDrawer.classList.toggle('active');
+      mobileMenuBtn.innerHTML = mobileDrawer.classList.contains('active')
+        ? '<i class="fa-solid fa-xmark"></i> <span>關閉</span>'
+        : '<i class="fa-solid fa-bars"></i> <span>選單</span>';
+    };
+
+    // Shopping data
+    const shoppingItems = [
+      { id:'sh-skyr',      cat:'food',  name:'Skyr 冰島優格',        nameEn:'Skyr',                              desc:'冰島國民食品，高蛋白低脂，在地口感版本台灣買不到。',                        price:'300–600 ISK',    where:'Bonus 超市、10-11 便利商店',          dayLink:1  },
+      { id:'sh-hardfiskur',cat:'food',  name:'魚乾 Harðfiskur',      nameEn:'Harðfiskur (dried fish)',           desc:'冰島傳統零食，高蛋白風乾魚片，通常搭奶油吃。',                           price:'800–1500 ISK',   where:'Bonus 超市、機場免稅區',              dayLink:11 },
+      { id:'sh-licorice',  cat:'food',  name:'甘草糖 / 海鹽巧克力',  nameEn:'Licorice & Sea Salt Chocolate',    desc:'冰島人超愛甘草味；Nói Síríus 海鹽巧克力是必帶伴手禮。',                   price:'500–1200 ISK',   where:'Rammagerðin、Bonus 超市、機場',      dayLink:8  },
+      { id:'sh-brenniv',   cat:'food',  name:'冰島燒酒 Brennivín',   nameEn:'Brennivín',                        desc:'黑標冰島傳統烈酒，綽號「黑色死亡」，葛縷子風味。',                        price:'3000–5000 ISK',  where:'State Alcohol Stores (Vínbúðin)',     dayLink:8  },
+      { id:'sh-lopapeysa', cat:'craft', name:'冰島羊毛衣 Lopapeysa', nameEn:'Lopapeysa Wool Sweater',           desc:'冰島傳統幾何花紋羊毛衫，保暖又有型，真品在 Rammagerðin。',               price:'15000–30000 ISK',where:'Rammagerðin 手工藝品店 (Laugavegur 12)', dayLink:8  },
+      { id:'sh-woolblanket',cat:'craft',name:'羊毛毯 / 羊毛帽',     nameEn:'Wool Blanket / Hat',                desc:'比羊毛衣輕巧，方便攜帶，選購手工款更有質感。',                           price:'5000–15000 ISK', where:'Rammagerðin、Handprjónasambandið',    dayLink:8  },
+      { id:'sh-puffin',    cat:'craft', name:'海鸚玩偶 Puffin',      nameEn:'Puffin Stuffed Toy',               desc:'冰島標誌性鳥類，毛絨玩具質感差異大，建議選中高端版。',                    price:'2000–5000 ISK',  where:'各景點紀念品店、市區禮品店',           dayLink:8  },
+      { id:'sh-lavasalt',  cat:'craft', name:'冰島火山熔岩鹽',       nameEn:'Icelandic Lava Salt',              desc:'以冰島海鹽加入熔岩礦物提煉，料理送禮兩相宜。',                           price:'1500–3000 ISK',  where:'Bonus 超市、紀念品店',                dayLink:9  },
+      { id:'sh-bonus',     cat:'store', name:'Bonus 超市 🐷',        nameEn:'Bonus Supermarket',                desc:'粉紅豬圖標的冰島最大平價超市，食品伴手禮首選，比機場便宜很多。',          price:'依購買',         where:'雷克雅維克多點；建議離境前一天補貨',  dayLink:8  },
+      { id:'sh-ramma',     cat:'store', name:'Rammagerðin 手工藝品', nameEn:'Rammagerðin',                      desc:'冰島最知名的傳統手工藝品專賣店，羊毛衣、皮革、珠寶、陶藝都有。',         price:'依購買',         where:'Laugavegur 12, Reykjavik（步行街核心）', dayLink:8  },
+      { id:'sh-kronborg',  cat:'store', name:'Kraum 設計品店',       nameEn:'Kraum',                            desc:'冰島當代設計師聯合展售，質感比紀念品店高很多。',                         price:'依購買',         where:'Harpa 音樂廳旁邊',                    dayLink:8  },
+      { id:'sh-dutyfree',  cat:'store', name:'機場免稅商店',          nameEn:'Keflavík Airport Duty Free',       desc:'回程時間充裕就多逛；酒類、巧克力、魚乾在這比市區便宜。',                  price:'依購買',         where:'Keflavík 機場出境後',                dayLink:11 }
+    ];
+
+    // Category labels
+    const catInfo = {
+      food:  { label:'🍫 食品',   cls:'cat-food'  },
+      craft: { label:'🧣 紀念品', cls:'cat-craft' },
+      store: { label:'🏪 店家',   cls:'cat-store' }
+    };
+
+    // LocalStorage state
+    const STORAGE_KEY = 'iceland_shopping_bought';
+    let boughtSet = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+
+    function saveBought() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...boughtSet]));
+    }
+
+    function updateStats() {
+      const total = shoppingItems.length;
+      const bought = boughtSet.size;
+      document.getElementById('stat-bought').textContent = bought;
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-pct').textContent = Math.round(bought / total * 100) + '%';
+    }
+
+    function toggleBought(id) {
+      if (boughtSet.has(id)) boughtSet.delete(id);
+      else boughtSet.add(id);
+      saveBought();
+      renderGrid(document.querySelector('.filter-btn.active')?.dataset.cat || 'all');
+    }
+
+    function renderGrid(catFilter) {
+      const grid = document.getElementById('shopping-grid');
+      grid.innerHTML = '';
+      const items = catFilter === 'all' ? shoppingItems : shoppingItems.filter(i => i.cat === catFilter);
+      items.forEach(item => {
+        const bought = boughtSet.has(item.id);
+        const cat = catInfo[item.cat];
+        const card = document.createElement('div');
+        card.className = 'shop-card' + (bought ? ' bought' : '');
+        card.onclick = () => toggleBought(item.id);
+        card.innerHTML = `
+          <div class="done-banner">✓ 已購買</div>
+          <div class="shop-card-top">
+            <span class="cat-badge ${cat.cls}">${cat.label}</span>
+            <div class="shop-check ${bought ? 'checked' : ''}">${bought ? '✓' : ''}</div>
+          </div>
+          <div class="shop-name">${item.name}</div>
+          <div class="shop-name-en">${item.nameEn}</div>
+          <div class="shop-desc">${item.desc}</div>
+          <div class="shop-meta">
+            <div class="shop-meta-row">
+              <i class="fa-solid fa-tag"></i>
+              <span class="price">${item.price}</span>
+            </div>
+            <div class="shop-meta-row">
+              <i class="fa-solid fa-location-dot"></i>
+              <span>${item.where}</span>
+            </div>
+          </div>
+          ${item.dayLink ? `<a class="day-link-btn" href="index.html#day-${item.dayLink}" onclick="event.stopPropagation()"><i class="fa-solid fa-calendar-day"></i> Day ${item.dayLink} 行程</a>` : ''}
+        `;
+        grid.appendChild(card);
+      });
+      updateStats();
+    }
+
+    function filterCards(cat, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderGrid(cat);
+    }
+
+    // Init
+    renderGrid('all');
+  </script>
+</body>
+</html>

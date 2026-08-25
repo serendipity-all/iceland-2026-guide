@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>住宿資訊 | 2026 冰島夢幻之旅</title>
+  <meta name="description" content="2026 冰島行程住宿管理頁，含三大住宿點位置、入住日期與訂房資訊。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, #1a2f3a 0%, #2d4a5a 50%, #1a3a2a 100%);
+      padding: 80px clamp(18px,5vw,78px) 48px;
+      color: white;
+    }
+    .page-hero h1 { font-size: clamp(28px,5vw,52px); font-weight:900; margin:0 0 8px; }
+    .page-hero p { color: rgba(255,255,255,0.65); font-size:15px; margin:0; }
+
+    .hotel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px,1fr));
+      gap: 24px;
+      padding: 40px clamp(18px,5vw,78px);
+    }
+
+    .hotel-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .hotel-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.1); transform: translateY(-2px); }
+
+    .hotel-map-thumb { width:100%; height:180px; background:#e8f0f5; }
+
+    .hotel-body { padding: 20px 22px 22px; }
+
+    .hotel-city-tag {
+      display: inline-block;
+      background: rgba(224,123,32,0.12);
+      color: #c05a10;
+      border: 1px solid rgba(224,123,32,0.25);
+      border-radius: 999px;
+      padding: 3px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .hotel-name { font-size: 18px; font-weight: 800; margin: 0 0 4px; }
+    .hotel-addr { font-size: 13px; color: var(--muted); margin: 0 0 16px; display:flex; align-items:flex-start; gap:6px; }
+
+    .hotel-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .hotel-meta-item { font-size: 13px; }
+    .hotel-meta-item .label { color: var(--muted); font-size: 11px; font-weight:700; letter-spacing:0.05em; display:block; margin-bottom:2px; }
+    .hotel-meta-item .val { font-weight: 600; }
+
+    .hotel-nights-section { margin-bottom: 16px; }
+    .hotel-nights-section .label { color: var(--muted); font-size: 11px; font-weight:700; letter-spacing:0.05em; margin-bottom:6px; display:block; }
+    .nights-tags { display:flex; flex-wrap:wrap; gap:6px; }
+    .night-tag {
+      background: var(--line);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .night-tag.pending { color: var(--muted); font-style: italic; }
+
+    .hotel-booking { font-size: 13px; color: var(--muted); }
+    .hotel-booking strong { color: var(--ink); }
+
+    .hotel-actions { display:flex; gap:8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+
+    /* Map section */
+    .map-section { padding: 0 clamp(18px,5vw,78px) 48px; }
+    .map-section h2 { font-size: 20px; font-weight: 800; margin: 0 0 16px; }
+    #accom-map { height: 380px; border-radius: 18px; border: 1px solid var(--line); }
+
+    /* Info bar */
+    .info-bar {
+      background: rgba(224,123,32,0.08);
+      border: 1px solid rgba(224,123,32,0.2);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin: 0 clamp(18px,5vw,78px) 32px;
+      font-size: 13px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    body.dark .hotel-city-tag { background: rgba(224,123,32,0.2); color: #f0a060; }
+    body.dark .night-tag { background: rgba(255,255,255,0.08); }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="回到手冊首頁">
+      <span class="brand-mark">◒</span>
+      <span>ICELAND · 2026</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html#today">今日模式</a>
+      <a href="index.html#route">地圖</a>
+      <a href="index.html#days">每日行程</a>
+      <a href="itinerary.html">簡易行程表</a>
+      <a href="accommodation.html" style="color:var(--accent);font-weight:800;">🏠 住宿</a>
+      <a href="transport.html">✈️ 交通票</a>
+      <a href="shopping.html">🛋️ 伴手禮</a>
+      <a href="index.html#prep">行前準備</a>
+    </nav>
+    <div class="topbar-actions">
+      <button id="themeBtn" class="icon-btn" aria-label="切換深色模式">☾</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="開啟選單"><i class="fa-solid fa-bars"></i> <span>選單</span></button>
+    </div>
+  </header>
+
+  <div id="mobileDrawer" class="mobile-drawer">
+    <nav class="mobile-drawer-nav">
+      <a href="index.html#today" class="drawer-link">⚡ 今日模式 <span>↗</span></a>
+      <a href="index.html#days" class="drawer-link">📅 每日行程 <span>↗</span></a>
+      <a href="itinerary.html" class="drawer-link">📋 簡易行程表 <span>↗</span></a>
+      <a href="accommodation.html" class="drawer-link" style="color:var(--accent);">🏠 住宿資訊 <span>↗</span></a>
+      <a href="transport.html" class="drawer-link">✈️ 交通票 <span>↗</span></a>
+      <a href="shopping.html" class="drawer-link">🛋️ 伴手禮清單 <span>↗</span></a>
+    </nav>
+  </div>
+
+  <main>
+    <div class="page-hero">
+      <h1>🏠 住宿資訊</h1>
+      <p>三大住宿地點 · 入住日期待填 · 點擊地圖房屋圖示查看詳細資訊</p>
+    </div>
+
+    <div class="info-bar">
+      <i class="fa-solid fa-circle-info" style="color:#e07b20;flex-shrink:0;"></i>
+      <span>目前住宿日期尚未分配，請在下方各住宿點的「入住日期」欄填入對應日期（格式：2026-09-23），填入後地圖也會同步顯示。</span>
+    </div>
+
+    <!-- Hotel Cards -->
+    <div class="hotel-grid">
+
+      <!-- Hotel 1: Reykjavik -->
+      <div class="hotel-card">
+        <div id="map-h-rvk" class="hotel-map-thumb"></div>
+        <div class="hotel-body">
+          <span class="hotel-city-tag">雷克雅維克 Reykjavik</span>
+          <div class="hotel-name">雷克雅維克住宿</div>
+          <div class="hotel-addr"><i class="fa-solid fa-location-dot" style="margin-top:2px;flex-shrink:0;color:var(--muted);"></i> Skálaförðustigur 21A, 101 Reykjavik, Iceland</div>
+          <div class="hotel-meta-grid">
+            <div class="hotel-meta-item"><span class="label">CHECK-IN</span><span class="val">⬆️ 15:00</span></div>
+            <div class="hotel-meta-item"><span class="label">CHECK-OUT</span><span class="val">⬇️ 11:00</span></div>
+          </div>
+          <div class="hotel-nights-section">
+            <span class="label">📅 入住日期</span>
+            <div class="nights-tags" id="nights-h-rvk">
+              <span class="night-tag pending">待填入日期…</span>
+            </div>
+          </div>
+          <div class="hotel-booking" id="booking-h-rvk">
+            <strong>訂單號：</strong><span style="color:var(--muted);">待填</span>
+          </div>
+          <div class="hotel-actions">
+            <a href="https://www.google.com/maps/search/?api=1&query=Skálaförðustigur+21A+101+Reykjavik" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-solid fa-location-arrow"></i> 導航</a>
+            <a href="https://maps.google.com/?q=64.1381,-21.9317" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-brands fa-google"></i> Google Maps</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hotel 2: Akureyri -->
+      <div class="hotel-card">
+        <div id="map-h-aku" class="hotel-map-thumb"></div>
+        <div class="hotel-body">
+          <span class="hotel-city-tag">阿克雷里 Akureyri</span>
+          <div class="hotel-name">阿克雷里住宿</div>
+          <div class="hotel-addr"><i class="fa-solid fa-location-dot" style="margin-top:2px;flex-shrink:0;color:var(--muted);"></i> Munkaþverárstræti, 600 Akureyri, Iceland</div>
+          <div class="hotel-meta-grid">
+            <div class="hotel-meta-item"><span class="label">CHECK-IN</span><span class="val">⬆️ 15:00</span></div>
+            <div class="hotel-meta-item"><span class="label">CHECK-OUT</span><span class="val">⬇️ 11:00</span></div>
+          </div>
+          <div class="hotel-nights-section">
+            <span class="label">📅 入住日期</span>
+            <div class="nights-tags" id="nights-h-aku">
+              <span class="night-tag pending">待填入日期…</span>
+            </div>
+          </div>
+          <div class="hotel-booking" id="booking-h-aku">
+            <strong>訂單號：</strong><span style="color:var(--muted);">待填</span>
+          </div>
+          <div class="hotel-actions">
+            <a href="https://www.google.com/maps/search/?api=1&query=Munkaþverárstræti+600+Akureyri" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-solid fa-location-arrow"></i> 導航</a>
+            <a href="https://maps.google.com/?q=65.6843,-18.0962" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-brands fa-google"></i> Google Maps</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hotel 3: Egilsstaðir -->
+      <div class="hotel-card">
+        <div id="map-h-egs" class="hotel-map-thumb"></div>
+        <div class="hotel-body">
+          <span class="hotel-city-tag">埃伊爾斯塔德 Egilsstaðir</span>
+          <div class="hotel-name">埃伊爾斯塔德住宿</div>
+          <div class="hotel-addr"><i class="fa-solid fa-location-dot" style="margin-top:2px;flex-shrink:0;color:var(--muted);"></i> Lyngási 5-7, 700 Egilsstaðir, Iceland</div>
+          <div class="hotel-meta-grid">
+            <div class="hotel-meta-item"><span class="label">CHECK-IN</span><span class="val">⬆️ 15:00</span></div>
+            <div class="hotel-meta-item"><span class="label">CHECK-OUT</span><span class="val">⬇️ 11:00</span></div>
+          </div>
+          <div class="hotel-nights-section">
+            <span class="label">📅 入住日期</span>
+            <div class="nights-tags" id="nights-h-egs">
+              <span class="night-tag pending">待填入日期…</span>
+            </div>
+          </div>
+          <div class="hotel-booking" id="booking-h-egs">
+            <strong>訂單號：</strong><span style="color:var(--muted);">待填</span>
+          </div>
+          <div class="hotel-actions">
+            <a href="https://www.google.com/maps/search/?api=1&query=Lyngási+5-7+700+Egilsstaðir" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-solid fa-location-arrow"></i> 導航</a>
+            <a href="https://maps.google.com/?q=65.2719,-14.3948" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-brands fa-google"></i> Google Maps</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Full Iceland Map with all 3 hotels -->
+    <div class="map-section">
+      <h2>🗺️ 住宿地點分布</h2>
+      <div id="accom-map"></div>
+    </div>
+
+    <div style="padding: 0 clamp(18px,5vw,78px) 60px; display:flex; gap:12px; flex-wrap:wrap;">
+      <a href="index.html" class="btn secondary" style="font-size:13px;padding:10px 20px;"><i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i> 回到完整手冊</a>
+      <button class="btn secondary" onclick="window.print()" style="font-size:13px;padding:10px 20px;"><i class="fa-solid fa-print" style="margin-right:6px;"></i> 列印住宿資訊</button>
+    </div>
+  </main>
+
+  <footer>
+    <span>ICELAND 2026 · 住宿資訊</span>
+    <span>3 大住宿點 · 10 晚</span>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    // Theme
+    const themeBtn = document.getElementById('themeBtn');
+    if (themeBtn) themeBtn.onclick = () => {
+      document.body.classList.toggle('dark');
+      themeBtn.textContent = document.body.classList.contains('dark') ? '☀' : '☾';
+    };
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    if (mobileMenuBtn) mobileMenuBtn.onclick = () => {
+      mobileDrawer.classList.toggle('active');
+      mobileMenuBtn.innerHTML = mobileDrawer.classList.contains('active')
+        ? '<i class="fa-solid fa-xmark"></i> <span>關閉</span>'
+        : '<i class="fa-solid fa-bars"></i> <span>選單</span>';
+    };
+
+    // Hotel data (mirrors index.html tripData.hotels)
+    const hotels = [
+      { id:'h-rvk', nameZh:'雷克雅維克住宿', city:'雷克雅維克 Reykjavik', address:'Skálaförðustigur 21A, 101 Reykjavik', lat:64.1381, lng:-21.9317, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'' },
+      { id:'h-aku', nameZh:'阿克雷里住宿',   city:'阿克雷里 Akureyri',       address:'Munkaþverárstræti, 600 Akureyri',         lat:65.6843, lng:-18.0962, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'' },
+      { id:'h-egs', nameZh:'埃伊爾斯塔德住宿', city:'埃伊爾斯塔德 Egilsstaðir', address:'Lyngási 5-7, 700 Egilsstaðir',         lat:65.2719, lng:-14.3948, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'' }
+    ];
+
+    // Load from localStorage if saved
+    const saved = localStorage.getItem('iceland_hotels_data');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        parsed.forEach(h => {
+          const found = hotels.find(x => x.id === h.id);
+          if (found) { found.nights = h.nights || []; found.booking = h.booking || ''; found.notes = h.notes || ''; }
+        });
+      } catch(e) {}
+    }
+
+    // Render nights tags on cards
+    hotels.forEach(h => {
+      const nightsEl = document.getElementById('nights-' + h.id);
+      const bookingEl = document.getElementById('booking-' + h.id);
+      if (nightsEl) {
+        if (h.nights && h.nights.length) {
+          nightsEl.innerHTML = h.nights.map(n => {
+            const d = new Date(n);
+            return `<span class="night-tag">${d.toLocaleDateString('zh-TW',{month:'numeric',day:'numeric',weekday:'short'})}</span>`;
+          }).join('');
+        }
+      }
+      if (bookingEl && h.booking) {
+        bookingEl.innerHTML = `<strong>訂單號：</strong><span>${h.booking}</span>`;
+      }
+    });
+
+    // Mini maps on each card
+    const miniMapConfigs = [
+      { id:'map-h-rvk', lat:64.1381, lng:-21.9317, zoom:14 },
+      { id:'map-h-aku', lat:65.6843, lng:-18.0962, zoom:14 },
+      { id:'map-h-egs', lat:65.2719, lng:-14.3948, zoom:14 }
+    ];
+    miniMapConfigs.forEach((cfg, i) => {
+      const el = document.getElementById(cfg.id);
+      if (!el) return;
+      const m = L.map(el, { zoomControl:false, dragging:false, scrollWheelZoom:false, attributionControl:false });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
+      m.setView([cfg.lat, cfg.lng], cfg.zoom);
+      L.marker([cfg.lat, cfg.lng]).addTo(m).bindPopup(hotels[i].nameZh).openPopup();
+    });
+
+    // Full map
+    const accomMap = L.map('accom-map', { zoomControl:true, attributionControl:true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }).addTo(accomMap);
+    accomMap.setView([65.0, -18.5], 5);
+
+    hotels.forEach(h => {
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🏠</div>`,
+        iconSize:[32,32], iconAnchor:[16,16]
+      });
+      L.marker([h.lat, h.lng], {icon})
+        .bindPopup(`<strong>${h.nameZh}</strong><br><span style="font-size:12px;">${h.address}</span><br><span style="font-size:12px;">入住 ${h.checkIn} · 退房 ${h.checkOut}</span>`)
+        .addTo(accomMap);
+    });
+  </script>
+</body>
+</html>

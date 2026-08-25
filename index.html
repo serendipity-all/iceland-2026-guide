@@ -33,9 +33,11 @@
       <a href="#route">地圖</a>
       <a href="#days">每日行程</a>
       <a href="itinerary.html">簡易行程表</a>
+      <a href="accommodation.html">🏠 住宿</a>
+      <a href="transport.html">✈️ 交通票</a>
+      <a href="shopping.html">🛋️ 伴手礼</a>
       <a href="#prep">行前準備</a>
       <a href="#packing">行李清單</a>
-      <a href="#notes">待確認</a>
     </nav>
     <div class="topbar-actions">
       <button id="reset-data-btn" class="edit-mode-btn" title="重新加載完整預設行程"><i class="fa-solid fa-rotate-right"></i> 🔄 重設行程</button>
@@ -53,6 +55,9 @@
       <a href="#route" class="drawer-link">🗺️ 全程地圖 <span>↗</span></a>
       <a href="#days" class="drawer-link">📅 每日行程 <span>↗</span></a>
       <a href="itinerary.html" class="drawer-link">📋 簡易行程表 <span>↗</span></a>
+      <a href="accommodation.html" class="drawer-link">🏠 住宿資訊 <span>↗</span></a>
+      <a href="transport.html" class="drawer-link">✈️ 交通票 <span>↗</span></a>
+      <a href="shopping.html" class="drawer-link">🛋️ 伴手礼清單 <span>↗</span></a>
       <a href="#prep" class="drawer-link">📋 行前準備清單 <span>↗</span></a>
       <a href="#packing" class="drawer-link">🧳 行李打包清單 <span>↗</span></a>
       <a href="#notes" class="drawer-link">📌 待確認事項 <span>↗</span></a>
@@ -474,7 +479,91 @@
       shared: [
         '兩件托運行李交叉放夫妻各 1–2 天衣物','共用萬國轉接頭／多孔充電頭','簡易急救藥包與暈船用品','行李 AirTag 追蹤器','拍極光專用相機腳架'
       ]
-    }
+    },
+
+    // ── 住宿資料（日期待填，自行指定每晚住哪）──────────────────────────────
+    hotels: [
+      {
+        id: 'h-rvk',
+        name: 'Skálaförðustigur 21A',
+        nameZh: '雷克雅維克住宿',
+        city: '雷克雅維克 Reykjavik',
+        address: 'Skálaförðustigur 21A, 101 Reykjavik, Iceland',
+        lat: 64.1381, lng: -21.9317,
+        checkIn: '15:00', checkOut: '11:00',
+        nights: [],          // 入住日，例如 ['2026-09-23','2026-09-30']（待填）
+        booking: '',         // 訂單號碼（待填）
+        phone: '', website: '', notes: ''
+      },
+      {
+        id: 'h-aku',
+        name: 'Munkaþverárstræti',
+        nameZh: '阿克雷里住宿',
+        city: '阿克雷里 Akureyri',
+        address: 'Munkaþverárstræti, 600 Akureyri, Iceland',
+        lat: 65.6843, lng: -18.0962,
+        checkIn: '15:00', checkOut: '11:00',
+        nights: [],          // 待填
+        booking: '',
+        phone: '', website: '', notes: ''
+      },
+      {
+        id: 'h-egs',
+        name: 'Lyngási 5-7',
+        nameZh: '埃伊爾斯塔德住宿',
+        city: '埃伊爾斯塔德 Egilsstaðir',
+        address: 'Lyngási 5-7, 700 Egilsstaðir, Iceland',
+        lat: 65.2719, lng: -14.3948,
+        checkIn: '15:00', checkOut: '11:00',
+        nights: [],          // 待填
+        booking: '',
+        phone: '', website: '', notes: ''
+      }
+    ],
+
+    // ── 交通票資訊（框架，待填）──────────────────────────────────────────
+    transport: [
+      {
+        id: 'tr-outbound', type: 'flight',
+        from: '台北 TPE', to: '雷克雅維克 KEF',
+        date: '2026-09-23', departTime: '', arriveTime: '15:25',
+        carrier: '', code: '', seat: '', terminal: '',
+        booking: '', notes: '去程機票（待填航班號、座位）'
+      },
+      {
+        id: 'tr-return', type: 'flight',
+        from: '雷克雅維克 KEF', to: '台北 TPE',
+        date: '2026-10-03', departTime: '07:40', arriveTime: '',
+        carrier: '', code: '', seat: '', terminal: '',
+        booking: '', notes: '回程機票（待填航班號、座位）'
+      },
+      {
+        id: 'tr-car', type: 'car',
+        from: '凱夫拉維克機場 KEF', to: '環島行程',
+        date: '2026-09-23', departTime: '', arriveTime: '',
+        carrier: '', code: '', seat: '', terminal: '',
+        booking: '', notes: '包車租車資訊（待填司機姓名、聯絡方式）'
+      }
+    ],
+
+    // ── 伴手禮 / 必買 / 必逛（購買地點可連結至行程天次）───────────────────
+    shopping: [
+      // 食品類
+      { id:'sh-skyr', cat:'food', name:'Skyr 冰島優格', nameEn:'Skyr', desc:'冰島國民食品，高蛋白低脂，台灣買不到的在地口感版本。', price:'300–600 ISK', where:'Bonus 超市、10-11 便利商店', dayLink: 1, bought: false, img:'' },
+      { id:'sh-hardfiskur', cat:'food', name:'魚乾 Harðfiskur', nameEn:'Harðfiskur (dried fish)', desc:'冰島傳統零食，高蛋白風乾魚片，通常搭奶油吃。', price:'800–1500 ISK', where:'Bonus 超市、機場免稅區', dayLink: 11, bought: false, img:'' },
+      { id:'sh-licorice', cat:'food', name:'甘草糖 / 海鹽巧克力', nameEn:'Icelandic Licorice & Sea Salt Chocolate', desc:'冰島人超愛甘草味；Nói Síríus 海鹽巧克力是必帶伴手禮。', price:'500–1200 ISK', where:'Rammagerðin、Bonus、機場', dayLink: 8, bought: false, img:'' },
+      { id:'sh-brenniv', cat:'food', name:'冰島燒酒 Brennivín', nameEn:'Brennivín', desc:'黑標冰島傳統烈酒，綽號「黑色死亡」，葛縷子風味。', price:'3000–5000 ISK', where:'State Alcohol Stores (Vínbúðin)', dayLink: 8, bought: false, img:'' },
+      // 紀念品類
+      { id:'sh-lopapeysa', cat:'craft', name:'冰島羊毛衣 Lopapeysa', nameEn:'Lopapeysa Wool Sweater', desc:'冰島傳統幾何花紋羊毛衫，保暖又有型，真品在 Rammagerðin。', price:'15000–30000 ISK', where:'Rammagerðin 手工藝品店 (Laugavegur 12)', dayLink: 8, bought: false, img:'' },
+      { id:'sh-woolblanket', cat:'craft', name:'羊毛毯 / 羊毛帽', nameEn:'Wool Blanket / Hat', desc:'比羊毛衣輕巧，方便攜帶，選購手工款更有質感。', price:'5000–15000 ISK', where:'Rammagerðin、Handprjónasambandið', dayLink: 8, bought: false, img:'' },
+      { id:'sh-puffin', cat:'craft', name:'海鸚玩偶 Puffin', nameEn:'Puffin Stuffed Toy', desc:'冰島標誌性鳥類，毛絨玩具質感差異大，建議選中高端版。', price:'2000–5000 ISK', where:'各景點紀念品店、市區禮品店', dayLink: 8, bought: false, img:'' },
+      { id:'sh-lavasalt', cat:'craft', name:'冰島火山熔岩鹽', nameEN:'Icelandic Lava Salt', desc:'以冰島海鹽加入熔岩礦物提煉，料理送禮兩相宜。', price:'1500–3000 ISK', where:'Bonus、紀念品店', dayLink: 9, bought: false, img:'' },
+      // 必逛店家
+      { id:'sh-bonus', cat:'store', name:'Bonus 超市 🐷', nameEn:'Bonus Supermarket', desc:'粉紅豬圖標的冰島最大平價超市，食品伴手禮首選，比機場便宜很多。', price:'依購買', where:'雷克雅維克多點；建議離境前一天補貨', dayLink: 8, bought: false, img:'' },
+      { id:'sh-ramma', cat:'store', name:'Rammagerðin 手工藝品', nameEn:'Rammagerðin', desc:'冰島最知名的傳統手工藝品專賣店，羊毛衣、皮革、珠寶、陶藝都有。', price:'依購買', where:'Laugavegur 12, Reykjavik (步行街核心)', dayLink: 8, bought: false, img:'' },
+      { id:'sh-kronborg', cat:'store', name:'Kraum 設計品店', nameEn:'Kraum', desc:'冰島當代設計師聯合展售，質感比紀念品店高很多。', price:'依購買', where:'Harpa 音樂廳旁邊', dayLink: 8, bought: false, img:'' },
+      { id:'sh-dutyfree', cat:'store', name:'機場免稅商店', nameEn:'Keflavík Airport Duty Free', desc:'回程時間充裕就多逛；酒類、巧克力、魚乾在這比市區便宜。', price:'依購買', where:'Keflavík 機場出境後', dayLink: 11, bought: false, img:'' }
+    ]
   };
   </script>
 
@@ -997,12 +1086,40 @@
     if (route.length > 1) {
       routeLine = L.polyline(route, { color: '#18242d', weight: 2, opacity: 0.5, dashArray: '5 8' }).addTo(map);
     }
+
+    // ── Hotel house markers ───────────────────────────────────────────
+    if (tripData.hotels) {
+      tripData.hotels.forEach(h => {
+        const nightsLabel = h.nights && h.nights.length
+          ? h.nights.map(n => new Date(n).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })).join('、')
+          : '入住日期待填';
+        const houseIcon = L.divIcon({
+          className: 'hotel-marker',
+          html: `<div class="hotel-dot" title="${h.nameZh}">🏠</div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        });
+        L.marker([h.lat, h.lng], { icon: houseIcon })
+          .bindPopup(`
+            <strong>🏠 ${h.nameZh}</strong><br>
+            <span style="font-size:12px;color:#666;">${h.city}</span><br>
+            <span style="font-size:12px;">${h.address}</span><br>
+            <span style="font-size:12px;">✅ 入住：${h.checkIn} &nbsp; 🕙 退房：${h.checkOut}</span><br>
+            <span style="font-size:12px;">📅 ${nightsLabel}</span><br>
+            <a href="accommodation.html" style="font-size:12px;color:#e07b20;">查看住宿管理頁 →</a>
+          `)
+          .addTo(markerLayer);
+      });
+    }
+
     if (legend) {
       tripData.days.forEach((d, i) => {
         legend.insertAdjacentHTML('beforeend', `<div class="legend-item"><span class="legend-dot" style="background:${dayColors[i % dayColors.length]}"></span><span>D${d.day} ${fmtDate(d.date)} · ${d.label}</span></div>`);
       });
+      legend.insertAdjacentHTML('beforeend', `<div class="legend-item"><span style="font-size:16px;line-height:1;margin-right:4px;">🏠</span><span>住宿地點</span></div>`);
     }
   }
+
 
   function renderPrep() {
     const grid = document.getElementById('prepGrid');

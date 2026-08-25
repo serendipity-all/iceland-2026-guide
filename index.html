@@ -288,6 +288,8 @@
           <button id="add-spot-search-btn" class="btn primary" style="white-space:nowrap;"><i class="fa-solid fa-search"></i> 搜尋</button>
         </div>
       </div>
+      <!-- Location reference hint (populated by JS) -->
+      <div id="add-spot-location-hint" style="display:none;font-size:12px;color:var(--muted);background:var(--line);border-radius:8px;padding:5px 10px;margin-top:6px;"></div>
       <div id="add-spot-results" style="max-height:260px;overflow-y:auto;margin-top:8px;display:flex;flex-direction:column;gap:8px;"></div>
       <div id="add-spot-manual" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px;display:none;">
         <p style="font-size:13px;color:var(--muted);margin:0 0 8px;">或手動填寫：</p>
@@ -633,18 +635,61 @@
   }
 
   // ─── Add Spot Modal: Wikipedia Geo + OSM dual-engine search ─────────────
-  let _addSpotDay = null, _addSpotGrid = null;
+  let _addSpotDay = null, _addSpotGrid = null, _searchCenter = null;
+
+  // Calculate centroid (average lat/lng) from an array of spots
+  function calcCentroid(spots) {
+    const valid = spots.filter(s => s.lat && s.lng);
+    if (!valid.length) return null;
+    const lat = valid.reduce((s, x) => s + x.lat, 0) / valid.length;
+    const lng = valid.reduce((s, x) => s + x.lng, 0) / valid.length;
+    return { lat, lng };
+  }
+
+  // Haversine distance in km between two lat/lng points
+  function haversine(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function fmtDist(km) {
+    return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+  }
 
   function openAddSpotModal(day, spotGrid) {
     _addSpotDay = day;
     _addSpotGrid = spotGrid;
+
+    // Determine search center: prefer day's existing spots, fall back to whole trip
+    const dayCenter = calcCentroid(day.spots);
+    const allSpots = tripData.days.flatMap(d => d.spots);
+    const tripCenter = calcCentroid(allSpots);
+    _searchCenter = dayCenter || tripCenter;
+
     const modal = document.getElementById('add-spot-modal');
     const q = document.getElementById('add-spot-query');
     const results = document.getElementById('add-spot-results');
     const manual = document.getElementById('add-spot-manual');
+    const hint = document.getElementById('add-spot-location-hint');
+
     if (q) q.value = '';
     if (results) results.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0;">請輸入景點名稱後按搜尋 🔍</p>';
     if (manual) manual.style.display = 'none';
+
+    // Update location hint badge
+    if (hint && _searchCenter) {
+      const refLabel = dayCenter
+        ? `以 Day ${day.day} 現有景點為參考中心（${dayCenter.lat.toFixed(2)}°, ${dayCenter.lng.toFixed(2)}°）`
+        : `以全程行程中心為參考位置（${tripCenter.lat.toFixed(2)}°, ${tripCenter.lng.toFixed(2)}°）`;
+      hint.textContent = '📍 ' + refLabel;
+      hint.style.display = 'block';
+    } else if (hint) {
+      hint.style.display = 'none';
+    }
+
     if (modal) modal.classList.add('active');
     setTimeout(() => q?.focus(), 80);
   }
@@ -694,29 +739,48 @@
       if (!q) return;
       resultsEl.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0;"><i class="fa-solid fa-spinner fa-spin"></i> 搜尋中...</p>';
 
+      // Use search center if available, default to Iceland center
+      const cLat = _searchCenter?.lat ?? 64.9;
+      const cLng = _searchCenter?.lng ?? -18.5;
+
       try {
-        // Engine 1: Wikipedia Geo search (Chinese + English)
-        const [zhRes, enRes] = await Promise.allSettled([
-          fetch(`https://zh.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=10000&gslimit=5&gscoord=65|−18&format=json&origin=*&gspage=${encodeURIComponent(q)}`),
-          fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=5&srnamespace=0&format=json&origin=*`)
-        ]);
+        // Wikipedia geo search centered on current day/trip location
+        const geoRadius = 200000; // 200km radius
+        const wikiGeoRes = await fetch(
+          `https://zh.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=${geoRadius}&gslimit=8&gscoord=${cLat}|${cLng}&format=json&origin=*`
+        );
+        const wikiGeoData = await wikiGeoRes.json();
+        const geoHits = (wikiGeoData?.query?.geosearch || []).filter(h =>
+          h.title.toLowerCase().includes(q.toLowerCase()) ||
+          q.toLowerCase().split(/\s+/).some(word => h.title.toLowerCase().includes(word))
+        );
 
-        // Engine 2: OSM Nominatim
-        const osmRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&accept-language=zh-TW,en`);
-        const osmData = await osmRes.json();
-
-        // Wikipedia text search (most reliable for named spots)
-        const wikiSearchRes = await fetch(`https://zh.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=6&srnamespace=0&format=json&origin=*`);
+        // Wikipedia text search
+        const wikiSearchRes = await fetch(
+          `https://zh.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=6&srnamespace=0&format=json&origin=*`
+        );
         const wikiSearchData = await wikiSearchRes.json();
         const wikiHits = wikiSearchData?.query?.search || [];
 
-        // Fetch coords + summary for wiki hits
+        // OSM Nominatim with proximity bias toward search center
+        const osmRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=8&accept-language=zh-TW,en&lat=${cLat}&lon=${cLng}`
+        );
+        const osmData = await osmRes.json();
+
+        // Fetch coords + summary for wiki hits (merge geo + text results, deduplicated)
+        const seenTitles = new Set();
+        const mergedHits = [];
+        geoHits.forEach(h => { if (!seenTitles.has(h.title)) { seenTitles.add(h.title); mergedHits.push(h); } });
+        wikiHits.forEach(h => { if (!seenTitles.has(h.title)) { seenTitles.add(h.title); mergedHits.push(h); } });
+
         const candidates = [];
-        await Promise.allSettled(wikiHits.slice(0, 4).map(async (hit) => {
+        await Promise.allSettled(mergedHits.slice(0, 6).map(async (hit) => {
           try {
             const r = await fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(hit.title)}`);
             const d = await r.json();
             if (d.coordinates) {
+              const dist = haversine(cLat, cLng, d.coordinates.lat, d.coordinates.lon);
               candidates.push({
                 name: d.displaytitle || hit.title,
                 en: d.title || hit.title,
@@ -725,24 +789,26 @@
                 img: d.originalimage?.source || d.thumbnail?.source || '',
                 wiki: hit.title,
                 highlight: d.extract ? d.extract.slice(0, 120) + '…' : '',
-                type: 'nature'
+                type: 'nature',
+                dist
               });
             }
           } catch(e) {}
         }));
 
-        // Also add OSM results
-        osmData.slice(0, 3).forEach(item => {
-          if (!candidates.find(c => Math.abs(c.lat - parseFloat(item.lat)) < 0.01)) {
+        // Add OSM results, deduplicated by proximity
+        osmData.forEach(item => {
+          const iLat = parseFloat(item.lat), iLng = parseFloat(item.lon);
+          if (!candidates.find(c => haversine(c.lat, c.lng, iLat, iLng) < 0.5)) {
+            const dist = haversine(cLat, cLng, iLat, iLng);
             candidates.push({
               name: item.display_name.split(',')[0],
               en: item.display_name.split(',')[0],
-              lat: parseFloat(item.lat),
-              lng: parseFloat(item.lon),
-              img: '',
-              wiki: '',
-              highlight: item.display_name,
-              type: item.type === 'hot_spring' ? 'spa' : item.type === 'city' ? 'city' : 'nature'
+              lat: iLat, lng: iLng,
+              img: '', wiki: '',
+              highlight: item.display_name.split(',').slice(0, 3).join(', '),
+              type: item.type === 'hot_spring' ? 'spa' : item.type === 'city' ? 'city' : 'nature',
+              dist
             });
           }
         });
@@ -752,16 +818,25 @@
           return;
         }
 
+        // Sort by distance to search center (nearest first)
+        candidates.sort((a, b) => (a.dist ?? 9999) - (b.dist ?? 9999));
+
         resultsEl.innerHTML = '';
         candidates.forEach(c => {
           const card = document.createElement('div');
           card.style.cssText = 'display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--surface);transition:background 0.15s;';
           card.onmouseenter = () => card.style.background = 'var(--bg)';
           card.onmouseleave = () => card.style.background = 'var(--surface)';
+          const distBadge = c.dist != null
+            ? `<span style="font-size:11px;color:var(--muted);background:var(--line);border-radius:999px;padding:2px 7px;flex-shrink:0;">${fmtDist(c.dist)}</span>`
+            : '';
           card.innerHTML = `
             ${c.img ? `<img src="${c.img}" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:52px;height:52px;border-radius:8px;background:var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;">📍</div>`}
             <div style="flex:1;min-width:0;">
-              <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="font-weight:700;font-size:14px;">${c.name}</span>
+                ${distBadge}
+              </div>
               <div style="font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.highlight || c.en}</div>
               <div style="font-size:11px;color:var(--muted);margin-top:2px;">${c.lat.toFixed(4)}, ${c.lng.toFixed(4)}</div>
             </div>

@@ -22,7 +22,7 @@
 
     .hotel-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px,1fr));
+      grid-template-columns: repeat(auto-fit, minmax(340px,1fr));
       gap: 24px;
       padding: 40px clamp(18px,5vw,78px);
     }
@@ -36,8 +36,7 @@
     }
     .hotel-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.1); transform: translateY(-2px); }
 
-    .hotel-map-thumb { width:100%; height:180px; background:#e8f0f5; }
-
+    .hotel-map-thumb { width:100%; height:160px; background:#e8f0f5; }
     .hotel-body { padding: 20px 22px 22px; }
 
     .hotel-city-tag {
@@ -52,57 +51,130 @@
       margin-bottom: 10px;
     }
 
-    .hotel-name { font-size: 18px; font-weight: 800; margin: 0 0 4px; }
-    .hotel-addr { font-size: 13px; color: var(--muted); margin: 0 0 16px; display:flex; align-items:flex-start; gap:6px; }
+    /* View mode */
+    .hotel-view {}
+    .hotel-name { font-size: 17px; font-weight: 800; margin: 0 0 4px; }
+    .hotel-addr { font-size: 13px; color: var(--muted); margin: 0 0 14px; display:flex; align-items:flex-start; gap:6px; }
 
     .hotel-meta-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 16px;
+      gap: 8px;
+      margin-bottom: 14px;
     }
-    .hotel-meta-item { font-size: 13px; }
-    .hotel-meta-item .label { color: var(--muted); font-size: 11px; font-weight:700; letter-spacing:0.05em; display:block; margin-bottom:2px; }
-    .hotel-meta-item .val { font-weight: 600; }
+    .hotel-meta-item .label { color: var(--muted); font-size: 10px; font-weight:700; letter-spacing:0.06em; display:block; margin-bottom:2px; }
+    .hotel-meta-item .val { font-weight: 700; font-size: 14px; }
 
-    .hotel-nights-section { margin-bottom: 16px; }
-    .hotel-nights-section .label { color: var(--muted); font-size: 11px; font-weight:700; letter-spacing:0.05em; margin-bottom:6px; display:block; }
-    .nights-tags { display:flex; flex-wrap:wrap; gap:6px; }
+    .hotel-nights-section { margin-bottom: 14px; }
+    .hotel-nights-section .label { color: var(--muted); font-size: 10px; font-weight:700; letter-spacing:0.06em; margin-bottom:6px; display:block; }
+    .nights-tags { display:flex; flex-wrap:wrap; gap:6px; min-height: 26px; }
     .night-tag {
       background: var(--line);
       border-radius: 8px;
-      padding: 4px 10px;
+      padding: 3px 10px;
       font-size: 12px;
       font-weight: 600;
     }
-    .night-tag.pending { color: var(--muted); font-style: italic; }
+    .night-tag.pending { color: var(--muted); font-style: italic; font-weight: 400; }
 
-    .hotel-booking { font-size: 13px; color: var(--muted); }
-    .hotel-booking strong { color: var(--ink); }
+    .hotel-booking-row { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .hotel-booking-row strong { color: var(--ink); }
 
-    .hotel-actions { display:flex; gap:8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+    /* Edit form */
+    .hotel-edit { display: none; }
+    .hotel-edit.active { display: block; }
+    .hotel-view.hidden { display: none; }
+
+    .edit-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .edit-form-grid .full { grid-column: 1 / -1; }
+    .edit-field label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+    .edit-field input, .edit-field textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 13px;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .edit-field input:focus, .edit-field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .edit-field textarea { resize: vertical; min-height: 60px; }
+
+    /* Nights management in edit form */
+    .nights-edit-wrap { margin-bottom: 12px; }
+    .nights-edit-wrap .label { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; color: var(--muted); display:block; margin-bottom:6px; text-transform: uppercase; }
+    .nights-edit-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; min-height: 28px; }
+    .night-edit-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(224,123,32,0.1);
+      border: 1px solid rgba(224,123,32,0.25);
+      border-radius: 8px;
+      padding: 3px 8px;
+      font-size: 12px; font-weight: 600;
+    }
+    .night-edit-tag button {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 12px; padding: 0; line-height: 1;
+    }
+    .night-edit-tag button:hover { color: #e03030; }
+    .add-night-row { display: flex; gap: 6px; }
+    .add-night-row input { flex:1; padding:6px 8px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); font-size:13px; }
+    .add-night-row button { padding:6px 12px; }
+
+    /* Card action row */
+    .hotel-actions { display:flex; gap:8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+    .edit-actions { display:flex; gap:8px; margin-top: 12px; }
+
+    /* Save toast */
+    .save-toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #1a7a5a; color: white;
+      padding: 12px 20px; border-radius: 12px;
+      font-size: 14px; font-weight: 700;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 999;
+    }
+    .save-toast.show { transform: translateY(0); opacity: 1; }
 
     /* Map section */
     .map-section { padding: 0 clamp(18px,5vw,78px) 48px; }
     .map-section h2 { font-size: 20px; font-weight: 800; margin: 0 0 16px; }
     #accom-map { height: 380px; border-radius: 18px; border: 1px solid var(--line); }
 
-    /* Info bar */
     .info-bar {
       background: rgba(224,123,32,0.08);
       border: 1px solid rgba(224,123,32,0.2);
       border-radius: 12px;
       padding: 14px 20px;
       margin: 0 clamp(18px,5vw,78px) 32px;
-      font-size: 13px;
-      color: var(--ink);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      font-size: 13px; color: var(--ink);
+      display: flex; align-items: center; gap: 10px;
     }
 
     body.dark .hotel-city-tag { background: rgba(224,123,32,0.2); color: #f0a060; }
     body.dark .night-tag { background: rgba(255,255,255,0.08); }
+    body.dark .night-edit-tag { background: rgba(224,123,32,0.15); border-color: rgba(224,123,32,0.3); }
   </style>
 </head>
 <body>
@@ -114,7 +186,6 @@
     </a>
     <nav class="nav">
       <a href="index.html#today">今日模式</a>
-      <a href="index.html#route">地圖</a>
       <a href="index.html#days">每日行程</a>
       <a href="itinerary.html">簡易行程表</a>
       <a href="accommodation.html" style="color:var(--accent);font-weight:800;">🏠 住宿</a>
@@ -139,104 +210,24 @@
     </nav>
   </div>
 
+  <!-- Save toast -->
+  <div class="save-toast" id="saveToast">✅ 住宿資訊已儲存</div>
+
   <main>
     <div class="page-hero">
       <h1>🏠 住宿資訊</h1>
-      <p>三大住宿地點 · 入住日期待填 · 點擊地圖房屋圖示查看詳細資訊</p>
+      <p>三大住宿地點 · 點擊「編輯」填入入住日期、訂單號等資訊</p>
     </div>
 
     <div class="info-bar">
       <i class="fa-solid fa-circle-info" style="color:#e07b20;flex-shrink:0;"></i>
-      <span>目前住宿日期尚未分配，請在下方各住宿點的「入住日期」欄填入對應日期（格式：2026-09-23），填入後地圖也會同步顯示。</span>
+      <span>點擊各住宿卡片的「✏️ 編輯」按鈕可填入入住日期、訂單號、電話等資訊，資料自動儲存在瀏覽器。</span>
     </div>
 
-    <!-- Hotel Cards -->
-    <div class="hotel-grid">
+    <!-- Hotel Cards (rendered by JS) -->
+    <div class="hotel-grid" id="hotel-grid"></div>
 
-      <!-- Hotel 1: Reykjavik -->
-      <div class="hotel-card">
-        <div id="map-h-rvk" class="hotel-map-thumb"></div>
-        <div class="hotel-body">
-          <span class="hotel-city-tag">雷克雅維克 Reykjavik</span>
-          <div class="hotel-name">雷克雅維克住宿</div>
-          <div class="hotel-addr"><i class="fa-solid fa-location-dot" style="margin-top:2px;flex-shrink:0;color:var(--muted);"></i> Skálaförðustigur 21A, 101 Reykjavik, Iceland</div>
-          <div class="hotel-meta-grid">
-            <div class="hotel-meta-item"><span class="label">CHECK-IN</span><span class="val">⬆️ 15:00</span></div>
-            <div class="hotel-meta-item"><span class="label">CHECK-OUT</span><span class="val">⬇️ 11:00</span></div>
-          </div>
-          <div class="hotel-nights-section">
-            <span class="label">📅 入住日期</span>
-            <div class="nights-tags" id="nights-h-rvk">
-              <span class="night-tag pending">待填入日期…</span>
-            </div>
-          </div>
-          <div class="hotel-booking" id="booking-h-rvk">
-            <strong>訂單號：</strong><span style="color:var(--muted);">待填</span>
-          </div>
-          <div class="hotel-actions">
-            <a href="https://www.google.com/maps/search/?api=1&query=Skálaförðustigur+21A+101+Reykjavik" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-solid fa-location-arrow"></i> 導航</a>
-            <a href="https://maps.google.com/?q=64.1381,-21.9317" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-brands fa-google"></i> Google Maps</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Hotel 2: Akureyri -->
-      <div class="hotel-card">
-        <div id="map-h-aku" class="hotel-map-thumb"></div>
-        <div class="hotel-body">
-          <span class="hotel-city-tag">阿克雷里 Akureyri</span>
-          <div class="hotel-name">阿克雷里住宿</div>
-          <div class="hotel-addr"><i class="fa-solid fa-location-dot" style="margin-top:2px;flex-shrink:0;color:var(--muted);"></i> Munkaþverárstræti, 600 Akureyri, Iceland</div>
-          <div class="hotel-meta-grid">
-            <div class="hotel-meta-item"><span class="label">CHECK-IN</span><span class="val">⬆️ 15:00</span></div>
-            <div class="hotel-meta-item"><span class="label">CHECK-OUT</span><span class="val">⬇️ 11:00</span></div>
-          </div>
-          <div class="hotel-nights-section">
-            <span class="label">📅 入住日期</span>
-            <div class="nights-tags" id="nights-h-aku">
-              <span class="night-tag pending">待填入日期…</span>
-            </div>
-          </div>
-          <div class="hotel-booking" id="booking-h-aku">
-            <strong>訂單號：</strong><span style="color:var(--muted);">待填</span>
-          </div>
-          <div class="hotel-actions">
-            <a href="https://www.google.com/maps/search/?api=1&query=Munkaþverárstræti+600+Akureyri" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-solid fa-location-arrow"></i> 導航</a>
-            <a href="https://maps.google.com/?q=65.6843,-18.0962" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-brands fa-google"></i> Google Maps</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Hotel 3: Egilsstaðir -->
-      <div class="hotel-card">
-        <div id="map-h-egs" class="hotel-map-thumb"></div>
-        <div class="hotel-body">
-          <span class="hotel-city-tag">埃伊爾斯塔德 Egilsstaðir</span>
-          <div class="hotel-name">埃伊爾斯塔德住宿</div>
-          <div class="hotel-addr"><i class="fa-solid fa-location-dot" style="margin-top:2px;flex-shrink:0;color:var(--muted);"></i> Lyngási 5-7, 700 Egilsstaðir, Iceland</div>
-          <div class="hotel-meta-grid">
-            <div class="hotel-meta-item"><span class="label">CHECK-IN</span><span class="val">⬆️ 15:00</span></div>
-            <div class="hotel-meta-item"><span class="label">CHECK-OUT</span><span class="val">⬇️ 11:00</span></div>
-          </div>
-          <div class="hotel-nights-section">
-            <span class="label">📅 入住日期</span>
-            <div class="nights-tags" id="nights-h-egs">
-              <span class="night-tag pending">待填入日期…</span>
-            </div>
-          </div>
-          <div class="hotel-booking" id="booking-h-egs">
-            <strong>訂單號：</strong><span style="color:var(--muted);">待填</span>
-          </div>
-          <div class="hotel-actions">
-            <a href="https://www.google.com/maps/search/?api=1&query=Lyngási+5-7+700+Egilsstaðir" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-solid fa-location-arrow"></i> 導航</a>
-            <a href="https://maps.google.com/?q=65.2719,-14.3948" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-brands fa-google"></i> Google Maps</a>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Full Iceland Map with all 3 hotels -->
+    <!-- Full Iceland Map -->
     <div class="map-section">
       <h2>🗺️ 住宿地點分布</h2>
       <div id="accom-map"></div>
@@ -255,87 +246,246 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script>
-    // Theme
-    const themeBtn = document.getElementById('themeBtn');
-    if (themeBtn) themeBtn.onclick = () => {
+    // Theme & mobile menu
+    document.getElementById('themeBtn').onclick = () => {
       document.body.classList.toggle('dark');
-      themeBtn.textContent = document.body.classList.contains('dark') ? '☀' : '☾';
+      document.getElementById('themeBtn').textContent = document.body.classList.contains('dark') ? '☀' : '☾';
     };
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileDrawer = document.getElementById('mobileDrawer');
-    if (mobileMenuBtn) mobileMenuBtn.onclick = () => {
+    mobileMenuBtn.onclick = () => {
       mobileDrawer.classList.toggle('active');
       mobileMenuBtn.innerHTML = mobileDrawer.classList.contains('active')
         ? '<i class="fa-solid fa-xmark"></i> <span>關閉</span>'
         : '<i class="fa-solid fa-bars"></i> <span>選單</span>';
     };
 
-    // Hotel data (mirrors index.html tripData.hotels)
-    const hotels = [
-      { id:'h-rvk', nameZh:'雷克雅維克住宿', city:'雷克雅維克 Reykjavik', address:'Skálaförðustigur 21A, 101 Reykjavik', lat:64.1381, lng:-21.9317, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'' },
-      { id:'h-aku', nameZh:'阿克雷里住宿',   city:'阿克雷里 Akureyri',       address:'Munkaþverárstræti, 600 Akureyri',         lat:65.6843, lng:-18.0962, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'' },
-      { id:'h-egs', nameZh:'埃伊爾斯塔德住宿', city:'埃伊爾斯塔德 Egilsstaðir', address:'Lyngási 5-7, 700 Egilsstaðir',         lat:65.2719, lng:-14.3948, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'' }
+    // ── Hotel base data ─────────────────────────────────────────────
+    const BASE_HOTELS = [
+      { id:'h-rvk', nameZh:'雷克雅維克住宿', city:'雷克雅維克 Reykjavik', address:'Skálaförðustigur 21A, 101 Reykjavik, Iceland', lat:64.1381, lng:-21.9317, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'', phone:'', website:'', notes:'' },
+      { id:'h-aku', nameZh:'阿克雷里住宿',   city:'阿克雷里 Akureyri',     address:'Munkaþverárstræti, 600 Akureyri, Iceland',      lat:65.6843, lng:-18.0962, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'', phone:'', website:'', notes:'' },
+      { id:'h-egs', nameZh:'埃伊爾斯塔德住宿', city:'埃伊爾斯塔德 Egilsstaðir', address:'Lyngási 5-7, 700 Egilsstaðir, Iceland',   lat:65.2719, lng:-14.3948, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'', phone:'', website:'', notes:'' }
     ];
 
-    // Load from localStorage if saved
-    const saved = localStorage.getItem('iceland_hotels_data');
-    if (saved) {
+    const STORAGE_KEY = 'iceland_hotels_data';
+
+    function loadHotels() {
       try {
-        const parsed = JSON.parse(saved);
-        parsed.forEach(h => {
-          const found = hotels.find(x => x.id === h.id);
-          if (found) { found.nights = h.nights || []; found.booking = h.booking || ''; found.notes = h.notes || ''; }
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        return BASE_HOTELS.map(base => {
+          const s = saved.find(x => x.id === base.id);
+          return s ? { ...base, ...s } : { ...base };
         });
-      } catch(e) {}
+      } catch(e) { return BASE_HOTELS.map(h => ({...h})); }
     }
 
-    // Render nights tags on cards
-    hotels.forEach(h => {
-      const nightsEl = document.getElementById('nights-' + h.id);
-      const bookingEl = document.getElementById('booking-' + h.id);
-      if (nightsEl) {
-        if (h.nights && h.nights.length) {
-          nightsEl.innerHTML = h.nights.map(n => {
-            const d = new Date(n);
-            return `<span class="night-tag">${d.toLocaleDateString('zh-TW',{month:'numeric',day:'numeric',weekday:'short'})}</span>`;
-          }).join('');
-        }
-      }
-      if (bookingEl && h.booking) {
-        bookingEl.innerHTML = `<strong>訂單號：</strong><span>${h.booking}</span>`;
-      }
-    });
+    function saveHotels(hotels) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(hotels));
+      const toast = document.getElementById('saveToast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
 
-    // Mini maps on each card
-    const miniMapConfigs = [
-      { id:'map-h-rvk', lat:64.1381, lng:-21.9317, zoom:14 },
-      { id:'map-h-aku', lat:65.6843, lng:-18.0962, zoom:14 },
-      { id:'map-h-egs', lat:65.2719, lng:-14.3948, zoom:14 }
-    ];
-    miniMapConfigs.forEach((cfg, i) => {
-      const el = document.getElementById(cfg.id);
-      if (!el) return;
+    // ── Mini maps ─────────────────────────────────────────────────────
+    const miniMaps = {};
+    const miniMarkers = {};
+    function initMiniMap(id, lat, lng) {
+      const el = document.getElementById('map-' + id);
+      if (!el || miniMaps[id]) return;
       const m = L.map(el, { zoomControl:false, dragging:false, scrollWheelZoom:false, attributionControl:false });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
-      m.setView([cfg.lat, cfg.lng], cfg.zoom);
-      L.marker([cfg.lat, cfg.lng]).addTo(m).bindPopup(hotels[i].nameZh).openPopup();
-    });
+      m.setView([lat, lng], 14);
+      miniMarkers[id] = L.marker([lat, lng]).addTo(m);
+      miniMaps[id] = m;
+    }
 
-    // Full map
-    const accomMap = L.map('accom-map', { zoomControl:true, attributionControl:true });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }).addTo(accomMap);
-    accomMap.setView([65.0, -18.5], 5);
+    // ── Render ────────────────────────────────────────────────────────
+    let hotels = loadHotels();
 
-    hotels.forEach(h => {
-      const icon = L.divIcon({
-        className: '',
-        html: `<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🏠</div>`,
-        iconSize:[32,32], iconAnchor:[16,16]
+    function fmtNight(dateStr) {
+      try {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('zh-TW', { month:'numeric', day:'numeric', weekday:'short' });
+      } catch(e) { return dateStr; }
+    }
+
+    function renderCards() {
+      const grid = document.getElementById('hotel-grid');
+      grid.innerHTML = '';
+      hotels.forEach((h, idx) => {
+        const card = document.createElement('div');
+        card.className = 'hotel-card';
+        card.id = 'hotel-card-' + h.id;
+
+        const nightTagsHtml = h.nights && h.nights.length
+          ? h.nights.map(n => `<span class="night-tag">${fmtNight(n)}</span>`).join('')
+          : '<span class="night-tag pending">待填入日期…</span>';
+
+        const bookingHtml = h.booking
+          ? `<strong>訂單號：</strong>${h.booking}`
+          : `<span style="color:var(--muted);">訂單號：待填</span>`;
+
+        const nightEditTagsHtml = (h.nights || []).map(n =>
+          `<span class="night-edit-tag">${fmtNight(n)}<button onclick="removeNight('${h.id}','${n}')" title="移除">×</button></span>`
+        ).join('');
+
+        card.innerHTML = `
+          <div id="map-${h.id}" class="hotel-map-thumb"></div>
+          <div class="hotel-body">
+            <span class="hotel-city-tag">${h.city}</span>
+
+            <!-- VIEW MODE -->
+            <div class="hotel-view" id="view-${h.id}">
+              <div class="hotel-name">${h.nameZh}</div>
+              <div class="hotel-addr"><i class="fa-solid fa-location-dot" style="margin-top:2px;flex-shrink:0;color:var(--muted);"></i> ${h.address}</div>
+              <div class="hotel-meta-grid">
+                <div class="hotel-meta-item"><span class="label">CHECK-IN</span><span class="val">⬆️ ${h.checkIn}</span></div>
+                <div class="hotel-meta-item"><span class="label">CHECK-OUT</span><span class="val">⬇️ ${h.checkOut}</span></div>
+              </div>
+              <div class="hotel-nights-section">
+                <span class="label">📅 入住日期</span>
+                <div class="nights-tags" id="nights-view-${h.id}">${nightTagsHtml}</div>
+              </div>
+              <div class="hotel-booking-row" id="booking-view-${h.id}">${bookingHtml}</div>
+              ${h.phone ? `<div style="font-size:13px;color:var(--muted);margin-bottom:6px;"><i class="fa-solid fa-phone" style="margin-right:5px;"></i>${h.phone}</div>` : ''}
+              ${h.notes ? `<div style="font-size:13px;color:var(--muted);margin-bottom:6px;font-style:italic;">${h.notes}</div>` : ''}
+              <div class="hotel-actions">
+                <button class="btn primary" style="font-size:13px;padding:8px 14px;" onclick="toggleEdit('${h.id}', true)"><i class="fa-solid fa-pen"></i> 編輯</button>
+                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.address)}" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-solid fa-location-arrow"></i> 導航</a>
+              </div>
+            </div>
+
+            <!-- EDIT MODE -->
+            <div class="hotel-edit" id="edit-${h.id}">
+              <div class="edit-form-grid">
+                <div class="edit-field full">
+                  <label>住宿名稱</label>
+                  <input type="text" id="ef-name-${h.id}" value="${h.nameZh}" placeholder="住宿名稱">
+                </div>
+                <div class="edit-field">
+                  <label>Check-In 時間</label>
+                  <input type="text" id="ef-checkin-${h.id}" value="${h.checkIn}" placeholder="15:00">
+                </div>
+                <div class="edit-field">
+                  <label>Check-Out 時間</label>
+                  <input type="text" id="ef-checkout-${h.id}" value="${h.checkOut}" placeholder="11:00">
+                </div>
+                <div class="edit-field full">
+                  <label>訂單號 / 訂房代號</label>
+                  <input type="text" id="ef-booking-${h.id}" value="${h.booking}" placeholder="Booking.com #XXXXXX">
+                </div>
+                <div class="edit-field full">
+                  <label>電話</label>
+                  <input type="text" id="ef-phone-${h.id}" value="${h.phone}" placeholder="+354 XXX XXXX">
+                </div>
+                <div class="edit-field full">
+                  <label>官網 / 訂房連結</label>
+                  <input type="text" id="ef-website-${h.id}" value="${h.website}" placeholder="https://...">
+                </div>
+                <div class="edit-field full">
+                  <label>備註</label>
+                  <textarea id="ef-notes-${h.id}" placeholder="例如：附早餐、需要刷卡擔保...">${h.notes}</textarea>
+                </div>
+              </div>
+
+              <div class="nights-edit-wrap">
+                <span class="label">📅 入住日期（可多晚）</span>
+                <div class="nights-edit-list" id="nights-edit-${h.id}">${nightEditTagsHtml}</div>
+                <div class="add-night-row">
+                  <input type="date" id="night-input-${h.id}" min="2026-09-23" max="2026-10-02">
+                  <button class="btn primary" style="font-size:12px;padding:6px 12px;" onclick="addNight('${h.id}')"><i class="fa-solid fa-plus"></i> 加入</button>
+                </div>
+              </div>
+
+              <div class="edit-actions">
+                <button class="btn primary" onclick="saveEdit('${h.id}')"><i class="fa-solid fa-check"></i> 儲存</button>
+                <button class="btn secondary" onclick="toggleEdit('${h.id}', false)">取消</button>
+              </div>
+            </div>
+
+          </div>
+        `;
+        grid.appendChild(card);
+        // Init mini map after DOM insert
+        setTimeout(() => initMiniMap(h.id, h.lat, h.lng), 50);
       });
-      L.marker([h.lat, h.lng], {icon})
-        .bindPopup(`<strong>${h.nameZh}</strong><br><span style="font-size:12px;">${h.address}</span><br><span style="font-size:12px;">入住 ${h.checkIn} · 退房 ${h.checkOut}</span>`)
-        .addTo(accomMap);
-    });
+    }
+
+    // ── Edit / save functions ─────────────────────────────────────────
+    function toggleEdit(id, show) {
+      document.getElementById('view-' + id).classList.toggle('hidden', show);
+      document.getElementById('edit-' + id).classList.toggle('active', show);
+    }
+
+    function addNight(id) {
+      const input = document.getElementById('night-input-' + id);
+      const val = input.value;
+      if (!val) { input.focus(); return; }
+      const h = hotels.find(x => x.id === id);
+      if (!h) return;
+      if (!h.nights) h.nights = [];
+      if (h.nights.includes(val)) { alert('此日期已加入'); return; }
+      h.nights.push(val);
+      h.nights.sort();
+      input.value = '';
+      // Re-render nights in edit form
+      const list = document.getElementById('nights-edit-' + id);
+      list.innerHTML = h.nights.map(n =>
+        `<span class="night-edit-tag">${fmtNight(n)}<button onclick="removeNight('${id}','${n}')" title="移除">×</button></span>`
+      ).join('');
+    }
+
+    function removeNight(id, dateStr) {
+      const h = hotels.find(x => x.id === id);
+      if (!h) return;
+      h.nights = (h.nights || []).filter(n => n !== dateStr);
+      const list = document.getElementById('nights-edit-' + id);
+      list.innerHTML = h.nights.map(n =>
+        `<span class="night-edit-tag">${fmtNight(n)}<button onclick="removeNight('${id}','${n}')" title="移除">×</button></span>`
+      ).join('');
+    }
+
+    function saveEdit(id) {
+      const h = hotels.find(x => x.id === id);
+      if (!h) return;
+      h.nameZh   = document.getElementById('ef-name-' + id).value.trim() || h.nameZh;
+      h.checkIn  = document.getElementById('ef-checkin-' + id).value.trim() || h.checkIn;
+      h.checkOut = document.getElementById('ef-checkout-' + id).value.trim() || h.checkOut;
+      h.booking  = document.getElementById('ef-booking-' + id).value.trim();
+      h.phone    = document.getElementById('ef-phone-' + id).value.trim();
+      h.website  = document.getElementById('ef-website-' + id).value.trim();
+      h.notes    = document.getElementById('ef-notes-' + id).value.trim();
+      // nights already updated live
+      saveHotels(hotels);
+      renderCards();          // full re-render to reflect new data
+      toggleEdit(id, false);  // switch back to view mode
+      // Re-init mini map for this card
+      setTimeout(() => initMiniMap(id, h.lat, h.lng), 60);
+    }
+
+    // ── Full Iceland map ───────────────────────────────────────────────
+    function initFullMap() {
+      const accomMap = L.map('accom-map', { zoomControl:true, attributionControl:true });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }).addTo(accomMap);
+      accomMap.setView([65.0, -18.5], 5);
+      hotels.forEach(h => {
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🏠</div>`,
+          iconSize:[32,32], iconAnchor:[16,16]
+        });
+        const nightsLabel = h.nights && h.nights.length
+          ? h.nights.map(n => fmtNight(n)).join('、')
+          : '入住日期待填';
+        L.marker([h.lat, h.lng], {icon})
+          .bindPopup(`<strong>${h.nameZh}</strong><br><span style="font-size:12px;">${h.address}</span><br><span style="font-size:12px;">入住 ${h.checkIn} · 退房 ${h.checkOut}</span><br><span style="font-size:12px;">📅 ${nightsLabel}</span>`)
+          .addTo(accomMap);
+      });
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────
+    renderCards();
+    setTimeout(initFullMap, 100);
   </script>
 </body>
 </html>

@@ -662,6 +662,19 @@
       if (d.longDrive) badges.push('<span class="badge warn">長距離移動</span>');
       if (d.aurora) badges.push('<span class="badge aurora">極光彈性</span>');
 
+      // Hotel info for this day
+      const assignedHotel = d.hotelId ? (tripData.hotels || []).find(h => h.id === d.hotelId) : null;
+      const hotelBadgeHtml = assignedHotel
+        ? `<div class="day-hotel-badge">🏠 ${assignedHotel.nameZh} · ${assignedHotel.city.split(' ')[0]}</div>`
+        : `<div class="day-hotel-badge day-hotel-none">🏠 今晚住宿未指定</div>`;
+
+      // Hotel selector options
+      const hotelOptions = [
+        `<option value="">── 未指定 ──</option>`,
+        ...(tripData.hotels || []).map(h =>
+          `<option value="${h.id}" ${d.hotelId === h.id ? 'selected' : ''}>${h.nameZh}（${h.city.split(' ')[0]}）</option>`)
+      ].join('');
+
       card.innerHTML = `
         <div class="day-top">
           <div>
@@ -673,6 +686,16 @@
             <p contenteditable="true">${d.summary}</p>
           </div>
           <div class="badges">${badges.join('')}</div>
+        </div>
+        <div class="day-hotel-row">
+          ${hotelBadgeHtml}
+          <div class="day-hotel-edit edit-only">
+            <i class="fa-solid fa-house" style="color:var(--muted);font-size:13px;"></i>
+            <span style="font-size:12px;color:var(--muted);font-weight:700;">今晚住宿：</span>
+            <select class="hotel-select" style="font-size:13px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer;">
+              ${hotelOptions}
+            </select>
+          </div>
         </div>
         <div class="day-body">
           <div class="spot-grid"></div>
@@ -694,6 +717,24 @@
 
       const sg = card.querySelector('.spot-grid');
       d.spots.forEach(s => sg.appendChild(spotCard(s, d)));
+
+      // Hotel picker change handler
+      const hotelSelect = card.querySelector('.hotel-select');
+      hotelSelect.onchange = () => {
+        d.hotelId = hotelSelect.value || null;
+        // Update badge immediately
+        const badge = card.querySelector('.day-hotel-badge');
+        const sel = (tripData.hotels || []).find(h => h.id === d.hotelId);
+        if (sel) {
+          badge.className = 'day-hotel-badge';
+          badge.textContent = `🏠 ${sel.nameZh} · ${sel.city.split(' ')[0]}`;
+        } else {
+          badge.className = 'day-hotel-badge day-hotel-none';
+          badge.textContent = '🏠 今晚住宿未指定';
+        }
+        saveItineraryToLocal();
+        refreshMap();
+      };
 
       const save = card.querySelector('.save-btn');
       const key = `iceland-save-day-${d.day}`;
@@ -722,6 +763,7 @@
       wrap.appendChild(card);
     });
   }
+
 
   // ─── Add Spot Modal: Wikipedia Geo + OSM dual-engine search ─────────────
   let _addSpotDay = null, _addSpotGrid = null, _searchCenter = null;

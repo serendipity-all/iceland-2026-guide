@@ -184,6 +184,39 @@ body.edit-active .edit-mode-btn { background: var(--accent); color: white; borde
 .btn-add-spot { display: none; }
 body.edit-active .btn-add-spot { display: inline-flex; }
 
+/* Edit-only elements: hidden by default, visible in edit mode */
+.edit-only { display: none !important; }
+body.edit-active .edit-only { display: flex !important; align-items: center; gap: 8px; }
+
+/* Day hotel row */
+.day-hotel-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 20px 8px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.day-hotel-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a7a5a;
+  background: rgba(47,174,132,0.1);
+  border: 1px solid rgba(47,174,132,0.25);
+  border-radius: 999px;
+  padding: 3px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.day-hotel-badge.day-hotel-none {
+  color: var(--muted);
+  background: var(--line);
+  border-color: transparent;
+  font-weight: 400;
+}
+body.edit-active .day-hotel-badge { display: none; }
+
 /* Hero Section */
 .hero {
   min-height: 640px;

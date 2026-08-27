@@ -1169,61 +1169,139 @@
     grid.innerHTML = '';
 
     const groups = [
-      ['admin', '📄 證件與手續', '3–6 個月前確認'],
-      ['bookings', '🎟️ 預約與訂單', '1–3 個月前預訂'],
-      ['gear', '🧥 裝備與衣物採購', '1 個月前試穿磨合'],
-      ['tech', '🔌 電源、通網與藥品', '2 週前確認']
+      ['admin',    '📄 證件與手續',         '3–6 個月前確認'],
+      ['bookings', '🎟️ 預約與訂單',          '1–3 個月前預訂'],
+      ['gear',     '🧥 裝備與衣物採購',      '1 個月前試穿磨合'],
+      ['tech',     '🔌 電源、通網與藥品',    '2 週前確認']
     ];
 
-    let totalItems = 0;
-    let checkedItems = 0;
-
-    groups.forEach(([key, title, sub]) => {
-      const items = tripData.prep[key] || [];
-      totalItems += items.length;
-
-      const card = document.createElement('article');
-      card.className = 'packing-card';
-      card.innerHTML = `<div class="packing-head"><div><h3>${title}</h3><p>${sub}</p></div><span>${items.length} 項</span></div><div class="check-list"></div>`;
-      const list = card.querySelector('.check-list');
-
-      items.forEach((item, i) => {
-        const id = `prep-${key}-${i}`;
-        const isChecked = Boolean(localStorage.getItem(id));
-        if (isChecked) checkedItems++;
-
-        const row = document.createElement('label');
-        row.className = 'check-row';
-        row.innerHTML = `<input type="checkbox" ${isChecked ? 'checked' : ''}><span>${item}</span>`;
-        row.querySelector('input').onchange = e => {
-          if (e.target.checked) {
-            localStorage.setItem(id, '1');
-          } else {
-            localStorage.removeItem(id);
-          }
-          updatePrepProgress();
-        };
-        list.appendChild(row);
-      });
-
-      grid.appendChild(card);
-    });
-
     const updatePrepProgress = () => {
-      let currentChecked = 0;
-      let total = 0;
+      let total = 0, done = 0;
       groups.forEach(([key]) => {
         (tripData.prep[key] || []).forEach((_, i) => {
           total++;
-          if (localStorage.getItem(`prep-${key}-${i}`)) currentChecked++;
+          if (localStorage.getItem(`prep-${key}-${i}`)) done++;
         });
       });
-      const pct = total ? Math.round((currentChecked / total) * 100) : 0;
+      const pct = total ? Math.round(done / total * 100) : 0;
       const fill = document.getElementById('prepProgressFill');
       const text = document.getElementById('prepProgressText');
       if (fill) fill.style.width = `${pct}%`;
-      if (text) text.textContent = `${currentChecked} / ${total} 已完成 (${pct}%)`;
+      if (text) text.textContent = `${done} / ${total} 已完成 (${pct}%)`;
     };
+
+    groups.forEach(([key, title, sub]) => {
+      const card = document.createElement('article');
+      card.className = 'packing-card';
+      card.innerHTML = `
+        <div class="packing-head">
+          <div><h3>${title}</h3><p>${sub}</p></div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+            <span class="cl-count">${(tripData.prep[key]||[]).length} 項</span>
+            <button class="small-btn edit-only cl-edit-btn" style="font-size:11px;padding:4px 10px;" title="編輯清單">✏️ 編輯</button>
+          </div>
+        </div>
+        <div class="check-list"></div>
+        <div class="cl-edit-area" style="display:none;border-top:1px solid var(--line);padding:12px 0 4px;">
+          <div class="cl-edit-list"></div>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <input class="cl-new-input" type="text" placeholder="新增項目（Enter 確認）" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;">
+            <button class="btn primary cl-add-btn" style="font-size:12px;padding:7px 12px;white-space:nowrap;">＋ 新增</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn primary cl-save-btn" style="font-size:12px;padding:7px 14px;">✓ 儲存</button>
+            <button class="btn secondary cl-cancel-btn" style="font-size:12px;padding:7px 14px;">取消</button>
+          </div>
+        </div>
+      `;
+
+      const checkList   = card.querySelector('.check-list');
+      const editArea    = card.querySelector('.cl-edit-area');
+      const editList    = card.querySelector('.cl-edit-list');
+      const editBtn     = card.querySelector('.cl-edit-btn');
+      const newInput    = card.querySelector('.cl-new-input');
+      const addBtn      = card.querySelector('.cl-add-btn');
+      const saveBtn     = card.querySelector('.cl-save-btn');
+      const cancelBtn   = card.querySelector('.cl-cancel-btn');
+      const countEl     = card.querySelector('.cl-count');
+
+      // ─ Render check rows ──────────────────────────────────────────
+      const renderCheckRows = () => {
+        checkList.innerHTML = '';
+        (tripData.prep[key] || []).forEach((item, i) => {
+          const id = `prep-${key}-${i}`;
+          const row = document.createElement('label');
+          row.className = 'check-row';
+          row.innerHTML = `<input type="checkbox" ${localStorage.getItem(id) ? 'checked' : ''}><span>${item}</span>`;
+          row.querySelector('input').onchange = e => {
+            e.target.checked ? localStorage.setItem(id, '1') : localStorage.removeItem(id);
+            updatePrepProgress();
+          };
+          checkList.appendChild(row);
+        });
+        countEl.textContent = `${(tripData.prep[key]||[]).length} 項`;
+      };
+
+      // ─ Render edit rows ───────────────────────────────────────────
+      const renderEditRows = () => {
+        editList.innerHTML = '';
+        (tripData.prep[key] || []).forEach((item) => {
+          addEditRow(item, editList, key);
+        });
+      };
+
+      const addEditRow = (text, container) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
+        row.innerHTML = `
+          <input type="text" value="${text.replace(/"/g,'&quot;').replace(/</g,'&lt;')}"
+            style="flex:1;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;">
+          <button title="刪除" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;transition:color 0.1s;"
+            onmouseover="this.style.color='#e03030'" onmouseout="this.style.color=''">×</button>
+        `;
+        row.querySelector('button').onclick = () => row.remove();
+        container.appendChild(row);
+      };
+
+      // ─ Event wiring ───────────────────────────────────────────────
+      editBtn.onclick = () => {
+        renderEditRows();
+        checkList.style.display = 'none';
+        editArea.style.display = 'block';
+        newInput.focus();
+      };
+
+      const doAdd = () => {
+        const val = newInput.value.trim();
+        if (!val) return;
+        addEditRow(val, editList);
+        newInput.value = '';
+        newInput.focus();
+      };
+      addBtn.onclick = doAdd;
+      newInput.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); doAdd(); } };
+
+      saveBtn.onclick = () => {
+        const newItems = [...editList.querySelectorAll('input[type=text]')]
+          .map(inp => inp.value.trim()).filter(Boolean);
+        // Clear old checkbox states for this group before reindex
+        Object.keys(localStorage).filter(k => k.startsWith(`prep-${key}-`)).forEach(k => localStorage.removeItem(k));
+        tripData.prep[key] = newItems;
+        saveItineraryToLocal();
+        checkList.style.display = '';
+        editArea.style.display = 'none';
+        renderCheckRows();
+        updatePrepProgress();
+      };
+
+      cancelBtn.onclick = () => {
+        checkList.style.display = '';
+        editArea.style.display = 'none';
+      };
+
+      renderCheckRows();
+      grid.appendChild(card);
+    });
 
     updatePrepProgress();
 
@@ -1231,7 +1309,7 @@
     if (resetBtn) {
       resetBtn.onclick = () => {
         Object.keys(localStorage).filter(k => k.startsWith('prep-')).forEach(k => localStorage.removeItem(k));
-        document.querySelectorAll('#prepGrid input').forEach(x => x.checked = false);
+        document.querySelectorAll('#prepGrid input[type=checkbox]').forEach(x => x.checked = false);
         updatePrepProgress();
       };
     }
@@ -1243,27 +1321,108 @@
     grid.innerHTML = '';
 
     const groups = [
-      ['carry', '隨身包包', '證件、貴重物品與途中隨時會用到'],
-      ['cabin', '手提行李', '托運延誤時仍能撐 1–2 天'],
-      ['checked', '托運行李', '主要衣物與旅行用品'],
-      ['shared', '共用／分裝', '夫妻或旅伴一起準備']
+      ['carry',   '隨身包包',   '證件、貴重物品與途中隨時會用到'],
+      ['cabin',   '手提行李',   '托運延誤時仍能撐 1–2 天'],
+      ['checked', '托運行李',   '主要衣物與旅行用品'],
+      ['shared',  '共用／分裝', '夫妻或旅伴一起準備']
     ];
 
     groups.forEach(([key, title, sub]) => {
       const card = document.createElement('article');
       card.className = 'packing-card';
-      card.innerHTML = `<div class="packing-head"><div><h3>${title}</h3><p>${sub}</p></div><span>${tripData.packing[key].length} 項</span></div><div class="check-list"></div>`;
-      const list = card.querySelector('.check-list');
-      
-      tripData.packing[key].forEach((item, i) => {
-        const id = `pack-${key}-${i}`;
-        const row = document.createElement('label');
-        row.className = 'check-row';
-        row.innerHTML = `<input type="checkbox" ${localStorage.getItem(id) ? 'checked' : ''}><span>${item}</span>`;
-        row.querySelector('input').onchange = e => e.target.checked ? localStorage.setItem(id, '1') : localStorage.removeItem(id);
-        list.appendChild(row);
-      });
+      card.innerHTML = `
+        <div class="packing-head">
+          <div><h3>${title}</h3><p>${sub}</p></div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+            <span class="cl-count">${(tripData.packing[key]||[]).length} 項</span>
+            <button class="small-btn edit-only cl-edit-btn" style="font-size:11px;padding:4px 10px;" title="編輯清單">✏️ 編輯</button>
+          </div>
+        </div>
+        <div class="check-list"></div>
+        <div class="cl-edit-area" style="display:none;border-top:1px solid var(--line);padding:12px 0 4px;">
+          <div class="cl-edit-list"></div>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <input class="cl-new-input" type="text" placeholder="新增項目（Enter 確認）" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;">
+            <button class="btn primary cl-add-btn" style="font-size:12px;padding:7px 12px;white-space:nowrap;">＋ 新增</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn primary cl-save-btn" style="font-size:12px;padding:7px 14px;">✓ 儲存</button>
+            <button class="btn secondary cl-cancel-btn" style="font-size:12px;padding:7px 14px;">取消</button>
+          </div>
+        </div>
+      `;
 
+      const checkList  = card.querySelector('.check-list');
+      const editArea   = card.querySelector('.cl-edit-area');
+      const editList   = card.querySelector('.cl-edit-list');
+      const editBtn    = card.querySelector('.cl-edit-btn');
+      const newInput   = card.querySelector('.cl-new-input');
+      const addBtn     = card.querySelector('.cl-add-btn');
+      const saveBtn    = card.querySelector('.cl-save-btn');
+      const cancelBtn  = card.querySelector('.cl-cancel-btn');
+      const countEl    = card.querySelector('.cl-count');
+
+      const renderCheckRows = () => {
+        checkList.innerHTML = '';
+        (tripData.packing[key] || []).forEach((item, i) => {
+          const id = `pack-${key}-${i}`;
+          const row = document.createElement('label');
+          row.className = 'check-row';
+          row.innerHTML = `<input type="checkbox" ${localStorage.getItem(id) ? 'checked' : ''}><span>${item}</span>`;
+          row.querySelector('input').onchange = e => e.target.checked ? localStorage.setItem(id, '1') : localStorage.removeItem(id);
+          checkList.appendChild(row);
+        });
+        countEl.textContent = `${(tripData.packing[key]||[]).length} 項`;
+      };
+
+      const addEditRow = (text, container) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
+        row.innerHTML = `
+          <input type="text" value="${text.replace(/"/g,'&quot;').replace(/</g,'&lt;')}"
+            style="flex:1;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;">
+          <button title="刪除" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;transition:color 0.1s;"
+            onmouseover="this.style.color='#e03030'" onmouseout="this.style.color=''">×</button>
+        `;
+        row.querySelector('button').onclick = () => row.remove();
+        container.appendChild(row);
+      };
+
+      editBtn.onclick = () => {
+        editList.innerHTML = '';
+        (tripData.packing[key] || []).forEach(item => addEditRow(item, editList));
+        checkList.style.display = 'none';
+        editArea.style.display = 'block';
+        newInput.focus();
+      };
+
+      const doAdd = () => {
+        const val = newInput.value.trim();
+        if (!val) return;
+        addEditRow(val, editList);
+        newInput.value = '';
+        newInput.focus();
+      };
+      addBtn.onclick = doAdd;
+      newInput.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); doAdd(); } };
+
+      saveBtn.onclick = () => {
+        const newItems = [...editList.querySelectorAll('input[type=text]')]
+          .map(inp => inp.value.trim()).filter(Boolean);
+        Object.keys(localStorage).filter(k => k.startsWith(`pack-${key}-`)).forEach(k => localStorage.removeItem(k));
+        tripData.packing[key] = newItems;
+        saveItineraryToLocal();
+        checkList.style.display = '';
+        editArea.style.display = 'none';
+        renderCheckRows();
+      };
+
+      cancelBtn.onclick = () => {
+        checkList.style.display = '';
+        editArea.style.display = 'none';
+      };
+
+      renderCheckRows();
       grid.appendChild(card);
     });
 
@@ -1271,7 +1430,7 @@
     if (resetBtn) {
       resetBtn.onclick = () => {
         Object.keys(localStorage).filter(k => k.startsWith('pack-')).forEach(k => localStorage.removeItem(k));
-        document.querySelectorAll('#packingGrid input').forEach(x => x.checked = false);
+        document.querySelectorAll('#packingGrid input[type=checkbox]').forEach(x => x.checked = false);
       };
     }
   }

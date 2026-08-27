@@ -262,25 +262,56 @@
 
     // ── Hotel base data ─────────────────────────────────────────────
     const BASE_HOTELS = [
-      { id:'h-rvk', nameZh:'雷克雅維克住宿', city:'雷克雅維克 Reykjavik', address:'Skálaförðustigur 21A, 101 Reykjavik, Iceland', lat:64.1381, lng:-21.9317, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'', phone:'', website:'', notes:'' },
-      { id:'h-aku', nameZh:'阿克雷里住宿',   city:'阿克雷里 Akureyri',     address:'Munkaþverárstræti, 600 Akureyri, Iceland',      lat:65.6843, lng:-18.0962, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'', phone:'', website:'', notes:'' },
-      { id:'h-egs', nameZh:'埃伊爾斯塔德住宿', city:'埃伊爾斯塔德 Egilsstaðir', address:'Lyngási 5-7, 700 Egilsstaðir, Iceland',   lat:65.2719, lng:-14.3948, checkIn:'15:00', checkOut:'11:00', nights:[], booking:'', phone:'', website:'', notes:'' }
+      { id:'h-rvk', nameZh:'雷克雅維克住宿', city:'雷克雅維克 Reykjavik', address:'Skálaförðustigur 21A, 101 Reykjavik, Iceland', lat:64.1381, lng:-21.9317, checkIn:'15:00', checkOut:'11:00', booking:'', phone:'', website:'', notes:'' },
+      { id:'h-aku', nameZh:'阿克雷里住宿',   city:'阿克雷里 Akureyri',     address:'Munkaþverárstræti, 600 Akureyri, Iceland',      lat:65.6843, lng:-18.0962, checkIn:'15:00', checkOut:'11:00', booking:'', phone:'', website:'', notes:'' },
+      { id:'h-egs', nameZh:'埃伊爾斯塔德住宿', city:'埃伊爾斯塔德 Egilsstaðir', address:'Lyngási 5-7, 700 Egilsstaðir, Iceland', lat:65.2719, lng:-14.3948, checkIn:'15:00', checkOut:'11:00', booking:'', phone:'', website:'', notes:'' }
     ];
 
-    const STORAGE_KEY = 'iceland_hotels_data';
+    const META_KEY = 'iceland_hotels_data';       // hotel name/booking/phone/notes
+    const TRIP_KEY = 'iceland_2026_trip_data';    // hotelId per day (shared with index.html)
 
-    function loadHotels() {
+    // ── Read trip days from shared key → derive nights per hotel ─────
+    function getNightsFromTrip(hotelId) {
       try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        return BASE_HOTELS.map(base => {
-          const s = saved.find(x => x.id === base.id);
-          return s ? { ...base, ...s } : { ...base };
-        });
-      } catch(e) { return BASE_HOTELS.map(h => ({...h})); }
+        const tripRaw = JSON.parse(localStorage.getItem(TRIP_KEY) || 'null');
+        if (!tripRaw || !tripRaw.days) return [];
+        return tripRaw.days
+          .filter(d => d.hotelId === hotelId)
+          .map(d => d.date)
+          .sort();
+      } catch(e) { return []; }
     }
 
-    function saveHotels(hotels) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(hotels));
+    // ── Write hotelId back into shared trip data ───────────────────────
+    function setDayHotelInTrip(date, hotelId) {
+      try {
+        const tripRaw = JSON.parse(localStorage.getItem(TRIP_KEY) || 'null');
+        if (!tripRaw || !tripRaw.days) return false;
+        const day = tripRaw.days.find(d => d.date === date);
+        if (!day) return false;
+        day.hotelId = hotelId || null;
+        localStorage.setItem(TRIP_KEY, JSON.stringify(tripRaw));
+        return true;
+      } catch(e) { console.warn('setDayHotelInTrip failed', e); return false; }
+    }
+
+    // ── Load merged hotel data ────────────────────────────────────────
+    function loadHotels() {
+      try {
+        const savedMeta = JSON.parse(localStorage.getItem(META_KEY) || '[]');
+        return BASE_HOTELS.map(base => {
+          const meta = savedMeta.find(x => x.id === base.id) || {};
+          const nights = getNightsFromTrip(base.id);  // always from trip data
+          return { ...base, ...meta, nights };
+        });
+      } catch(e) { return BASE_HOTELS.map(h => ({ ...h, nights: [] })); }
+    }
+
+    // ── Save only metadata (name/booking/phone/notes) ──────────────────
+    function saveMeta(hotels) {
+      const meta = hotels.map(({ id, nameZh, checkIn, checkOut, booking, phone, website, notes }) =>
+        ({ id, nameZh, checkIn, checkOut, booking, phone, website, notes }));
+      localStorage.setItem(META_KEY, JSON.stringify(meta));
       const toast = document.getElementById('saveToast');
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 2500);
@@ -307,6 +338,65 @@
         const d = new Date(dateStr);
         return d.toLocaleDateString('zh-TW', { month:'numeric', day:'numeric', weekday:'short' });
       } catch(e) { return dateStr; }
+    }
+
+    // ── Night add/remove (writes to trip data) ────────────────────────
+    function addNight(id) {
+      const input = document.getElementById('night-input-' + id);
+      const dateStr = input.value;
+      if (!dateStr) { input.focus(); return; }
+
+      const h = hotels.find(x => x.id === id);
+      if (!h) return;
+      if ((h.nights || []).includes(dateStr)) { alert('此日期已指派給此住宿點'); return; }
+
+      // Check if this date is already assigned to another hotel
+      const tripRaw = JSON.parse(localStorage.getItem(TRIP_KEY) || 'null');
+      if (tripRaw) {
+        const day = (tripRaw.days || []).find(d => d.date === dateStr);
+        if (day && day.hotelId && day.hotelId !== id) {
+          const other = hotels.find(x => x.id === day.hotelId);
+          if (!confirm(`${fmtNight(dateStr)} 目前已指派至「${other ? other.nameZh : day.hotelId}」，要改為此住宿點嗎？`)) return;
+          // Remove from other hotel's display
+          const otherH = hotels.find(x => x.id === day.hotelId);
+          if (otherH) otherH.nights = (otherH.nights || []).filter(n => n !== dateStr);
+        }
+      }
+
+      const ok = setDayHotelInTrip(dateStr, id);
+      if (!ok) {
+        alert(`找不到日期 ${dateStr} 在行程資料中（行程日期範圍：2026-09-23 至 2026-10-03）`);
+        return;
+      }
+      if (!h.nights) h.nights = [];
+      h.nights.push(dateStr);
+      h.nights.sort();
+      input.value = '';
+      refreshNightsList(id, h.nights);
+    }
+
+    function removeNight(id, dateStr) {
+      const h = hotels.find(x => x.id === id);
+      if (!h) return;
+      setDayHotelInTrip(dateStr, null);   // clear hotelId in trip data
+      h.nights = (h.nights || []).filter(n => n !== dateStr);
+      refreshNightsList(id, h.nights);
+      // Also update view-mode badges
+      const viewNights = document.getElementById('nights-view-' + id);
+      if (viewNights) {
+        viewNights.innerHTML = h.nights.length
+          ? h.nights.map(n => `<span class="night-tag">${fmtNight(n)}</span>`).join('')
+          : '<span class="night-tag pending">待填入日期…</span>';
+      }
+    }
+
+    function refreshNightsList(id, nights) {
+      const list = document.getElementById('nights-edit-' + id);
+      if (list) {
+        list.innerHTML = nights.map(n =>
+          `<span class="night-edit-tag">${fmtNight(n)}<button onclick="removeNight('${id}','${n}')" title="移除">×</button></span>`
+        ).join('');
+      }
     }
 
     function renderCards() {
@@ -417,34 +507,6 @@
       document.getElementById('edit-' + id).classList.toggle('active', show);
     }
 
-    function addNight(id) {
-      const input = document.getElementById('night-input-' + id);
-      const val = input.value;
-      if (!val) { input.focus(); return; }
-      const h = hotels.find(x => x.id === id);
-      if (!h) return;
-      if (!h.nights) h.nights = [];
-      if (h.nights.includes(val)) { alert('此日期已加入'); return; }
-      h.nights.push(val);
-      h.nights.sort();
-      input.value = '';
-      // Re-render nights in edit form
-      const list = document.getElementById('nights-edit-' + id);
-      list.innerHTML = h.nights.map(n =>
-        `<span class="night-edit-tag">${fmtNight(n)}<button onclick="removeNight('${id}','${n}')" title="移除">×</button></span>`
-      ).join('');
-    }
-
-    function removeNight(id, dateStr) {
-      const h = hotels.find(x => x.id === id);
-      if (!h) return;
-      h.nights = (h.nights || []).filter(n => n !== dateStr);
-      const list = document.getElementById('nights-edit-' + id);
-      list.innerHTML = h.nights.map(n =>
-        `<span class="night-edit-tag">${fmtNight(n)}<button onclick="removeNight('${id}','${n}')" title="移除">×</button></span>`
-      ).join('');
-    }
-
     function saveEdit(id) {
       const h = hotels.find(x => x.id === id);
       if (!h) return;
@@ -455,13 +517,13 @@
       h.phone    = document.getElementById('ef-phone-' + id).value.trim();
       h.website  = document.getElementById('ef-website-' + id).value.trim();
       h.notes    = document.getElementById('ef-notes-' + id).value.trim();
-      // nights already updated live
-      saveHotels(hotels);
+      // nights are updated live via addNight/removeNight → no extra save needed for nights
+      saveMeta(hotels);       // save metadata only (not nights, those live in trip data)
       renderCards();          // full re-render to reflect new data
       toggleEdit(id, false);  // switch back to view mode
-      // Re-init mini map for this card
       setTimeout(() => initMiniMap(id, h.lat, h.lng), 60);
     }
+
 
     // ── Full Iceland map ───────────────────────────────────────────────
     function initFullMap() {

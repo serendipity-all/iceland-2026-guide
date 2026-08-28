@@ -285,11 +285,14 @@
       }
     ];
 
-    const STORAGE_KEY = 'iceland_transport_data';
+    function getStorageKey() {
+      const uid = window.AppState && window.AppState.currentUser ? window.AppState.currentUser.uid : 'guest';
+      return 'iceland_transport_data_' + uid;
+    }
 
     function loadTransports() {
       try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const saved = JSON.parse(localStorage.getItem(getStorageKey()) || '[]');
         return BASE_TRANSPORTS.map(base => {
           const s = saved.find(x => x.id === base.id);
           return s ? { ...base, ...s } : { ...base };
@@ -298,7 +301,7 @@
     }
 
     function saveTransports(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      localStorage.setItem(getStorageKey(), JSON.stringify(data));
       const toast = document.getElementById('saveToast');
       if (toast) {
         toast.classList.add('show');
@@ -307,6 +310,7 @@
     }
 
     let transports = loadTransports();
+
 
     function renderTimeline() {
       const container = document.getElementById('transport-timeline');
@@ -391,9 +395,11 @@
 
     // Init
     initAuthListener(() => {
+      transports = loadTransports();
       renderTimeline();
     });
     renderTimeline();
+
   </script>
 </body>
 </html>

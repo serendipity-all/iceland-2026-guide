@@ -269,9 +269,51 @@
 
     // ── Hotel base data ─────────────────────────────────────────────
     const BASE_HOTELS = [
-      { id:'h-rvk', nameZh:'雷克雅維克住宿', city:'雷克雅維克 Reykjavik', address:'Skálaförðustigur 21A, 101 Reykjavik, Iceland', lat:64.1381, lng:-21.9317, checkIn:'15:00', checkOut:'11:00', booking:'', phone:'', website:'', notes:'' },
-      { id:'h-aku', nameZh:'阿克雷里住宿',   city:'阿克雷里 Akureyri',     address:'Munkaþverárstræti, 600 Akureyri, Iceland',      lat:65.6843, lng:-18.0962, checkIn:'15:00', checkOut:'11:00', booking:'', phone:'', website:'', notes:'' },
-      { id:'h-egs', nameZh:'埃伊爾斯塔德住宿', city:'埃伊爾斯塔德 Egilsstaðir', address:'Lyngási 5-7, 700 Egilsstaðir, Iceland', lat:65.2719, lng:-14.3948, checkIn:'15:00', checkOut:'11:00', booking:'', phone:'', website:'', notes:'' }
+      {
+        id: 'h-rvk',
+        nameZh: '雷克雅維克公寓酒店 (Reykjavik Residence Hotel)',
+        city: '雷克雅維克 Reykjavik',
+        address: 'Skólavörðustígur 21A, 101 Reykjavík, Iceland',
+        lat: 64.1458,
+        lng: -21.9317,
+        checkIn: '15:00',
+        checkOut: '11:00',
+        booking: '確認號：#RRH-20260923',
+        phone: '+354 561 1155',
+        website: 'https://www.rrhotel.is',
+        notes: '位於雷克雅維克市中心，鄰近哈爾格林姆教堂與彩虹步道。附廚房設備與免費 Wi-Fi，方便自煮。',
+        nights: ['2026-09-23', '2026-09-30', '2026-10-01', '2026-10-02']
+      },
+      {
+        id: 'h-aku',
+        nameZh: '基亞大飯店 (Hotel Kea by Keahotels)',
+        city: '阿克雷里 Akureyri',
+        address: 'Hafnarstræti 87-89, 600 Akureyri, Iceland',
+        lat: 65.6811,
+        lng: -18.0898,
+        checkIn: '15:00',
+        checkOut: '11:00',
+        booking: '確認號：#KEA-20260925',
+        phone: '+354 460 2000',
+        website: 'https://www.keahotels.is/hotel-kea',
+        notes: '北部阿克雷里核心地標飯店，緊鄰愛心紅綠燈與地標大教堂。周邊生活機能好，含每日早餐。',
+        nights: ['2026-09-25', '2026-09-26', '2026-09-27']
+      },
+      {
+        id: 'h-egs',
+        nameZh: '埃伊爾斯塔德莊園民宿 (Guesthouse Egilsstaðir)',
+        city: '埃伊爾斯塔德 Egilsstaðir',
+        address: 'Egilsstaðanes, 700 Egilsstaðir, Iceland',
+        lat: 65.2635,
+        lng: -14.4075,
+        checkIn: '15:00',
+        checkOut: '11:00',
+        booking: '確認號：#EGS-20260928',
+        phone: '+354 471 1114',
+        website: 'https://egilsstadir.is',
+        notes: '東部狹長拉加爾湖畔（Lagarfljót）溫馨莊園民宿。遠離光害，極適合夜晚在湖畔花園等待極光。',
+        nights: ['2026-09-28', '2026-09-29']
+      }
     ];
 
     const META_KEY = 'iceland_hotels_data';       // hotel name/booking/phone/notes
@@ -305,30 +347,45 @@
     }
 
     // ── Load merged hotel data ────────────────────────────────────────
-    function loadHotels() {
+    async function loadHotels() {
       try {
-        const savedMeta = JSON.parse(localStorage.getItem(META_KEY) || '[]');
+        let savedMeta = JSON.parse(localStorage.getItem(META_KEY) || '[]');
+        if (window.db) {
+          try {
+            const doc = await db.collection('iceland_2026_shared').doc('hotels').get();
+            if (doc.exists && doc.data().meta) {
+              savedMeta = doc.data().meta;
+              localStorage.setItem(META_KEY, JSON.stringify(savedMeta));
+            }
+          } catch(err) { console.log('Firestore load hotels error, using local fallback', err); }
+        }
         return BASE_HOTELS.map(base => {
           const meta = savedMeta.find(x => x.id === base.id) || {};
           const tripNights = getNightsFromTrip(base.id);
-          const metaNights = meta.nights || [];
+          const metaNights = meta.nights || base.nights || [];
           const combinedNights = [...new Set([...tripNights, ...metaNights])].sort();
           return { ...base, ...meta, nights: combinedNights };
         });
-      } catch(e) { return BASE_HOTELS.map(h => ({ ...h, nights: [] })); }
+      } catch(e) { return BASE_HOTELS.map(h => ({ ...h })); }
     }
 
     // ── Save metadata and nights ──────────────────────────────────────
-    function saveMeta(hotels) {
+    async function saveMeta(hotels) {
       const meta = hotels.map(({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }) =>
         ({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }));
       localStorage.setItem(META_KEY, JSON.stringify(meta));
+      if (window.db) {
+        try {
+          await db.collection('iceland_2026_shared').doc('hotels').set({ meta, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        } catch(e) { console.warn('Firestore save hotels warning:', e); }
+      }
       const toast = document.getElementById('saveToast');
       if (toast) {
         toast.classList.add('show');
         setTimeout(() => toast.classList.remove('show'), 2500);
       }
     }
+
 
     // ── Mini maps ─────────────────────────────────────────────────────
     const miniMaps = {};
@@ -548,7 +605,8 @@
     }
 
     // ── Init ──────────────────────────────────────────────────────────
-    initAuthListener(() => {
+    initAuthListener(async () => {
+      hotels = await loadHotels();
       renderCards();
       setTimeout(initFullMap, 100);
     });
@@ -557,4 +615,5 @@
   </script>
 </body>
 </html>
+
 

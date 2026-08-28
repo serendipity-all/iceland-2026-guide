@@ -197,8 +197,12 @@
             <h2>行前準備清單</h2>
             <p class="lead">出發前幾週／幾個月需先採購與辦理的事項；提前確認，打包時才不會手忙腳亂。</p>
           </div>
-          <button class="chip" id="resetPrep">清除勾選</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn primary" style="font-size:12px;padding:6px 14px;border-radius:999px;" onclick="addCategoryCard('prep')">＋ 新增大分類卡片</button>
+            <button class="chip" id="resetPrep">清除勾選</button>
+          </div>
         </div>
+
 
         <div class="prep-progress-wrap">
           <div class="prep-progress-bar">
@@ -219,8 +223,12 @@
             <h2>行李打包清單</h2>
             <p class="lead">以 11 天冰島秋季行程為基礎；勾選狀態會自動存於這台裝置的瀏覽器中。</p>
           </div>
-          <button class="chip" id="resetPacking">清除勾選</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn primary" style="font-size:12px;padding:6px 14px;border-radius:999px;" onclick="addCategoryCard('packing')">＋ 新增大分類卡片</button>
+            <button class="chip" id="resetPacking">清除勾選</button>
+          </div>
         </div>
+
 
         <div id="packingGrid" class="packing-grid"></div>
 
@@ -279,92 +287,61 @@
     if (editModeBtn)   editModeBtn.onclick   = toggleEdit;
     if (mobileEditBtn) mobileEditBtn.onclick = toggleEdit;
 
-    // ── Load tripData from localStorage ───────────────────────────────
-    const TRIP_KEY = 'iceland_2026_trip_data';
-
-    // Default prep/packing in case no localStorage data exists yet
-    const DEFAULT_TRIP_PREP = {
-      admin: [
-        '確認護照效期（至少 6 個月）',
-        '申辦申根簽證（如需要）',
-        '國際駕照（如需租車）',
-        '旅遊保險（含緊急醫療與行程取消）',
-        '機票電子機票確認信'
-      ],
-      bookings: [
-        '藍湖溫泉 Blue Lagoon 預約',
-        '極光/觀鯨行程預約',
-        '租車確認書',
-        '住宿確認（雷克雅維克、阿克雷里、埃伊爾斯塔德）',
-        '機場接送或交通安排'
-      ],
-      gear: [
-        '防水外層衝鋒衣（Gore-Tex 或同等級）',
-        '羊毛中層衣（Merino wool）',
-        '保暖內層（排汗速乾）',
-        '防水登山靴（中高筒）',
-        '羊毛或抓絨帽 + 手套',
-        '防水褲'
-      ],
-      tech: [
-        '歐規轉接插頭（Type F）',
-        '行動電源（<100Wh 可帶上機）',
-        '海外漫遊或冰島 eSIM 啟用確認',
-        '常備藥品（暈車藥、腸胃藥、感冒藥）',
-        '防曬乳 SPF50+'
-      ]
-    };
-    const DEFAULT_TRIP_PACKING = {
-      carry: [
-        '護照 + 護照影本（放另一個包）',
-        '機票 / 電子登機證',
-        '信用卡 + 少量現金（ISK 或 EUR）',
-        '手機 + 耳機',
-        '充電線 + 行動電源',
-        '口罩與手部消毒液'
-      ],
-      cabin: [
-        '換洗衣物 1–2 套',
-        '盥洗包（≤100ml 液體）',
-        '輕薄保暖層',
-        '眼鏡 / 隱形眼鏡備份',
-        '頸枕'
-      ],
-      checked: [
-        '防水外層衝鋒衣',
-        '保暖中層（羊毛衣或刷毛）',
-        '排汗內層 × 5 套',
-        '防水登山靴',
-        '一般鞋子（室內用）',
-        '牛仔褲 / 休閒褲 × 2',
-        '毛帽 + 手套 + 圍巾',
-        '泳衣（藍湖、天空藍潟湖）',
-        '雨傘或輕量雨衣',
-        '太陽眼鏡（低角度陽光）'
-      ],
-      shared: [
-        '旅遊書 / 離線地圖下載',
-        '手機腳架 / 小型三腳架',
-        '延長線插座',
-        '零食與乾燥食品',
-        '夸克型暖暖包'
-      ]
-    };
-
-    let tripData = null;
-    try {
-      const raw = localStorage.getItem(TRIP_KEY);
-      tripData = raw ? JSON.parse(raw) : null;
-    } catch(e) {}
-
-    if (!tripData) {
-      tripData = { prep: DEFAULT_TRIP_PREP, packing: DEFAULT_TRIP_PACKING };
+    // ── Load userChecklistData from localStorage ──────────────────────
+    function getUserTripKey() {
+      const isSuper = window.AppState && window.AppState.isSuperAdmin;
+      const uid = window.AppState && window.AppState.currentUser ? window.AppState.currentUser.uid : 'default';
+      return isSuper ? 'iceland_2026_trip_data' : 'iceland_checklist_user_' + uid;
     }
-    if (!tripData.prep)    tripData.prep    = DEFAULT_TRIP_PREP;
-    if (!tripData.packing) tripData.packing = DEFAULT_TRIP_PACKING;
 
-    function saveItineraryToLocal() {
-      try { localStorage.setItem(TRIP_KEY, JSON.stringify(tripData)); } catch(e) {}
+    const FULL_PREP_TEMPLATES = [
+      { key: 'admin', title: '📄 證件與手續', sub: '3–6 個月前確認', items: ['確認護照效期（至少 6 個月）', '申辦申根簽證（如需要）', '國際駕照（如需租車）', '旅遊保險（含緊急醫療與行程取消）', '機票電子機票確認信'] },
+      { key: 'bookings', title: '🎟️ 預約與訂單', sub: '1–3 個月前預訂', items: ['藍湖溫泉 Blue Lagoon 預約', '極光/觀鯨行程預約', '租車確認書', '住宿確認（雷克雅維克、阿克雷里、埃伊爾斯塔德）', '機場接送或交通安排'] },
+      { key: 'gear', title: '🧥 裝備與衣物採購', sub: '1 個月前試穿磨合', items: ['防水外層衝鋒衣（Gore-Tex 或同等級）', '羊毛中層衣（Merino wool）', '保暖內層（排汗速乾）', '防水登山靴（中高筒）', '羊毛或抓絨帽 + 手套', '防水褲'] },
+      { key: 'tech', title: '🔌 電源、通網與藥品', sub: '2 週前確認', items: ['歐規轉接插頭（Type F）', '行動電源（<100Wh 可帶上機）', '海外漫遊或冰島 eSIM 啟用確認', '常備藥品（暈車藥、腸胃藥、感冒藥）', '防曬乳 SPF50+'] }
+    ];
+
+    const FULL_PACKING_TEMPLATES = [
+      { key: 'carry', title: '🎒 隨身包包', sub: '證件、貴重物品與途中隨時會用到', items: ['護照 + 護照影本（放另一個包）', '機票 / 電子登機證', '信用卡 + 少量現金（ISK 或 EUR）', '手機 + 耳機', '充電線 + 行動電源', '口罩與手部消毒液'] },
+      { key: 'cabin', title: '🧳 手提行李', sub: '托運延誤時仍能撐 1–2 天', items: ['換洗衣物 1–2 套', '盥洗包（≤100ml 液體）', '輕薄保暖層', '眼鏡 / 隱形眼鏡備份', '頸枕'] },
+      { key: 'checked', title: '📦 托運行李', sub: '主要衣物與旅行用品', items: ['防水外層衝鋒衣', '保暖中層（羊毛衣或刷毛）', '排汗內層 × 5 套', '防水登山靴', '一般鞋子（室內用）', '牛仔褲 / 休閒褲 × 2', '毛帽 + 手套 + 圍巾', '泳衣（藍湖、天空藍潟湖）', '雨傘或輕量雨衣', '太陽眼鏡（低角度陽光）'] },
+      { key: 'shared', title: '🤝 共用／分裝', sub: '夫妻或旅伴一起準備', items: ['旅遊書 / 離線地圖下載', '手機腳架 / 小型三腳架', '延長線插座', '零食與乾燥食品', '夸克型暖暖包'] }
+    ];
+
+    let userChecklistData = { prepCards: [], packingCards: [] };
+
+    function loadChecklistData() {
+      const isSuper = window.AppState && window.AppState.isSuperAdmin;
+      const key = getUserTripKey();
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          userChecklistData = JSON.parse(raw);
+          if (userChecklistData.prepCards && userChecklistData.packingCards) {
+            return;
+          }
+        }
+      } catch(e) {}
+
+      if (isSuper) {
+        userChecklistData = {
+          prepCards: JSON.parse(JSON.stringify(FULL_PREP_TEMPLATES)),
+          packingCards: JSON.parse(JSON.stringify(FULL_PACKING_TEMPLATES))
+        };
+      } else {
+        // Members: exclude 'gear' from prep, exclude 'shared' from packing
+        userChecklistData = {
+          prepCards: JSON.parse(JSON.stringify(FULL_PREP_TEMPLATES.filter(x => x.key !== 'gear'))),
+          packingCards: JSON.parse(JSON.stringify(FULL_PACKING_TEMPLATES.filter(x => x.key !== 'shared')))
+        };
+      }
+    }
+
+    function saveChecklistData() {
+      const key = getUserTripKey();
+      try {
+        localStorage.setItem(key, JSON.stringify(userChecklistData));
+      } catch(e) {}
     }
 
     // ── Tab switching ─────────────────────────────────────────────────
@@ -394,22 +371,29 @@
       container.appendChild(row);
     }
 
-    function buildChecklistCard(title, sub, items, key, prefix, onSave, onReset) {
+    function buildChecklistCard(title, sub, items, key, prefix, onSave, onReset, onDeleteCard) {
       const card = document.createElement('article');
       card.className = 'packing-card';
       card.innerHTML = `
         <div class="packing-head">
-          <div><h3>${title}</h3><p>${sub}</p></div>
+          <div><h3 class="cl-title-text">${title}</h3><p class="cl-sub-text">${sub}</p></div>
           <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
             <span class="cl-count">${items.length} 項</span>
-            <button class="small-btn edit-only cl-edit-btn" style="font-size:11px;padding:4px 10px;">✏️ 編輯</button>
+            <button class="small-btn cl-edit-btn" style="font-size:11px;padding:4px 10px;">✏️ 編輯</button>
           </div>
         </div>
         <div class="check-list"></div>
         <div class="cl-edit-area" style="display:none;border-top:1px solid var(--line);padding:12px 0 4px;">
+          <div style="background:var(--bg);padding:10px;border-radius:10px;margin-bottom:12px;border:1px solid var(--line);">
+            <div style="font-size:11px;font-weight:800;color:var(--muted);margin-bottom:4px;">修改大分類標題</div>
+            <div style="display:flex;gap:6px;">
+              <input class="cl-title-input" type="text" value="${title.replace(/"/g,'&quot;')}" style="flex:1;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font-size:13px;">
+              <button class="btn secondary cl-delete-card-btn" style="font-size:11px;padding:4px 10px;color:#e03030;border-color:rgba(224,48,48,0.3);" title="刪除整張分類卡片"><i class="fa-solid fa-trash-can"></i> 刪除卡片</button>
+            </div>
+          </div>
           <div class="cl-edit-list"></div>
           <div style="display:flex;gap:6px;margin-top:8px;">
-            <input class="cl-new-input" type="text" placeholder="新增項目（Enter 確認）"
+            <input class="cl-new-input" type="text" placeholder="新增細項（Enter 確認）"
               style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;">
             <button class="btn primary cl-add-btn" style="font-size:12px;padding:7px 12px;white-space:nowrap;">＋ 新增</button>
           </div>
@@ -429,10 +413,12 @@
       const saveBtn    = card.querySelector('.cl-save-btn');
       const cancelBtn  = card.querySelector('.cl-cancel-btn');
       const countEl    = card.querySelector('.cl-count');
+      const titleInput = card.querySelector('.cl-title-input');
+      const deleteCardBtn = card.querySelector('.cl-delete-card-btn');
 
       const renderCheckRows = () => {
         checkList.innerHTML = '';
-        const curItems = items; // reference
+        const curItems = items;
         curItems.forEach((item, i) => {
           const id = `${prefix}-${key}-${i}`;
           const row = document.createElement('label');
@@ -455,6 +441,10 @@
         newInput.focus();
       };
 
+      if (deleteCardBtn && onDeleteCard) {
+        deleteCardBtn.onclick = () => onDeleteCard();
+      }
+
       const doAdd = () => {
         const val = newInput.value.trim();
         if (!val) return;
@@ -466,13 +456,12 @@
       newInput.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); doAdd(); } };
 
       saveBtn.onclick = () => {
-        const newItems = [...editList.querySelectorAll('input[type=text]')]
+        const newItems = [...editList.querySelectorAll('.cl-edit-list input[type=text]')]
           .map(inp => inp.value.trim()).filter(Boolean);
-        // Clear old checkbox states for this group
         Object.keys(localStorage).filter(k => k.startsWith(`${prefix}-${key}-`)).forEach(k => localStorage.removeItem(k));
-        items.splice(0, items.length, ...newItems); // mutate in place
-        saveItineraryToLocal();
-        if (onSave) onSave();
+        items.splice(0, items.length, ...newItems);
+        const newTitle = titleInput ? titleInput.value.trim() : title;
+        if (onSave) onSave(newTitle);
         checkList.style.display = '';
         editArea.style.display = 'none';
         renderCheckRows();
@@ -493,19 +482,14 @@
       if (!grid) return;
       grid.innerHTML = '';
 
-      const groups = [
-        ['admin',    '📄 證件與手續',      '3–6 個月前確認'],
-        ['bookings', '🎟️ 預約與訂單',       '1–3 個月前預訂'],
-        ['gear',     '🧥 裝備與衣物採購',   '1 個月前試穿磨合'],
-        ['tech',     '🔌 電源、通網與藥品', '2 週前確認']
-      ];
+      const cards = userChecklistData.prepCards || [];
 
       const updateProgress = () => {
         let total = 0, done = 0;
-        groups.forEach(([key]) => {
-          (tripData.prep[key] || []).forEach((_, i) => {
+        cards.forEach((c) => {
+          (c.items || []).forEach((_, i) => {
             total++;
-            if (localStorage.getItem(`prep-${key}-${i}`)) done++;
+            if (localStorage.getItem(`prep-${c.key}-${i}`)) done++;
           });
         });
         const pct = total ? Math.round(done / total * 100) : 0;
@@ -513,16 +497,26 @@
         const text = document.getElementById('prepProgressText');
         if (fill) fill.style.width = `${pct}%`;
         if (text) text.textContent = `${done} / ${total} 已完成 (${pct}%)`;
-        // Update tab count
         const tc = document.getElementById('tab-prep-count');
         if (tc) tc.textContent = `${done}/${total}`;
       };
 
-      groups.forEach(([key, title, sub]) => {
-        if (!tripData.prep[key]) tripData.prep[key] = [];
+      cards.forEach((c, idx) => {
         const card = buildChecklistCard(
-          title, sub, tripData.prep[key], key, 'prep',
-          updateProgress, updateProgress
+          c.title, c.sub || '', c.items || [], c.key, 'prep',
+          (newTitle) => {
+            if (newTitle) c.title = newTitle;
+            saveChecklistData();
+            updateProgress();
+          },
+          updateProgress,
+          () => {
+            if (confirm(`確定要刪除「${c.title}」整個大分類卡片嗎？`)) {
+              userChecklistData.prepCards.splice(idx, 1);
+              saveChecklistData();
+              renderPrep();
+            }
+          }
         );
         grid.appendChild(card);
       });
@@ -545,30 +539,36 @@
       if (!grid) return;
       grid.innerHTML = '';
 
-      const groups = [
-        ['carry',   '隨身包包',   '證件、貴重物品與途中隨時會用到'],
-        ['cabin',   '手提行李',   '托運延誤時仍能撐 1–2 天'],
-        ['checked', '托運行李',   '主要衣物與旅行用品'],
-        ['shared',  '共用／分裝', '夫妻或旅伴一起準備']
-      ];
+      const cards = userChecklistData.packingCards || [];
 
       const updateCount = () => {
         let total = 0, done = 0;
-        groups.forEach(([key]) => {
-          (tripData.packing[key] || []).forEach((_, i) => {
+        cards.forEach((c) => {
+          (c.items || []).forEach((_, i) => {
             total++;
-            if (localStorage.getItem(`pack-${key}-${i}`)) done++;
+            if (localStorage.getItem(`pack-${c.key}-${i}`)) done++;
           });
         });
         const tc = document.getElementById('tab-packing-count');
         if (tc) tc.textContent = `${done}/${total}`;
       };
 
-      groups.forEach(([key, title, sub]) => {
-        if (!tripData.packing[key]) tripData.packing[key] = [];
+      cards.forEach((c, idx) => {
         const card = buildChecklistCard(
-          title, sub, tripData.packing[key], key, 'pack',
-          updateCount, updateCount
+          c.title, c.sub || '', c.items || [], c.key, 'pack',
+          (newTitle) => {
+            if (newTitle) c.title = newTitle;
+            saveChecklistData();
+            updateCount();
+          },
+          updateCount,
+          () => {
+            if (confirm(`確定要刪除「${c.title}」整個大分類卡片嗎？`)) {
+              userChecklistData.packingCards.splice(idx, 1);
+              saveChecklistData();
+              renderPacking();
+            }
+          }
         );
         grid.appendChild(card);
       });
@@ -585,14 +585,38 @@
       }
     }
 
+    // Add new Category Card
+    function addCategoryCard(type) {
+      const title = prompt(type === 'prep' ? '請輸入新增的行前準備大分類名稱：' : '請輸入新增的行李打包大分類名稱：');
+      if (!title || !title.trim()) return;
+
+      const newCard = {
+        key: 'cat_' + Date.now(),
+        title: title.trim(),
+        sub: '自訂大分類',
+        items: ['新增第一個細項']
+      };
+
+      if (type === 'prep') {
+        userChecklistData.prepCards.push(newCard);
+        saveChecklistData();
+        renderPrep();
+      } else {
+        userChecklistData.packingCards.push(newCard);
+        saveChecklistData();
+        renderPacking();
+      }
+    }
+
     // ── Init ───────────────────────────────────────────────────────────
     initAuthListener(() => {
+      loadChecklistData();
       renderPrep();
       renderPacking();
     });
+    loadChecklistData();
     renderPrep();
     renderPacking();
   </script>
 </body>
 </html>
-

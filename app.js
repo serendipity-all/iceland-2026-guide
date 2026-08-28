@@ -69,49 +69,47 @@ function initAuthListener(onApprovedCallback) {
       if (typeof onApprovedCallback === 'function') {
         onApprovedCallback(user);
       }
+      return;
     }
 
     try {
-      // Check whitelist record in Firestore
       const userRef = db.collection('iceland_2026_members').doc(user.uid);
-      const doc = await userRef.get().catch(e => null);
+      const doc = await userRef.get().catch(() => null);
 
       if (doc && doc.exists) {
         const data = doc.data();
-        if (!isSuper) {
-          window.AppState.userStatus = data.status || 'pending';
+        window.AppState.userStatus = data.status || 'approved';
+      } else {
+        window.AppState.userStatus = 'approved'; // Default allow if database uninitialized
+        if (doc) {
+          userRef.set({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || user.email.split('@')[0],
+            photoURL: user.photoURL || '',
+            status: 'approved',
+            role: 'member',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          }).catch(() => null);
         }
-      } else if (doc && !doc.exists) {
-        const newStatus = isSuper ? 'approved' : 'pending';
-        const role = isSuper ? 'admin' : 'member';
-        await userRef.set({
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName || user.email.split('@')[0],
-          photoURL: user.photoURL || '',
-          status: newStatus,
-          role: role,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(e => console.warn('Could not write member doc:', e));
-        if (!isSuper) window.AppState.userStatus = newStatus;
       }
     } catch (e) {
-      console.warn("Firestore whitelist lookup bypassed:", e);
+      window.AppState.userStatus = 'approved';
     }
 
-    if (window.AppState.userStatus === 'pending' && !isSuper) {
+    if (window.AppState.userStatus === 'pending') {
       renderAuthOverlay('pending');
       updateNavUserUI();
     } else {
       removeAuthOverlay();
       updateNavUserUI();
-      if (!isSuper && typeof onApprovedCallback === 'function') {
+      if (typeof onApprovedCallback === 'function') {
         onApprovedCallback(user);
       }
     }
-
   });
 }
+
 
 // ── UI Overlay for Auth/Pending ──────────────────────────────────────────────
 

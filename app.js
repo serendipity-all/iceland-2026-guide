@@ -1,606 +1,343 @@
-/* ==========================================================================
-   ICELAND 2026 - EDITORIAL INTERACTIVE LOGIC & CLOUD SYNC
-   ========================================================================== */
+/**
+ * app.js - Firebase Auth, Admin Whitelist, and Cloud Synchronization Module
+ * Travel Guide: Iceland 2026
+ */
 
-const dayColors = ['#ff5a36','#f89e3d','#c36ff0','#5b93e5','#2fae84','#6e8d4a','#cf6b8b','#7b6fe0','#e0b438','#2f9ea4','#71808a'];
-let map, markerLayer, routeLine;
-const allMarkers = [];
-let activeSpotImgTarget = null;
+// Firebase Configuration (Compat SDK)
+const firebaseConfig = {
+  apiKey: "AIzaSyALQhQzhnkj-UOmRZGVQKMKqkW0DecwE3s",
+  authDomain: "my-travel-book-85243.firebaseapp.com",
+  projectId: "my-travel-book-85243",
+  storageBucket: "my-travel-book-85243.firebasestorage.app",
+  messagingSenderId: "936708966292",
+  appId: "1:936708966292:web:d3c7c08e14f60548cf3181"
+};
 
-function fmtDate(s) {
-  return new Intl.DateTimeFormat('zh-TW', { month: 'numeric', day: 'numeric', weekday: 'short' }).format(new Date(s + 'T12:00:00'));
+// Super Admin Email
+const SUPER_ADMIN_EMAIL = "dreamland11023@gmail.com";
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
 }
 
-function intensityLabel(d) {
-  if (d.intensity === 'walk') return '步行較多';
-  if (d.intensity === 'longdrive' || d.longDrive) return '長車程';
-  return '輕鬆';
-}
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-function wikiUrl(slug) {
-  return `https://en.wikipedia.org/wiki/${encodeURIComponent(slug || '')}`;
-}
+// Global App State
+window.AppState = {
+  currentUser: null,
+  userStatus: 'guest', // 'guest', 'pending', 'approved', 'admin'
+  isSuperAdmin: false
+};
 
-async function wikiThumb(slug, imgEl) {
-  if (!slug) return;
-  try {
-    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`);
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    const src = data.originalimage?.source || data.thumbnail?.source;
-    if (src) {
-      imgEl.src = src;
-      imgEl.hidden = false;
-    }
-  } catch (e) {}
-}
+// ── Auth & Whitelist System ──────────────────────────────────────────────────
 
-function spotCard(spot, day) {
-  const el = document.createElement('article');
-  el.className = 'spot-card';
-  el.id = `spot-${spot.id}`;
-  
-  const imgSrc = spot.img ? `${spot.img}?v=20260813` : '';
-  
-  el.innerHTML = `
-    <img src="${imgSrc}" alt="${spot.name}" loading="lazy" onerror="this.hidden=true;">
-    
-    <div class="spot-edit-bar">
-      <button class="spot-edit-btn btn-move-up" title="上移"><i class="fa-solid fa-arrow-up"></i></button>
-      <button class="spot-edit-btn btn-move-down" title="下移"><i class="fa-solid fa-arrow-down"></i></button>
-      <button class="spot-edit-btn btn-wiki-match" title="維基匹配"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
-      <button class="spot-edit-btn btn-change-photo" title="更換照片"><i class="fa-solid fa-camera"></i></button>
-      <button class="spot-edit-btn delete btn-delete-spot" title="刪除"><i class="fa-solid fa-trash"></i></button>
-    </div>
-
-    <div class="spot-content">
-      <div class="spot-kicker" contenteditable="true">${spot.en}</div>
-      <h4 contenteditable="true">${spot.name}</h4>
-      <p contenteditable="true">${spot.highlight}</p>
-      <div class="spot-gear">⌁ <span contenteditable="true">${spot.gear || '一般旅遊裝備'}</span></div>
-    </div>
-  `;
-
-  const imgEl = el.querySelector('img');
-  if (!spot.img && spot.wiki) {
-    wikiThumb(spot.wiki, imgEl);
-  } else if (imgSrc) {
-    imgEl.hidden = false;
-  }
-
-  el.addEventListener('click', (e) => {
-    if (e.target.closest('.spot-edit-bar') || e.target.getAttribute('contenteditable') === 'true') return;
-    showSpot(spot, day);
-  });
-
-  return el;
-}
-
-function renderDays() {
-  const wrap = document.getElementById('dayList');
-  if (!wrap) return;
-  wrap.innerHTML = '';
-
-  tripData.days.forEach(d => {
-    const card = document.createElement('article');
-    card.className = 'day-card';
-    card.dataset.filter = [d.intensity, d.longDrive ? 'longdrive' : '', d.aurora ? 'aurora' : ''].join(' ');
-    card.id = `day-${d.day}`;
-
-    const badges = [`<span class="badge">${intensityLabel(d)}</span>`];
-    if (d.longDrive) badges.push('<span class="badge warn">長距離移動</span>');
-    if (d.aurora) badges.push('<span class="badge aurora">極光彈性</span>');
-
-    card.innerHTML = `
-      <div class="day-top">
-        <div>
-          <div class="day-num">${String(d.day).padStart(2, '0')}</div>
-          <div class="day-date">${fmtDate(d.date)}</div>
-        </div>
-        <div class="day-title">
-          <h3 contenteditable="true">${d.label}</h3>
-          <p contenteditable="true">${d.summary}</p>
-        </div>
-        <div class="badges">${badges.join('')}</div>
-      </div>
-      <div class="day-body">
-        <div class="spot-grid"></div>
-        <aside class="day-side">
-          <div class="info-box">
-            <strong>注意事項</strong>
-            <ul class="tip-list">
-              ${d.tips.map(x => `<li contenteditable="true">${x}</li>`).join('')}
-            </ul>
-          </div>
-          <div class="day-actions">
-            <button class="small-btn save-btn">♡ 收藏這天</button>
-            <button class="small-btn map-btn">⌖ 地圖定位</button>
-            <button class="small-btn add-spot btn-add-spot"><i class="fa-solid fa-plus"></i> 新增景點</button>
-          </div>
-        </aside>
-      </div>
-    `;
-
-    const sg = card.querySelector('.spot-grid');
-    d.spots.forEach(s => sg.appendChild(spotCard(s, d)));
-
-    const save = card.querySelector('.save-btn');
-    const key = `iceland-save-day-${d.day}`;
-    if (localStorage.getItem(key)) {
-      save.classList.add('saved');
-      save.textContent = '♥ 已收藏';
-    }
-    save.onclick = () => {
-      if (localStorage.getItem(key)) {
-        localStorage.removeItem(key);
-        save.classList.remove('saved');
-        save.textContent = '♡ 收藏這天';
-      } else {
-        localStorage.setItem(key, '1');
-        save.classList.add('saved');
-        save.textContent = '♥ 已收藏';
-      }
-    };
-
-    card.querySelector('.map-btn').onclick = () => focusDay(d);
-    
-    // Add Spot handler for day
-    card.querySelector('.btn-add-spot').onclick = () => {
-      const spotName = prompt('請輸入新增景點名稱（例：Dyrhólaey 迪霍拉里海蝕拱門）：');
-      if (spotName) {
-        const newSpot = {
-          id: `spot-new-${Date.now()}`,
-          name: spotName,
-          en: spotName,
-          type: 'nature',
-          lat: d.spots[0]?.lat || 64.14,
-          lng: d.spots[0]?.lng || -21.92,
-          img: 'images/kirkjufell.jpg',
-          wiki: '',
-          highlight: '點擊此處輸入新增景點特色說明...',
-          gear: '防風防水外套、好走的鞋',
-          caution: '請留意現場天氣與安全指示。'
-        };
-        d.spots.push(newSpot);
-        sg.appendChild(spotCard(newSpot, d));
-        saveItineraryToLocal();
-      }
-    };
-
-    wrap.appendChild(card);
+function loginWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  return auth.signInWithPopup(provider).catch(err => {
+    console.error("Login failed:", err);
+    alert("登入失敗：" + err.message);
   });
 }
 
-function showSpot(spot, day) {
-  const dialog = document.getElementById('spotDialog');
-  const body = document.getElementById('spotDialogBody');
-  if (!dialog || !body) return;
-
-  const imgSrc = spot.img ? `${spot.img}?v=20260813` : '';
-
-  body.innerHTML = `
-    <div class="dialog-hero">
-      <img src="${imgSrc}" alt="${spot.name}" onerror="this.hidden=true;">
-    </div>
-    <div class="dialog-content">
-      <div class="spot-kicker">DAY ${day.day} · ${spot.en}</div>
-      <h3>${spot.name}</h3>
-      <p>${spot.highlight}</p>
-      <div class="dialog-grid">
-        <div class="dialog-info">
-          <strong>建議裝備</strong>
-          <p>${spot.gear || '一般旅遊裝備'}</p>
-        </div>
-        <div class="dialog-info">
-          <strong>注意事項</strong>
-          <p>${spot.caution || '依現場天氣與公告調整。'}</p>
-        </div>
-      </div>
-      <div class="dialog-links">
-        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name + ' Iceland')}" target="_blank" rel="noreferrer"><i class="fa-solid fa-location-arrow"></i> Google Maps 導航 ↗</a>
-        <a href="${wikiUrl(spot.wiki)}" target="_blank" rel="noreferrer"><i class="fa-solid fa-book-atlas"></i> 維基百科背景 ↗</a>
-        <a href="#route" class="dialog-map-link"><i class="fa-solid fa-map-pin"></i> 在全程地圖查看</a>
-      </div>
-    </div>
-  `;
-
-  if (!spot.img && spot.wiki) {
-    wikiThumb(spot.wiki, body.querySelector('img'));
-  }
-
-  body.querySelector('.dialog-map-link').onclick = (e) => {
-    e.preventDefault();
-    dialog.close();
-    document.getElementById('route')?.scrollIntoView({ behavior: 'smooth' });
-    setTimeout(() => {
-      map.setView([spot.lat, spot.lng], 10, { animate: true });
-      const m = allMarkers.find(x => x.spot.id === spot.id);
-      if (m) m.marker.openPopup();
-    }, 450);
-  };
-
-  dialog.showModal();
+function logoutUser() {
+  return auth.signOut().then(() => window.location.reload());
 }
 
-function focusDay(day) {
-  document.getElementById('route')?.scrollIntoView({ behavior: 'smooth' });
-  setTimeout(() => {
-    const pts = day.spots.map(s => [s.lat, s.lng]);
-    if (pts.length > 0) {
-      map.fitBounds(pts, { padding: [55, 55], maxZoom: 9 });
+// Listen to auth status change
+function initAuthListener(onApprovedCallback) {
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      window.AppState.currentUser = null;
+      window.AppState.userStatus = 'guest';
+      window.AppState.isSuperAdmin = false;
+      renderAuthOverlay('guest');
+      updateNavUserUI();
+      return;
     }
-  }, 450);
-}
 
-function initMap() {
-  const mapContainer = document.getElementById('map');
-  if (!mapContainer) return;
+    window.AppState.currentUser = user;
+    const isSuper = (user.email && user.email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase());
+    window.AppState.isSuperAdmin = isSuper;
 
-  map = L.map('map', { zoomControl: true, scrollWheelZoom: false }).setView([64.85, -18.8], 6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
+    try {
+      // Check whitelist record in Firestore
+      const userRef = db.collection('iceland_2026_members').doc(user.uid);
+      const doc = await userRef.get();
 
-  markerLayer = L.layerGroup().addTo(map);
-  const route = [];
-
-  tripData.days.forEach((d, i) => {
-    d.spots.forEach(s => {
-      route.push([s.lat, s.lng]);
-      const icon = L.divIcon({
-        className: 'custom-marker',
-        html: `<div class="marker-dot" style="background:${dayColors[i % dayColors.length]}"></div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9]
-      });
-      const marker = L.marker([s.lat, s.lng], { icon })
-        .bindPopup(`<strong>Day ${d.day} · ${s.name}</strong><br><span>${s.en}</span><br><a class="popup-link" href="#spot-${s.id}">查看景點卡 ↓</a>`);
-      
-      marker.on('popupopen', () => {
-        document.querySelector('.leaflet-popup-content a')?.addEventListener('click', () => {
-          document.getElementById(`spot-${s.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (!doc.exists()) {
+        // New user registration
+        const newStatus = isSuper ? 'approved' : 'pending';
+        const role = isSuper ? 'admin' : 'member';
+        await userRef.set({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName || user.email.split('@')[0],
+          photoURL: user.photoURL || '',
+          status: newStatus,
+          role: role,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-      });
-      
-      marker.addTo(markerLayer);
-      allMarkers.push({ marker, spot: s, day: d });
-    });
-  });
-
-  routeLine = L.polyline(route, { color: '#18242d', weight: 2, opacity: 0.5, dashArray: '5 8' }).addTo(map);
-
-  const legend = document.getElementById('mapLegend');
-  if (legend) {
-    tripData.days.forEach((d, i) => {
-      legend.insertAdjacentHTML('beforeend', `<div class="legend-item"><span class="legend-dot" style="background:${dayColors[i % dayColors.length]}"></span><span>D${d.day} ${fmtDate(d.date)} · ${d.label}</span></div>`);
-    });
-  }
-
-  document.querySelectorAll('[data-map-filter]').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('[data-map-filter]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const f = btn.dataset.mapFilter;
-      markerLayer.clearLayers();
-      allMarkers.filter(x => f === 'all' || x.spot.type === f).forEach(x => x.marker.addTo(markerLayer));
-    };
-  });
-}
-
-function renderPacking() {
-  const grid = document.getElementById('packingGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  const groups = [
-    ['carry', '隨身包包', '證件、貴重物品與途中隨時會用到'],
-    ['cabin', '手提行李', '托運延誤時仍能撐 1–2 天'],
-    ['checked', '托運行李', '主要衣物與旅行用品'],
-    ['shared', '共用／分裝', '夫妻或旅伴一起準備']
-  ];
-
-  groups.forEach(([key, title, sub]) => {
-    const card = document.createElement('article');
-    card.className = 'packing-card';
-    card.innerHTML = `<div class="packing-head"><div><h3>${title}</h3><p>${sub}</p></div><span>${tripData.packing[key].length} 項</span></div><div class="check-list"></div>`;
-    const list = card.querySelector('.check-list');
-    
-    tripData.packing[key].forEach((item, i) => {
-      const id = `pack-${key}-${i}`;
-      const row = document.createElement('label');
-      row.className = 'check-row';
-      row.innerHTML = `<input type="checkbox" ${localStorage.getItem(id) ? 'checked' : ''}><span>${item}</span>`;
-      row.querySelector('input').onchange = e => e.target.checked ? localStorage.setItem(id, '1') : localStorage.removeItem(id);
-      list.appendChild(row);
-    });
-
-    grid.appendChild(card);
-  });
-
-  const resetBtn = document.getElementById('resetPacking');
-  if (resetBtn) {
-    resetBtn.onclick = () => {
-      Object.keys(localStorage).filter(k => k.startsWith('pack-')).forEach(k => localStorage.removeItem(k));
-      document.querySelectorAll('#packingGrid input').forEach(x => x.checked = false);
-    };
-  }
-}
-
-function setupFilters() {
-  document.querySelectorAll('#dayFilters [data-filter]').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('#dayFilters [data-filter]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const f = btn.dataset.filter;
-      document.querySelectorAll('.day-card').forEach(c => {
-        c.style.display = (f === 'all' || c.dataset.filter.includes(f)) ? '' : 'none';
-      });
-    };
-  });
-}
-
-function renderToday() {
-  const select = document.getElementById('todaySelect');
-  if (!select) return;
-
-  tripData.days.forEach(d => {
-    select.insertAdjacentHTML('beforeend', `<option value="${d.day}">Day ${d.day} · ${fmtDate(d.date)} · ${d.label}</option>`);
-  });
-
-  const now = new Date();
-  const todayISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  let active = tripData.days.find(d => d.date === todayISO) || tripData.days.find(d => new Date(d.date + 'T23:59:59') >= now) || tripData.days[tripData.days.length - 1];
-  select.value = active.day;
-
-  const draw = (d) => {
-    const gear = [...new Set(d.spots.flatMap(s => (s.gear || '').split(/[、；]/).map(x => x.trim()).filter(Boolean)))].slice(0, 6);
-    document.getElementById('todayPanel').innerHTML = `
-      <article class="today-card">
-        <div class="today-main">
-          <div class="today-copy">
-            <div class="today-date">DAY ${d.day} · ${fmtDate(d.date)}</div>
-            <h3>${d.label}</h3>
-            <p class="today-summary">${d.summary}</p>
-            <div class="today-route">
-              ${d.spots.map(s => `<div class="route-stop">${s.name}</div>`).join('')}
-            </div>
-          </div>
-          <aside class="today-side">
-            <div>
-              <h4>今天記得帶</h4>
-              <p>${gear.length ? gear.join(' · ') : '依天氣準備基本防風保暖裝備'}</p>
-            </div>
-            <div>
-              <h4>今天最重要</h4>
-              <ul>
-                ${d.tips.slice(0, 3).map(x => `<li>${x}</li>`).join('')}
-              </ul>
-            </div>
-            <div class="today-actions">
-              <button id="todayMap"><i class="fa-solid fa-location-crosshairs"></i> 看今天地圖</button>
-              <a href="https://en.vedur.is/" target="_blank" rel="noreferrer">Vedur 天氣 ↗</a>
-              <a href="https://safetravel.is/" target="_blank" rel="noreferrer">SafeTravel ↗</a>
-            </div>
-          </aside>
-        </div>
-        <div class="daily-checks">
-          <div class="daily-check"><strong>出門前</strong><span>手機 · 錢包 · 行充 · 水</span></div>
-          <div class="daily-check"><strong>戶外</strong><span>風雨層隨身，不放大行李</span></div>
-          <div class="daily-check"><strong>晚上</strong><span>${d.aurora ? '保留極光彈性 · 毛帽手套' : '確認隔日集合與天氣'}</span></div>
-          <div class="daily-check"><strong>照片</strong><span>電池 · 鏡頭布 · 儲存空間</span></div>
-        </div>
-      </article>
-    `;
-    document.getElementById('todayMap').onclick = () => focusDay(d);
-  };
-
-  draw(active);
-  select.onchange = () => draw(tripData.days.find(d => d.day === Number(select.value)));
-}
-
-function setupMisc() {
-  const spotCountEl = document.getElementById('spotCount');
-  if (spotCountEl) spotCountEl.textContent = tripData.days.reduce((n, d) => n + d.spots.length, 0);
-
-  const days = Math.ceil((new Date(tripData.start) - new Date()) / 86400000);
-  const countdownEl = document.getElementById('countdown');
-  if (countdownEl) countdownEl.textContent = days > 0 ? `${days} 天` : days === 0 ? '今天' : '已出發';
-
-  const focusMapBtn = document.getElementById('focusMapBtn');
-  if (focusMapBtn) {
-    focusMapBtn.onclick = () => {
-      document.getElementById('route')?.scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => map.fitBounds([[63.3, -24], [66.5, -13.2]], { padding: [25, 25] }), 400);
-    };
-  }
-
-  const themeBtn = document.getElementById('themeBtn');
-  if (themeBtn) {
-    themeBtn.onclick = () => {
-      document.body.classList.toggle('dark');
-      themeBtn.textContent = document.body.classList.contains('dark') ? '☀' : '☾';
-      setTimeout(() => map && map.invalidateSize(), 50);
-    };
-  }
-
-  // Edit Mode Toggle
-  const editToggleBtn = document.getElementById('edit-mode-toggle');
-  if (editToggleBtn) {
-    editToggleBtn.onclick = () => {
-      document.body.classList.toggle('edit-active');
-      const isActive = document.body.classList.contains('edit-active');
-      editToggleBtn.innerHTML = isActive 
-        ? '<i class="fa-solid fa-check"></i> 完成退出' 
-        : '<i class="fa-solid fa-pen-to-square"></i> ✏️ 編輯模式';
-    };
-  }
-
-  // Edit Controls Event Delegation
-  document.addEventListener('click', (e) => {
-    // Reorder Up
-    if (e.target.closest('.btn-move-up')) {
-      const spotCardEl = e.target.closest('.spot-card');
-      if (spotCardEl && spotCardEl.previousElementSibling) {
-        spotCardEl.parentNode.insertBefore(spotCardEl, spotCardEl.previousElementSibling);
-        saveItineraryToLocal();
-      }
-    }
-    // Reorder Down
-    if (e.target.closest('.btn-move-down')) {
-      const spotCardEl = e.target.closest('.spot-card');
-      if (spotCardEl && spotCardEl.nextElementSibling) {
-        spotCardEl.parentNode.insertBefore(spotCardEl.nextElementSibling, spotCardEl);
-        saveItineraryToLocal();
-      }
-    }
-    // Delete Spot
-    if (e.target.closest('.btn-delete-spot')) {
-      const spotCardEl = e.target.closest('.spot-card');
-      if (spotCardEl && confirm('確定要刪除這個景點嗎？')) {
-        spotCardEl.remove();
-        saveItineraryToLocal();
-      }
-    }
-    // Wiki Match Photo
-    if (e.target.closest('.btn-wiki-match')) {
-      const spotCardEl = e.target.closest('.spot-card');
-      const spotTitle = spotCardEl.querySelector('h4').innerText.trim();
-      alert(`正連線為您自動匹配維基百科【${spotTitle}】條目官方原圖...`);
-      const query = spotTitle.split(' ')[0];
-      fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`)
-        .then(r => r.json())
-        .then(data => {
-          const src = data.originalimage?.source || data.thumbnail?.source;
-          if (src) {
-            const img = spotCardEl.querySelector('img');
-            img.src = src;
-            img.hidden = false;
-            alert(`✅ 已成功為「${spotTitle}」更新維基百科官方原圖！`);
-            saveItineraryToLocal();
-          } else {
-            alert(`⚠️ 維基百科未找到「${spotTitle}」的封面照片，請手動更換照片。`);
-          }
-        })
-        .catch(err => alert(`⚠️ 搜尋失敗：${err}`));
-    }
-    // Manual Photo Upload Modal
-    if (e.target.closest('.btn-change-photo')) {
-      const spotCardEl = e.target.closest('.spot-card');
-      activeSpotImgTarget = spotCardEl.querySelector('img');
-      const photoModal = document.getElementById('photo-modal');
-      const modalUrlInput = document.getElementById('modal-photo-url');
-      if (photoModal) {
-        modalUrlInput.value = activeSpotImgTarget.src;
-        photoModal.classList.add('active');
-      }
-    }
-  });
-
-  // Modal Buttons
-  const modalCancelBtn = document.getElementById('modal-cancel-photo');
-  const modalSaveBtn = document.getElementById('modal-save-photo');
-  const photoModal = document.getElementById('photo-modal');
-  const modalFileInput = document.getElementById('modal-photo-file');
-  const modalUrlInput = document.getElementById('modal-photo-url');
-
-  if (modalCancelBtn) {
-    modalCancelBtn.onclick = () => photoModal.classList.remove('active');
-  }
-
-  if (modalSaveBtn) {
-    modalSaveBtn.onclick = () => {
-      if (activeSpotImgTarget) {
-        if (modalFileInput && modalFileInput.files && modalFileInput.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            activeSpotImgTarget.src = e.target.result;
-            activeSpotImgTarget.hidden = false;
-            photoModal.classList.remove('active');
-            saveItineraryToLocal();
-          };
-          reader.readAsDataURL(modalFileInput.files[0]);
-        } else if (modalUrlInput && modalUrlInput.value.trim()) {
-          activeSpotImgTarget.src = modalUrlInput.value.trim();
-          activeSpotImgTarget.hidden = false;
-          photoModal.classList.remove('active');
-          saveItineraryToLocal();
+        window.AppState.userStatus = newStatus;
+      } else {
+        const data = doc.data();
+        // Super admin override
+        if (isSuper && data.status !== 'approved') {
+          await userRef.update({ status: 'approved', role: 'admin' });
+          window.AppState.userStatus = 'approved';
+        } else {
+          window.AppState.userStatus = data.status || 'pending';
         }
       }
-    };
-  }
 
-  // Cloud Sync
-  const cloudSyncBtn = document.getElementById('cloud-sync-btn');
-  if (cloudSyncBtn) {
-    cloudSyncBtn.onclick = () => {
-      const token = prompt('請輸入 GitHub Personal Access Token（僅此次使用，不會儲存）：');
-      if (!token || !token.startsWith('ghp_')) {
-        alert('⚠️ 未輸入有效 Token，同步已取消。');
-        return;
+      if (window.AppState.userStatus === 'pending' && !isSuper) {
+        renderAuthOverlay('pending');
+        updateNavUserUI();
+      } else {
+        // Approved or Admin
+        removeAuthOverlay();
+        updateNavUserUI();
+        if (typeof onApprovedCallback === 'function') {
+          onApprovedCallback(user);
+        }
       }
-      alert('正同步將全隊最新行程寫回 GitHub 雲端伺服器...');
-      const repo = 'serendipity-all/iceland-2026-guide';
-      const path = 'index.html';
-      const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-      const base64Content = btoa(unescape(encodeURIComponent(fullHtml)));
+    } catch (e) {
+      console.error("Error checking whitelist:", e);
+      // Fallback: allow superadmin offline
+      if (isSuper) {
+        window.AppState.userStatus = 'approved';
+        removeAuthOverlay();
+        updateNavUserUI();
+        if (typeof onApprovedCallback === 'function') onApprovedCallback(user);
+      } else {
+        alert("存取驗證失敗，請檢查網路連線");
+      }
+    }
+  });
+}
 
-      fetch(`https://api.github.com/repos/${repo}/contents/${path}?ref=main`, {
-        headers: { 'Authorization': `token ${token}` }
-      })
-      .then(res => res.json())
-      .then(data => {
-        const sha = data.sha;
-        return fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `token ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: 'Update Iceland 2026 Editorial Itinerary via Web',
-            content: base64Content,
-            sha: sha,
-            branch: 'main'
-          })
-        });
-      })
-      .then(res => res.json())
-      .then(() => alert('🎉 成功！全隊最新行程與照片已全數同步至 GitHub 雲端！隊友開啟網頁即可同步更新！'))
-      .catch(err => alert('⚠️ 雲端同步失敗：' + err));
-    };
+// ── UI Overlay for Auth/Pending ──────────────────────────────────────────────
+
+function renderAuthOverlay(status) {
+  let overlay = document.getElementById('auth-guard-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'auth-guard-overlay';
+    overlay.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(16, 24, 32, 0.96); backdrop-filter: blur(12px);
+      z-index: 99999; display: flex; align-items: center; justify-content: center;
+      padding: 24px; box-sizing: border-box; color: white; text-align: center;
+      font-family: 'Noto Sans TC', 'Inter', sans-serif;
+    `;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+  }
+
+  if (status === 'guest') {
+    overlay.innerHTML = `
+      <div style="max-width: 420px; width: 100%; background: var(--surface, #18242d); border: 1px solid var(--line, rgba(255,255,255,0.12)); border-radius: 24px; padding: 40px 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+        <div style="font-size: 48px; margin-bottom: 16px;">◒</div>
+        <h2 style="font-size: 24px; font-weight: 900; margin: 0 0 8px; color: #fff;">2026 冰島夢幻之旅</h2>
+        <p style="font-size: 14px; color: rgba(255,255,255,0.65); margin: 0 0 28px; line-height: 1.6;">本手冊為私人專屬行程。請先使用 Google 帳號登入以進行驗證。</p>
+        <button id="auth-overlay-login-btn" style="
+          width: 100%; padding: 14px 20px; border-radius: 12px; border: none;
+          background: #ff5a36; color: white; font-size: 15px; font-weight: 700;
+          cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+          transition: transform 0.15s, background 0.15s;
+        " onmouseover="this.style.background='#e04826'" onmouseout="this.style.background='#ff5a36'">
+          <i class="fa-brands fa-google"></i> 使用 Google 帳號登入
+        </button>
+      </div>
+    `;
+    document.getElementById('auth-overlay-login-btn').onclick = loginWithGoogle;
+  } else if (status === 'pending') {
+    const user = window.AppState.currentUser;
+    overlay.innerHTML = `
+      <div style="max-width: 440px; width: 100%; background: var(--surface, #18242d); border: 1px solid var(--line, rgba(255,255,255,0.12)); border-radius: 24px; padding: 40px 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+        <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+        <h2 style="font-size: 22px; font-weight: 900; margin: 0 0 10px; color: #fff;">等待管理者開通權限</h2>
+        <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin: 0 0 16px; line-height: 1.6;">
+          已收到您的訪問申請！<br>
+          <strong style="color: #ff5a36;">${user ? user.email : ''}</strong>
+        </p>
+        <div style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 24px;">
+          請告知管理者開通權限。授權成功後重新整理此頁面即可進入手冊。
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button onclick="window.location.reload()" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; font-size: 13px; font-weight: 700; cursor: pointer;">重新整理</button>
+          <button id="auth-overlay-logout-btn" style="flex: 1; padding: 12px; border-radius: 10px; border: none; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 700; cursor: pointer;">切換帳號</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('auth-overlay-logout-btn').onclick = logoutUser;
   }
 }
 
-function saveItineraryToLocal() {
-  const dayList = document.getElementById('dayList');
-  if (dayList) {
-    localStorage.setItem('iceland_2026_editorial_days', dayList.innerHTML);
+function removeAuthOverlay() {
+  const overlay = document.getElementById('auth-guard-overlay');
+  if (overlay) {
+    overlay.remove();
+    document.body.style.overflow = '';
   }
 }
 
-function loadItineraryFromLocal() {
-  const saved = localStorage.getItem('iceland_2026_editorial_days');
-  if (saved) {
-    const dayList = document.getElementById('dayList');
-    if (dayList) {
-      dayList.innerHTML = saved;
+// ── Update Nav Topbar User UI ────────────────────────────────────────────────
+
+function updateNavUserUI() {
+  const user = window.AppState.currentUser;
+  const isSuper = window.AppState.isSuperAdmin;
+
+  // Insert or update topbar user section
+  const topbarActions = document.querySelector('.topbar-actions');
+  if (!topbarActions) return;
+
+  let userBox = document.getElementById('topbar-user-box');
+  if (!userBox) {
+    userBox = document.createElement('div');
+    userBox.id = 'topbar-user-box';
+    userBox.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-left: 4px;';
+    topbarActions.insertBefore(userBox, topbarActions.firstChild);
+  }
+
+  if (!user) {
+    userBox.innerHTML = `
+      <button id="nav-login-btn" class="btn primary" style="font-size: 12px; padding: 6px 14px; border-radius: 999px;">
+        <i class="fa-brands fa-google"></i> 登入
+      </button>
+    `;
+    document.getElementById('nav-login-btn').onclick = loginWithGoogle;
+  } else {
+    const avatar = user.photoURL ? `<img src="${user.photoURL}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">` : `<i class="fa-solid fa-user-check" style="color:var(--accent);"></i>`;
+    userBox.innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;background:var(--surface,#18242d);padding:4px 10px;border-radius:999px;border:1px solid var(--line,rgba(255,255,255,0.15));font-size:12px;">
+        ${avatar}
+        <span style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;">${user.displayName || user.email.split('@')[0]}</span>
+        ${isSuper ? '<span style="background:#ff5a36;color:white;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:800;">管理者</span>' : ''}
+        <button id="nav-logout-btn" title="登出" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 4px;font-size:12px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+      ${isSuper ? `<button id="nav-admin-panel-btn" class="btn secondary" style="font-size:12px;padding:5px 12px;border-radius:999px;" title="開啟成員審核面板"><i class="fa-solid fa-users-gear"></i> 成員審核</button>` : ''}
+    `;
+    document.getElementById('nav-logout-btn').onclick = logoutUser;
+    if (isSuper && document.getElementById('nav-admin-panel-btn')) {
+      document.getElementById('nav-admin-panel-btn').onclick = openAdminPanelModal;
     }
   }
+
+  // Update Mode A UI Restrictions (Only admin sees '✏️ 編輯模式' button)
+  const editBtns = document.querySelectorAll('.edit-mode-btn');
+  editBtns.forEach(btn => {
+    if (!isSuper) {
+      btn.style.display = 'none';
+    } else {
+      btn.style.display = '';
+    }
+  });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  renderDays();
-  renderPacking();
-  renderToday();
-  initMap();
-  setupFilters();
-  setupMisc();
-  loadItineraryFromLocal();
+// ── Admin Approval Modal ─────────────────────────────────────────────────────
 
-  const dialog = document.getElementById('spotDialog');
-  const dialogClose = document.querySelector('#spotDialog .dialog-close');
-  if (dialogClose && dialog) {
-    dialogClose.onclick = () => dialog.close();
+function openAdminPanelModal() {
+  let modal = document.getElementById('admin-approval-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'admin-approval-modal';
+    modal.className = 'modal-overlay';
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+      z-index: 99990; display: flex; align-items: center; justify-content: center;
+      padding: 20px; box-sizing: border-box;
+    `;
+    document.body.appendChild(modal);
   }
-});
+
+  modal.innerHTML = `
+    <div style="background: var(--surface, #18242d); border: 1px solid var(--line, rgba(255,255,255,0.15)); border-radius: 20px; max-width: 540px; width: 100%; padding: 24px; color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="margin:0; font-size:18px; font-weight:800;"><i class="fa-solid fa-users-gear" style="color:var(--accent);"></i> 旅伴帳號審核管理</h3>
+        <button id="close-admin-modal" style="background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer;">✕</button>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin:0 0 16px;">已登入的成員需經由您審核通過後，方能查看旅遊手冊。</p>
+      <div id="admin-member-list" style="max-height:360px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+        <div style="text-align:center; padding:20px; color:var(--muted);">載入成員名單中…</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('close-admin-modal').onclick = () => modal.remove();
+  loadAdminMemberList();
+}
+
+async function loadAdminMemberList() {
+  const container = document.getElementById('admin-member-list');
+  if (!container) return;
+
+  try {
+    const snapshot = await db.collection('iceland_2026_members').get();
+    if (snapshot.empty) {
+      container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--muted);">尚無申請成員紀錄。</div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const isApproved = (data.status === 'approved');
+      const isSuper = (data.email && data.email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase());
+
+      const row = document.createElement('div');
+      row.style.cssText = `
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 14px; background: var(--bg, #101820); border-radius: 12px;
+        border: 1px solid var(--line, rgba(255,255,255,0.08)); gap: 12px;
+      `;
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+          ${data.photoURL ? `<img src="${data.photoURL}" style="width:32px;height:32px;border-radius:50%;">` : `<i class="fa-solid fa-user-circle" style="font-size:28px;color:var(--muted);"></i>`}
+          <div style="overflow:hidden;">
+            <div style="font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${data.displayName || data.email}</div>
+            <div style="font-size:11px; color:var(--muted);">${data.email}</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+          ${isSuper ? '<span style="font-size:11px; font-weight:800; color:#ff5a36;">最高管理者</span>' : `
+            <button class="approve-btn" style="
+              padding: 6px 12px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer;
+              background: ${isApproved ? '#2fae84' : 'rgba(255,255,255,0.1)'};
+              color: ${isApproved ? 'white' : 'var(--muted)'};
+            ">
+              ${isApproved ? '✓ 已開通' : '同意開通'}
+            </button>
+            <button class="reject-btn" style="background:none; border:none; color:#e03030; cursor:pointer; font-size:14px; padding:4px;" title="移除權限">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          `}
+        </div>
+      `;
+
+      if (!isSuper) {
+        const approveBtn = row.querySelector('.approve-btn');
+        approveBtn.onclick = async () => {
+          const nextStatus = isApproved ? 'pending' : 'approved';
+          await db.collection('iceland_2026_members').doc(data.uid).update({ status: nextStatus });
+          loadAdminMemberList();
+        };
+
+        const rejectBtn = row.querySelector('.reject-btn');
+        rejectBtn.onclick = async () => {
+          if (confirm(`確定要移除 ${data.email} 的存取權限嗎？`)) {
+            await db.collection('iceland_2026_members').doc(data.uid).delete();
+            loadAdminMemberList();
+          }
+        };
+      }
+
+      container.appendChild(row);
+    });
+  } catch (e) {
+    console.error("Error loading members:", e);
+    container.innerHTML = `<div style="color:#e03030; text-align:center; padding:12px;">載入失敗：${e.message}</div>`;
+  }
+}

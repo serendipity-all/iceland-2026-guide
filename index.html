@@ -19,7 +19,14 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="app.js"></script>
 </head>
+
 <body>
 
   <!-- Sticky Glass Topbar -->
@@ -1441,23 +1448,44 @@
     }
   }
 
-  // Save the entire tripData object as JSON (source of truth)
-  function saveItineraryToLocal() {
+  // Save the entire tripData object as JSON (both local & Firestore cloud)
+  async function saveItineraryToLocal() {
     try {
       localStorage.setItem('iceland_2026_trip_data', JSON.stringify(tripData));
+      // Cloud sync to Firestore if user is admin
+      if (window.AppState && window.AppState.isSuperAdmin && typeof db !== 'undefined') {
+        await db.collection('iceland_2026_shared').doc('trip').set({
+          tripData: tripData,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedBy: window.AppState.currentUser ? window.AppState.currentUser.email : 'admin'
+        }, { merge: true });
+      }
     } catch(e) { console.warn('saveItineraryToLocal failed:', e); }
   }
 
-  // Load saved tripData JSON, merge into live tripData, then re-render
-  function loadItineraryFromLocal() {
+  // Load saved tripData JSON from Firestore cloud (or local cache fallback), merge into live tripData
+  async function loadItineraryFromLocal() {
     try {
+      // 1. Try Firestore first
+      if (typeof db !== 'undefined') {
+        const doc = await db.collection('iceland_2026_shared').doc('trip').get();
+        if (doc.exists && doc.data().tripData) {
+          const parsed = doc.data().tripData;
+          if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
+            tripData.days = parsed.days;
+            if (parsed.hotels) tripData.hotels = parsed.hotels;
+            localStorage.setItem('iceland_2026_trip_data', JSON.stringify(tripData));
+            return true;
+          }
+        }
+      }
+      // 2. Fallback to LocalStorage
       const saved = localStorage.getItem('iceland_2026_trip_data');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
-          // Merge into live tripData so all references stay valid
           tripData.days = parsed.days;
-          if (parsed.title) tripData.title = parsed.title;
+          if (parsed.hotels) tripData.hotels = parsed.hotels;
           return true;
         }
       }
@@ -1469,15 +1497,23 @@
   window._defaultTripData = JSON.parse(JSON.stringify(tripData));
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Load saved data into tripData FIRST, then render
+    // Auth & Whitelist listener initialization
+    initAuthListener(async () => {
+      await loadItineraryFromLocal();
+      renderDays();
+      renderToday();
+      refreshMap();
+    });
+
+    // Initial render from local cache
     loadItineraryFromLocal();
     renderDays();
-    // renderPrep / renderPacking moved to checklist.html
     renderToday();
     initMap();
     setupFilters();
     setupMisc();
     initAddSpotModal();
+
 
     const dialog = document.getElementById('spotDialog');
     const dialogClose = document.querySelector('#spotDialog .dialog-close');

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>準備清單 | 2026 冰島夢幻之旅</title>
+  <meta name="description" content="2026 冰島行程行前準備清單與行李打包清單，可手動新增、刪除、編輯項目。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, #1a2a3a 0%, #2d3f5a 50%, #1a3a2a 100%);
+      padding: 72px clamp(18px,5vw,78px) 40px;
+      color: white;
+    }
+    .page-hero h1 { font-size: clamp(26px,4.5vw,48px); font-weight:900; margin:0 0 6px; }
+    .page-hero p  { color: rgba(255,255,255,0.6); font-size:14px; margin:0; }
+
+    /* Tab bar */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--line);
+      padding: 0 clamp(18px,5vw,78px);
+      background: var(--surface);
+      position: sticky;
+      top: 64px;
+      z-index: 90;
+    }
+    .tab-btn {
+      padding: 14px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .tab-btn:hover { color: var(--ink); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-count {
+      background: var(--line);
+      border-radius: 999px;
+      padding: 1px 8px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .tab-btn.active .tab-count { background: rgba(224,123,32,0.15); color: var(--accent); }
+
+    /* Tab panels */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Section inner */
+    .checklist-section {
+      padding: 40px clamp(18px,5vw,78px) 60px;
+    }
+    .section-head-inline {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .section-head-inline h2 { font-size: 24px; font-weight: 900; margin: 0 0 4px; }
+    .section-head-inline .lead { color: var(--muted); font-size: 13px; margin: 0; }
+
+    /* Progress bar */
+    .prep-progress-wrap { margin-bottom: 28px; }
+    .prep-progress-bar {
+      height: 8px; border-radius: 999px;
+      background: var(--line); overflow: hidden; margin-bottom: 6px;
+    }
+    .prep-progress-fill {
+      height: 100%; border-radius: 999px;
+      background: linear-gradient(90deg, #2fae84, #1a7a5a);
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    .prep-progress-text { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+    /* Packing note */
+    .packing-note {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-top: 24px;
+      font-size: 13px;
+    }
+    .packing-note strong { display: block; margin-bottom: 4px; font-size: 14px; }
+
+    /* Edit mode banner */
+    .edit-hint {
+      background: rgba(224,123,32,0.08);
+      border: 1px solid rgba(224,123,32,0.2);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 12px;
+      color: var(--ink);
+      margin: 0 clamp(18px,5vw,78px) 0;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    body.edit-active .edit-hint { display: flex; }
+
+    @media (max-width: 600px) {
+      .tab-btn { padding: 12px 14px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="回到手冊首頁">
+      <span class="brand-mark">◒</span>
+      <span>ICELAND · 2026</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html#today">今日模式</a>
+      <a href="index.html#days">每日行程</a>
+      <a href="itinerary.html">簡易行程表</a>
+      <a href="accommodation.html">🏠 住宿</a>
+      <a href="transport.html">✈️ 交通票</a>
+      <a href="shopping.html">🛋️ 伴手禮</a>
+      <a href="checklist.html" style="color:var(--accent);font-weight:800;">✅ 清單</a>
+    </nav>
+    <div class="topbar-actions">
+      <button id="editModeBtn" class="edit-mode-btn"><i class="fa-solid fa-pen-to-square"></i> ✏️ 編輯模式</button>
+      <button id="themeBtn" class="icon-btn" aria-label="切換深色模式">☾</button>
+      <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="開啟選單"><i class="fa-solid fa-bars"></i> <span>選單</span></button>
+    </div>
+  </header>
+
+  <div id="mobileDrawer" class="mobile-drawer">
+    <nav class="mobile-drawer-nav">
+      <a href="index.html#today" class="drawer-link">⚡ 今日模式 <span>↗</span></a>
+      <a href="index.html#days" class="drawer-link">📅 每日行程 <span>↗</span></a>
+      <a href="itinerary.html" class="drawer-link">📋 簡易行程表 <span>↗</span></a>
+      <a href="accommodation.html" class="drawer-link">🏠 住宿資訊 <span>↗</span></a>
+      <a href="transport.html" class="drawer-link">✈️ 交通票 <span>↗</span></a>
+      <a href="shopping.html" class="drawer-link">🛋️ 伴手禮清單 <span>↗</span></a>
+      <a href="checklist.html" class="drawer-link" style="color:var(--accent);">✅ 準備清單 <span>↗</span></a>
+    </nav>
+    <div class="mobile-drawer-actions">
+      <button id="mobile-edit-btn" class="edit-mode-btn"><i class="fa-solid fa-pen-to-square"></i> ✏️ 編輯模式</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="page-hero">
+      <h1>✅ 準備清單</h1>
+      <p>行前準備 · 行李打包 — 勾選進度自動儲存，編輯模式可增刪項目</p>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="tab-bar" role="tablist">
+      <button class="tab-btn active" id="tab-prep" role="tab" aria-selected="true" onclick="switchTab('prep')">
+        📋 行前準備清單
+        <span class="tab-count" id="tab-prep-count">…</span>
+      </button>
+      <button class="tab-btn" id="tab-packing" role="tab" aria-selected="false" onclick="switchTab('packing')">
+        🧳 行李打包清單
+        <span class="tab-count" id="tab-packing-count">…</span>
+      </button>
+    </div>
+
+    <!-- Edit hint bar -->
+    <div class="edit-hint">
+      <i class="fa-solid fa-pen" style="color:var(--accent);flex-shrink:0;"></i>
+      <span>編輯模式已開啟！點每張卡片上的「✏️ 編輯」可新增、刪除或修改項目，完成後點「✓ 儲存」。</span>
+    </div>
+
+    <!-- ── Tab: 行前準備 ───────────────────────────────────────────── -->
+    <div class="tab-panel active" id="panel-prep">
+      <div class="checklist-section">
+        <div class="section-head-inline">
+          <div>
+            <h2>行前準備清單</h2>
+            <p class="lead">出發前幾週／幾個月需先採購與辦理的事項；提前確認，打包時才不會手忙腳亂。</p>
+          </div>
+          <button class="chip" id="resetPrep">清除勾選</button>
+        </div>
+
+        <div class="prep-progress-wrap">
+          <div class="prep-progress-bar">
+            <div id="prepProgressFill" class="prep-progress-fill"></div>
+          </div>
+          <div id="prepProgressText" class="prep-progress-text">計算中…</div>
+        </div>
+
+        <div id="prepGrid" class="packing-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── Tab: 行李打包 ───────────────────────────────────────────── -->
+    <div class="tab-panel" id="panel-packing">
+      <div class="checklist-section">
+        <div class="section-head-inline">
+          <div>
+            <h2>行李打包清單</h2>
+            <p class="lead">以 11 天冰島秋季行程為基礎；勾選狀態會自動存於這台裝置的瀏覽器中。</p>
+          </div>
+          <button class="chip" id="resetPacking">清除勾選</button>
+        </div>
+
+        <div id="packingGrid" class="packing-grid"></div>
+
+        <div class="packing-note">
+          <strong>🧳 夫妻／旅伴分裝技巧</strong>
+          <p>若有兩件托運行李，建議交叉放置每人 1–2 天衣物。即使其中一件延誤，也不會只有一個人完全沒有換洗衣物。</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 0 clamp(18px,5vw,78px) 60px; display:flex; gap:12px; flex-wrap:wrap;">
+      <a href="index.html" class="btn secondary" style="font-size:13px;padding:10px 20px;"><i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i> 回到完整手冊</a>
+      <button class="btn secondary" onclick="window.print()" style="font-size:13px;padding:10px 20px;"><i class="fa-solid fa-print" style="margin-right:6px;"></i> 列印清單</button>
+    </div>
+  </main>
+
+  <footer>
+    <span>ICELAND 2026 · 準備清單</span>
+    <span>行前準備 + 行李打包</span>
+  </footer>
+
+  <script>
+    // ── Theme ──────────────────────────────────────────────────────────
+    document.getElementById('themeBtn').onclick = () => {
+      document.body.classList.toggle('dark');
+      document.getElementById('themeBtn').textContent = document.body.classList.contains('dark') ? '☀' : '☾';
+    };
+
+    // ── Mobile drawer ──────────────────────────────────────────────────
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    mobileMenuBtn.onclick = () => {
+      mobileDrawer.classList.toggle('active');
+      mobileMenuBtn.innerHTML = mobileDrawer.classList.contains('active')
+        ? '<i class="fa-solid fa-xmark"></i> <span>關閉</span>'
+        : '<i class="fa-solid fa-bars"></i> <span>選單</span>';
+    };
+
+    // ── Edit mode ──────────────────────────────────────────────────────
+    let editActive = false;
+    const editModeBtn = document.getElementById('editModeBtn');
+    const mobileEditBtn = document.getElementById('mobile-edit-btn');
+    function toggleEdit() {
+      editActive = !editActive;
+      document.body.classList.toggle('edit-active', editActive);
+      [editModeBtn, mobileEditBtn].forEach(btn => {
+        if (!btn) return;
+        btn.innerHTML = editActive
+          ? '<i class="fa-solid fa-check"></i> ✅ 結束編輯'
+          : '<i class="fa-solid fa-pen-to-square"></i> ✏️ 編輯模式';
+        btn.style.background = editActive ? 'var(--accent)' : '';
+        btn.style.color = editActive ? 'white' : '';
+        btn.style.borderColor = editActive ? 'var(--accent)' : '';
+      });
+    }
+    if (editModeBtn)   editModeBtn.onclick   = toggleEdit;
+    if (mobileEditBtn) mobileEditBtn.onclick = toggleEdit;
+
+    // ── Load tripData from localStorage ───────────────────────────────
+    const TRIP_KEY = 'iceland_2026_trip_data';
+
+    // Default prep/packing in case no localStorage data exists yet
+    const DEFAULT_TRIP_PREP = {
+      admin: [
+        '確認護照效期（至少 6 個月）',
+        '申辦申根簽證（如需要）',
+        '國際駕照（如需租車）',
+        '旅遊保險（含緊急醫療與行程取消）',
+        '機票電子機票確認信'
+      ],
+      bookings: [
+        '藍湖溫泉 Blue Lagoon 預約',
+        '極光/觀鯨行程預約',
+        '租車確認書',
+        '住宿確認（雷克雅維克、阿克雷里、埃伊爾斯塔德）',
+        '機場接送或交通安排'
+      ],
+      gear: [
+        '防水外層衝鋒衣（Gore-Tex 或同等級）',
+        '羊毛中層衣（Merino wool）',
+        '保暖內層（排汗速乾）',
+        '防水登山靴（中高筒）',
+        '羊毛或抓絨帽 + 手套',
+        '防水褲'
+      ],
+      tech: [
+        '歐規轉接插頭（Type F）',
+        '行動電源（<100Wh 可帶上機）',
+        '海外漫遊或冰島 eSIM 啟用確認',
+        '常備藥品（暈車藥、腸胃藥、感冒藥）',
+        '防曬乳 SPF50+'
+      ]
+    };
+    const DEFAULT_TRIP_PACKING = {
+      carry: [
+        '護照 + 護照影本（放另一個包）',
+        '機票 / 電子登機證',
+        '信用卡 + 少量現金（ISK 或 EUR）',
+        '手機 + 耳機',
+        '充電線 + 行動電源',
+        '口罩與手部消毒液'
+      ],
+      cabin: [
+        '換洗衣物 1–2 套',
+        '盥洗包（≤100ml 液體）',
+        '輕薄保暖層',
+        '眼鏡 / 隱形眼鏡備份',
+        '頸枕'
+      ],
+      checked: [
+        '防水外層衝鋒衣',
+        '保暖中層（羊毛衣或刷毛）',
+        '排汗內層 × 5 套',
+        '防水登山靴',
+        '一般鞋子（室內用）',
+        '牛仔褲 / 休閒褲 × 2',
+        '毛帽 + 手套 + 圍巾',
+        '泳衣（藍湖、天空藍潟湖）',
+        '雨傘或輕量雨衣',
+        '太陽眼鏡（低角度陽光）'
+      ],
+      shared: [
+        '旅遊書 / 離線地圖下載',
+        '手機腳架 / 小型三腳架',
+        '延長線插座',
+        '零食與乾燥食品',
+        '夸克型暖暖包'
+      ]
+    };
+
+    let tripData = null;
+    try {
+      const raw = localStorage.getItem(TRIP_KEY);
+      tripData = raw ? JSON.parse(raw) : null;
+    } catch(e) {}
+
+    if (!tripData) {
+      tripData = { prep: DEFAULT_TRIP_PREP, packing: DEFAULT_TRIP_PACKING };
+    }
+    if (!tripData.prep)    tripData.prep    = DEFAULT_TRIP_PREP;
+    if (!tripData.packing) tripData.packing = DEFAULT_TRIP_PACKING;
+
+    function saveItineraryToLocal() {
+      try { localStorage.setItem(TRIP_KEY, JSON.stringify(tripData)); } catch(e) {}
+    }
+
+    // ── Tab switching ─────────────────────────────────────────────────
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      document.getElementById('tab-' + tab).setAttribute('aria-selected','true');
+      document.getElementById('panel-' + tab).classList.add('active');
+      history.replaceState(null, '', '#' + tab);
+    }
+
+    // Read hash on load
+    if (location.hash === '#packing') switchTab('packing');
+
+    // ── Helpers ───────────────────────────────────────────────────────
+    function addEditRow(text, container, removeHandler) {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
+      row.innerHTML = `
+        <input type="text" value="${text.replace(/"/g,'&quot;').replace(/</g,'&lt;')}"
+          style="flex:1;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;">
+        <button title="刪除" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;transition:color 0.1s;"
+          onmouseover="this.style.color='#e03030'" onmouseout="this.style.color=''">×</button>
+      `;
+      row.querySelector('button').onclick = () => row.remove();
+      container.appendChild(row);
+    }
+
+    function buildChecklistCard(title, sub, items, key, prefix, onSave, onReset) {
+      const card = document.createElement('article');
+      card.className = 'packing-card';
+      card.innerHTML = `
+        <div class="packing-head">
+          <div><h3>${title}</h3><p>${sub}</p></div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+            <span class="cl-count">${items.length} 項</span>
+            <button class="small-btn edit-only cl-edit-btn" style="font-size:11px;padding:4px 10px;">✏️ 編輯</button>
+          </div>
+        </div>
+        <div class="check-list"></div>
+        <div class="cl-edit-area" style="display:none;border-top:1px solid var(--line);padding:12px 0 4px;">
+          <div class="cl-edit-list"></div>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <input class="cl-new-input" type="text" placeholder="新增項目（Enter 確認）"
+              style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;">
+            <button class="btn primary cl-add-btn" style="font-size:12px;padding:7px 12px;white-space:nowrap;">＋ 新增</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn primary cl-save-btn" style="font-size:12px;padding:7px 14px;">✓ 儲存</button>
+            <button class="btn secondary cl-cancel-btn" style="font-size:12px;padding:7px 14px;">取消</button>
+          </div>
+        </div>
+      `;
+
+      const checkList  = card.querySelector('.check-list');
+      const editArea   = card.querySelector('.cl-edit-area');
+      const editList   = card.querySelector('.cl-edit-list');
+      const editBtn    = card.querySelector('.cl-edit-btn');
+      const newInput   = card.querySelector('.cl-new-input');
+      const addBtn     = card.querySelector('.cl-add-btn');
+      const saveBtn    = card.querySelector('.cl-save-btn');
+      const cancelBtn  = card.querySelector('.cl-cancel-btn');
+      const countEl    = card.querySelector('.cl-count');
+
+      const renderCheckRows = () => {
+        checkList.innerHTML = '';
+        const curItems = items; // reference
+        curItems.forEach((item, i) => {
+          const id = `${prefix}-${key}-${i}`;
+          const row = document.createElement('label');
+          row.className = 'check-row';
+          row.innerHTML = `<input type="checkbox" ${localStorage.getItem(id) ? 'checked' : ''}><span>${item}</span>`;
+          row.querySelector('input').onchange = e => {
+            e.target.checked ? localStorage.setItem(id, '1') : localStorage.removeItem(id);
+            if (onReset) onReset();
+          };
+          checkList.appendChild(row);
+        });
+        countEl.textContent = `${curItems.length} 項`;
+      };
+
+      editBtn.onclick = () => {
+        editList.innerHTML = '';
+        items.forEach(item => addEditRow(item, editList));
+        checkList.style.display = 'none';
+        editArea.style.display = 'block';
+        newInput.focus();
+      };
+
+      const doAdd = () => {
+        const val = newInput.value.trim();
+        if (!val) return;
+        addEditRow(val, editList);
+        newInput.value = '';
+        newInput.focus();
+      };
+      addBtn.onclick = doAdd;
+      newInput.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); doAdd(); } };
+
+      saveBtn.onclick = () => {
+        const newItems = [...editList.querySelectorAll('input[type=text]')]
+          .map(inp => inp.value.trim()).filter(Boolean);
+        // Clear old checkbox states for this group
+        Object.keys(localStorage).filter(k => k.startsWith(`${prefix}-${key}-`)).forEach(k => localStorage.removeItem(k));
+        items.splice(0, items.length, ...newItems); // mutate in place
+        saveItineraryToLocal();
+        if (onSave) onSave();
+        checkList.style.display = '';
+        editArea.style.display = 'none';
+        renderCheckRows();
+      };
+
+      cancelBtn.onclick = () => {
+        checkList.style.display = '';
+        editArea.style.display = 'none';
+      };
+
+      renderCheckRows();
+      return card;
+    }
+
+    // ── renderPrep ─────────────────────────────────────────────────────
+    function renderPrep() {
+      const grid = document.getElementById('prepGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const groups = [
+        ['admin',    '📄 證件與手續',      '3–6 個月前確認'],
+        ['bookings', '🎟️ 預約與訂單',       '1–3 個月前預訂'],
+        ['gear',     '🧥 裝備與衣物採購',   '1 個月前試穿磨合'],
+        ['tech',     '🔌 電源、通網與藥品', '2 週前確認']
+      ];
+
+      const updateProgress = () => {
+        let total = 0, done = 0;
+        groups.forEach(([key]) => {
+          (tripData.prep[key] || []).forEach((_, i) => {
+            total++;
+            if (localStorage.getItem(`prep-${key}-${i}`)) done++;
+          });
+        });
+        const pct = total ? Math.round(done / total * 100) : 0;
+        const fill = document.getElementById('prepProgressFill');
+        const text = document.getElementById('prepProgressText');
+        if (fill) fill.style.width = `${pct}%`;
+        if (text) text.textContent = `${done} / ${total} 已完成 (${pct}%)`;
+        // Update tab count
+        const tc = document.getElementById('tab-prep-count');
+        if (tc) tc.textContent = `${done}/${total}`;
+      };
+
+      groups.forEach(([key, title, sub]) => {
+        if (!tripData.prep[key]) tripData.prep[key] = [];
+        const card = buildChecklistCard(
+          title, sub, tripData.prep[key], key, 'prep',
+          updateProgress, updateProgress
+        );
+        grid.appendChild(card);
+      });
+
+      updateProgress();
+
+      const resetBtn = document.getElementById('resetPrep');
+      if (resetBtn) {
+        resetBtn.onclick = () => {
+          Object.keys(localStorage).filter(k => k.startsWith('prep-')).forEach(k => localStorage.removeItem(k));
+          grid.querySelectorAll('input[type=checkbox]').forEach(x => x.checked = false);
+          updateProgress();
+        };
+      }
+    }
+
+    // ── renderPacking ──────────────────────────────────────────────────
+    function renderPacking() {
+      const grid = document.getElementById('packingGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const groups = [
+        ['carry',   '隨身包包',   '證件、貴重物品與途中隨時會用到'],
+        ['cabin',   '手提行李',   '托運延誤時仍能撐 1–2 天'],
+        ['checked', '托運行李',   '主要衣物與旅行用品'],
+        ['shared',  '共用／分裝', '夫妻或旅伴一起準備']
+      ];
+
+      const updateCount = () => {
+        let total = 0, done = 0;
+        groups.forEach(([key]) => {
+          (tripData.packing[key] || []).forEach((_, i) => {
+            total++;
+            if (localStorage.getItem(`pack-${key}-${i}`)) done++;
+          });
+        });
+        const tc = document.getElementById('tab-packing-count');
+        if (tc) tc.textContent = `${done}/${total}`;
+      };
+
+      groups.forEach(([key, title, sub]) => {
+        if (!tripData.packing[key]) tripData.packing[key] = [];
+        const card = buildChecklistCard(
+          title, sub, tripData.packing[key], key, 'pack',
+          updateCount, updateCount
+        );
+        grid.appendChild(card);
+      });
+
+      updateCount();
+
+      const resetBtn = document.getElementById('resetPacking');
+      if (resetBtn) {
+        resetBtn.onclick = () => {
+          Object.keys(localStorage).filter(k => k.startsWith('pack-')).forEach(k => localStorage.removeItem(k));
+          grid.querySelectorAll('input[type=checkbox]').forEach(x => x.checked = false);
+          updateCount();
+        };
+      }
+    }
+
+    // ── Init ───────────────────────────────────────────────────────────
+    renderPrep();
+    renderPacking();
+  </script>
+</body>
+</html>

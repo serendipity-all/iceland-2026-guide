@@ -35,9 +35,8 @@
       <a href="itinerary.html">簡易行程表</a>
       <a href="accommodation.html">🏠 住宿</a>
       <a href="transport.html">✈️ 交通票</a>
-      <a href="shopping.html">🛋️ 伴手礼</a>
-      <a href="#prep">行前準備</a>
-      <a href="#packing">行李清單</a>
+      <a href="shopping.html">🛋️ 伴手禮</a>
+      <a href="checklist.html">✅ 清單</a>
     </nav>
     <div class="topbar-actions">
       <button id="reset-data-btn" class="edit-mode-btn" title="重新加載完整預設行程"><i class="fa-solid fa-rotate-right"></i> 🔄 重設行程</button>
@@ -57,9 +56,8 @@
       <a href="itinerary.html" class="drawer-link">📋 簡易行程表 <span>↗</span></a>
       <a href="accommodation.html" class="drawer-link">🏠 住宿資訊 <span>↗</span></a>
       <a href="transport.html" class="drawer-link">✈️ 交通票 <span>↗</span></a>
-      <a href="shopping.html" class="drawer-link">🛋️ 伴手礼清單 <span>↗</span></a>
-      <a href="#prep" class="drawer-link">📋 行前準備清單 <span>↗</span></a>
-      <a href="#packing" class="drawer-link">🧳 行李打包清單 <span>↗</span></a>
+      <a href="shopping.html" class="drawer-link">🛋️ 伴手禮清單 <span>↗</span></a>
+      <a href="checklist.html" class="drawer-link">✅ 準備清單 <span>↗</span></a>
       <a href="#notes" class="drawer-link">📌 待確認事項 <span>↗</span></a>
     </nav>
     <div class="mobile-drawer-actions">
@@ -170,43 +168,7 @@
       <div id="dayList" class="day-list"></div>
     </section>
 
-    <!-- Pre-Trip Preparation Checklist -->
-    <section id="prep" class="section prep-section">
-      <div class="section-head stack-on-mobile">
-        <div>
-          <div class="eyebrow">PRE-TRIP CHECKLIST</div>
-          <h2>行前準備清單</h2>
-          <p class="lead">出發前幾週／幾個月需先採購與辦理的事項；提前確認，打包時才不會手忙腳亂。</p>
-        </div>
-        <button class="chip" id="resetPrep">清除勾選</button>
-      </div>
-
-      <div class="prep-progress-wrap">
-        <div class="prep-progress-bar">
-          <div id="prepProgressFill" class="prep-progress-fill"></div>
-        </div>
-        <div id="prepProgressText" class="prep-progress-text">0 / 20 已完成 (0%)</div>
-      </div>
-
-      <div id="prepGrid" class="packing-grid"></div>
-    </section>
-
-    <!-- Packing Checklist -->
-    <section id="packing" class="section packing-section">
-      <div class="section-head stack-on-mobile">
-        <div>
-          <div class="eyebrow">PACKING CHECKLIST</div>
-          <h2>行李打包清單</h2>
-          <p class="lead">以 11 天冰島秋季行程為基礎；勾選狀態會自動存於這台裝置的瀏覽器中。</p>
-        </div>
-        <button class="chip" id="resetPacking">清除勾選</button>
-      </div>
-      <div id="packingGrid" class="packing-grid"></div>
-      <div class="packing-note">
-        <strong>夫妻／旅伴分裝技巧</strong>
-        <p>若有兩件托運行李，建議交叉放置每人 1–2 天衣物。即使其中一件延誤，也不會只有一個人完全沒有換洗衣物。</p>
-      </div>
-    </section>
+    <!-- Checklist moved to checklist.html -->
 
     <!-- To Confirm Section -->
     <section id="notes" class="section notes-section">
@@ -1163,279 +1125,10 @@
   }
 
 
-  function renderPrep() {
-    const grid = document.getElementById('prepGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-
-    const groups = [
-      ['admin',    '📄 證件與手續',         '3–6 個月前確認'],
-      ['bookings', '🎟️ 預約與訂單',          '1–3 個月前預訂'],
-      ['gear',     '🧥 裝備與衣物採購',      '1 個月前試穿磨合'],
-      ['tech',     '🔌 電源、通網與藥品',    '2 週前確認']
-    ];
-
-    const updatePrepProgress = () => {
-      let total = 0, done = 0;
-      groups.forEach(([key]) => {
-        (tripData.prep[key] || []).forEach((_, i) => {
-          total++;
-          if (localStorage.getItem(`prep-${key}-${i}`)) done++;
-        });
-      });
-      const pct = total ? Math.round(done / total * 100) : 0;
-      const fill = document.getElementById('prepProgressFill');
-      const text = document.getElementById('prepProgressText');
-      if (fill) fill.style.width = `${pct}%`;
-      if (text) text.textContent = `${done} / ${total} 已完成 (${pct}%)`;
-    };
-
-    groups.forEach(([key, title, sub]) => {
-      const card = document.createElement('article');
-      card.className = 'packing-card';
-      card.innerHTML = `
-        <div class="packing-head">
-          <div><h3>${title}</h3><p>${sub}</p></div>
-          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-            <span class="cl-count">${(tripData.prep[key]||[]).length} 項</span>
-            <button class="small-btn edit-only cl-edit-btn" style="font-size:11px;padding:4px 10px;" title="編輯清單">✏️ 編輯</button>
-          </div>
-        </div>
-        <div class="check-list"></div>
-        <div class="cl-edit-area" style="display:none;border-top:1px solid var(--line);padding:12px 0 4px;">
-          <div class="cl-edit-list"></div>
-          <div style="display:flex;gap:6px;margin-top:8px;">
-            <input class="cl-new-input" type="text" placeholder="新增項目（Enter 確認）" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;">
-            <button class="btn primary cl-add-btn" style="font-size:12px;padding:7px 12px;white-space:nowrap;">＋ 新增</button>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:10px;">
-            <button class="btn primary cl-save-btn" style="font-size:12px;padding:7px 14px;">✓ 儲存</button>
-            <button class="btn secondary cl-cancel-btn" style="font-size:12px;padding:7px 14px;">取消</button>
-          </div>
-        </div>
-      `;
-
-      const checkList   = card.querySelector('.check-list');
-      const editArea    = card.querySelector('.cl-edit-area');
-      const editList    = card.querySelector('.cl-edit-list');
-      const editBtn     = card.querySelector('.cl-edit-btn');
-      const newInput    = card.querySelector('.cl-new-input');
-      const addBtn      = card.querySelector('.cl-add-btn');
-      const saveBtn     = card.querySelector('.cl-save-btn');
-      const cancelBtn   = card.querySelector('.cl-cancel-btn');
-      const countEl     = card.querySelector('.cl-count');
-
-      // ─ Render check rows ──────────────────────────────────────────
-      const renderCheckRows = () => {
-        checkList.innerHTML = '';
-        (tripData.prep[key] || []).forEach((item, i) => {
-          const id = `prep-${key}-${i}`;
-          const row = document.createElement('label');
-          row.className = 'check-row';
-          row.innerHTML = `<input type="checkbox" ${localStorage.getItem(id) ? 'checked' : ''}><span>${item}</span>`;
-          row.querySelector('input').onchange = e => {
-            e.target.checked ? localStorage.setItem(id, '1') : localStorage.removeItem(id);
-            updatePrepProgress();
-          };
-          checkList.appendChild(row);
-        });
-        countEl.textContent = `${(tripData.prep[key]||[]).length} 項`;
-      };
-
-      // ─ Render edit rows ───────────────────────────────────────────
-      const renderEditRows = () => {
-        editList.innerHTML = '';
-        (tripData.prep[key] || []).forEach((item) => {
-          addEditRow(item, editList, key);
-        });
-      };
-
-      const addEditRow = (text, container) => {
-        const row = document.createElement('div');
-        row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
-        row.innerHTML = `
-          <input type="text" value="${text.replace(/"/g,'&quot;').replace(/</g,'&lt;')}"
-            style="flex:1;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;">
-          <button title="刪除" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;transition:color 0.1s;"
-            onmouseover="this.style.color='#e03030'" onmouseout="this.style.color=''">×</button>
-        `;
-        row.querySelector('button').onclick = () => row.remove();
-        container.appendChild(row);
-      };
-
-      // ─ Event wiring ───────────────────────────────────────────────
-      editBtn.onclick = () => {
-        renderEditRows();
-        checkList.style.display = 'none';
-        editArea.style.display = 'block';
-        newInput.focus();
-      };
-
-      const doAdd = () => {
-        const val = newInput.value.trim();
-        if (!val) return;
-        addEditRow(val, editList);
-        newInput.value = '';
-        newInput.focus();
-      };
-      addBtn.onclick = doAdd;
-      newInput.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); doAdd(); } };
-
-      saveBtn.onclick = () => {
-        const newItems = [...editList.querySelectorAll('input[type=text]')]
-          .map(inp => inp.value.trim()).filter(Boolean);
-        // Clear old checkbox states for this group before reindex
-        Object.keys(localStorage).filter(k => k.startsWith(`prep-${key}-`)).forEach(k => localStorage.removeItem(k));
-        tripData.prep[key] = newItems;
-        saveItineraryToLocal();
-        checkList.style.display = '';
-        editArea.style.display = 'none';
-        renderCheckRows();
-        updatePrepProgress();
-      };
-
-      cancelBtn.onclick = () => {
-        checkList.style.display = '';
-        editArea.style.display = 'none';
-      };
-
-      renderCheckRows();
-      grid.appendChild(card);
-    });
-
-    updatePrepProgress();
-
-    const resetBtn = document.getElementById('resetPrep');
-    if (resetBtn) {
-      resetBtn.onclick = () => {
-        Object.keys(localStorage).filter(k => k.startsWith('prep-')).forEach(k => localStorage.removeItem(k));
-        document.querySelectorAll('#prepGrid input[type=checkbox]').forEach(x => x.checked = false);
-        updatePrepProgress();
-      };
-    }
-  }
-
-  function renderPacking() {
-    const grid = document.getElementById('packingGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-
-    const groups = [
-      ['carry',   '隨身包包',   '證件、貴重物品與途中隨時會用到'],
-      ['cabin',   '手提行李',   '托運延誤時仍能撐 1–2 天'],
-      ['checked', '托運行李',   '主要衣物與旅行用品'],
-      ['shared',  '共用／分裝', '夫妻或旅伴一起準備']
-    ];
-
-    groups.forEach(([key, title, sub]) => {
-      const card = document.createElement('article');
-      card.className = 'packing-card';
-      card.innerHTML = `
-        <div class="packing-head">
-          <div><h3>${title}</h3><p>${sub}</p></div>
-          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-            <span class="cl-count">${(tripData.packing[key]||[]).length} 項</span>
-            <button class="small-btn edit-only cl-edit-btn" style="font-size:11px;padding:4px 10px;" title="編輯清單">✏️ 編輯</button>
-          </div>
-        </div>
-        <div class="check-list"></div>
-        <div class="cl-edit-area" style="display:none;border-top:1px solid var(--line);padding:12px 0 4px;">
-          <div class="cl-edit-list"></div>
-          <div style="display:flex;gap:6px;margin-top:8px;">
-            <input class="cl-new-input" type="text" placeholder="新增項目（Enter 確認）" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;">
-            <button class="btn primary cl-add-btn" style="font-size:12px;padding:7px 12px;white-space:nowrap;">＋ 新增</button>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:10px;">
-            <button class="btn primary cl-save-btn" style="font-size:12px;padding:7px 14px;">✓ 儲存</button>
-            <button class="btn secondary cl-cancel-btn" style="font-size:12px;padding:7px 14px;">取消</button>
-          </div>
-        </div>
-      `;
-
-      const checkList  = card.querySelector('.check-list');
-      const editArea   = card.querySelector('.cl-edit-area');
-      const editList   = card.querySelector('.cl-edit-list');
-      const editBtn    = card.querySelector('.cl-edit-btn');
-      const newInput   = card.querySelector('.cl-new-input');
-      const addBtn     = card.querySelector('.cl-add-btn');
-      const saveBtn    = card.querySelector('.cl-save-btn');
-      const cancelBtn  = card.querySelector('.cl-cancel-btn');
-      const countEl    = card.querySelector('.cl-count');
-
-      const renderCheckRows = () => {
-        checkList.innerHTML = '';
-        (tripData.packing[key] || []).forEach((item, i) => {
-          const id = `pack-${key}-${i}`;
-          const row = document.createElement('label');
-          row.className = 'check-row';
-          row.innerHTML = `<input type="checkbox" ${localStorage.getItem(id) ? 'checked' : ''}><span>${item}</span>`;
-          row.querySelector('input').onchange = e => e.target.checked ? localStorage.setItem(id, '1') : localStorage.removeItem(id);
-          checkList.appendChild(row);
-        });
-        countEl.textContent = `${(tripData.packing[key]||[]).length} 項`;
-      };
-
-      const addEditRow = (text, container) => {
-        const row = document.createElement('div');
-        row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
-        row.innerHTML = `
-          <input type="text" value="${text.replace(/"/g,'&quot;').replace(/</g,'&lt;')}"
-            style="flex:1;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;">
-          <button title="刪除" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;transition:color 0.1s;"
-            onmouseover="this.style.color='#e03030'" onmouseout="this.style.color=''">×</button>
-        `;
-        row.querySelector('button').onclick = () => row.remove();
-        container.appendChild(row);
-      };
-
-      editBtn.onclick = () => {
-        editList.innerHTML = '';
-        (tripData.packing[key] || []).forEach(item => addEditRow(item, editList));
-        checkList.style.display = 'none';
-        editArea.style.display = 'block';
-        newInput.focus();
-      };
-
-      const doAdd = () => {
-        const val = newInput.value.trim();
-        if (!val) return;
-        addEditRow(val, editList);
-        newInput.value = '';
-        newInput.focus();
-      };
-      addBtn.onclick = doAdd;
-      newInput.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); doAdd(); } };
-
-      saveBtn.onclick = () => {
-        const newItems = [...editList.querySelectorAll('input[type=text]')]
-          .map(inp => inp.value.trim()).filter(Boolean);
-        Object.keys(localStorage).filter(k => k.startsWith(`pack-${key}-`)).forEach(k => localStorage.removeItem(k));
-        tripData.packing[key] = newItems;
-        saveItineraryToLocal();
-        checkList.style.display = '';
-        editArea.style.display = 'none';
-        renderCheckRows();
-      };
-
-      cancelBtn.onclick = () => {
-        checkList.style.display = '';
-        editArea.style.display = 'none';
-      };
-
-      renderCheckRows();
-      grid.appendChild(card);
-    });
-
-    const resetBtn = document.getElementById('resetPacking');
-    if (resetBtn) {
-      resetBtn.onclick = () => {
-        Object.keys(localStorage).filter(k => k.startsWith('pack-')).forEach(k => localStorage.removeItem(k));
-        document.querySelectorAll('#packingGrid input[type=checkbox]').forEach(x => x.checked = false);
-      };
-    }
-  }
+  // renderPrep / renderPacking → moved to checklist.html
 
   function setupFilters() {
+
     document.querySelectorAll('#dayFilters [data-filter]').forEach(btn => {
       btn.onclick = () => {
         document.querySelectorAll('#dayFilters [data-filter]').forEach(b => b.classList.remove('active'));
@@ -1779,8 +1472,7 @@
     // Load saved data into tripData FIRST, then render
     loadItineraryFromLocal();
     renderDays();
-    renderPrep();
-    renderPacking();
+    // renderPrep / renderPacking moved to checklist.html
     renderToday();
     initMap();
     setupFilters();

@@ -293,13 +293,15 @@
     function setDayHotelInTrip(date, hotelId) {
       try {
         const tripRaw = JSON.parse(localStorage.getItem(TRIP_KEY) || 'null');
-        if (!tripRaw || !tripRaw.days) return false;
-        const day = tripRaw.days.find(d => d.date === date);
-        if (!day) return false;
-        day.hotelId = hotelId || null;
-        localStorage.setItem(TRIP_KEY, JSON.stringify(tripRaw));
+        if (tripRaw && Array.isArray(tripRaw.days)) {
+          const day = tripRaw.days.find(d => d.date === date);
+          if (day) {
+            day.hotelId = hotelId || null;
+            localStorage.setItem(TRIP_KEY, JSON.stringify(tripRaw));
+          }
+        }
         return true;
-      } catch(e) { console.warn('setDayHotelInTrip failed', e); return false; }
+      } catch(e) { console.warn('setDayHotelInTrip failed', e); return true; }
     }
 
     // ── Load merged hotel data ────────────────────────────────────────
@@ -308,20 +310,24 @@
         const savedMeta = JSON.parse(localStorage.getItem(META_KEY) || '[]');
         return BASE_HOTELS.map(base => {
           const meta = savedMeta.find(x => x.id === base.id) || {};
-          const nights = getNightsFromTrip(base.id);  // always from trip data
-          return { ...base, ...meta, nights };
+          const tripNights = getNightsFromTrip(base.id);
+          const metaNights = meta.nights || [];
+          const combinedNights = [...new Set([...tripNights, ...metaNights])].sort();
+          return { ...base, ...meta, nights: combinedNights };
         });
       } catch(e) { return BASE_HOTELS.map(h => ({ ...h, nights: [] })); }
     }
 
-    // ── Save only metadata (name/booking/phone/notes) ──────────────────
+    // ── Save metadata and nights ──────────────────────────────────────
     function saveMeta(hotels) {
-      const meta = hotels.map(({ id, nameZh, checkIn, checkOut, booking, phone, website, notes }) =>
-        ({ id, nameZh, checkIn, checkOut, booking, phone, website, notes }));
+      const meta = hotels.map(({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }) =>
+        ({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }));
       localStorage.setItem(META_KEY, JSON.stringify(meta));
       const toast = document.getElementById('saveToast');
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2500);
+      if (toast) {
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+      }
     }
 
     // ── Mini maps ─────────────────────────────────────────────────────
@@ -347,7 +353,7 @@
       } catch(e) { return dateStr; }
     }
 
-    // ── Night add/remove (writes to trip data) ────────────────────────
+    // ── Night add/remove (writes to trip data & hotel meta) ───────────
     function addNight(id) {
       const input = document.getElementById('night-input-' + id);
       const dateStr = input.value;
@@ -355,29 +361,17 @@
 
       const h = hotels.find(x => x.id === id);
       if (!h) return;
-      if ((h.nights || []).includes(dateStr)) { alert('此日期已指派給此住宿點'); return; }
+      if ((h.nights || []).includes(dateStr)) { alert('此日期已加入此住宿點'); return; }
 
-      // Check if this date is already assigned to another hotel
-      const tripRaw = JSON.parse(localStorage.getItem(TRIP_KEY) || 'null');
-      if (tripRaw) {
-        const day = (tripRaw.days || []).find(d => d.date === dateStr);
-        if (day && day.hotelId && day.hotelId !== id) {
-          const other = hotels.find(x => x.id === day.hotelId);
-          if (!confirm(`${fmtNight(dateStr)} 目前已指派至「${other ? other.nameZh : day.hotelId}」，要改為此住宿點嗎？`)) return;
-          // Remove from other hotel's display
-          const otherH = hotels.find(x => x.id === day.hotelId);
-          if (otherH) otherH.nights = (otherH.nights || []).filter(n => n !== dateStr);
-        }
-      }
-
-      const ok = setDayHotelInTrip(dateStr, id);
-      if (!ok) {
-        alert(`找不到日期 ${dateStr} 在行程資料中（行程日期範圍：2026-09-23 至 2026-10-03）`);
-        return;
-      }
+      setDayHotelInTrip(dateStr, id);
       if (!h.nights) h.nights = [];
       h.nights.push(dateStr);
       h.nights.sort();
+      saveMeta(hotels);
+      input.value = '';
+      refreshNightsList(id, h.nights);
+    }
+
       input.value = '';
       refreshNightsList(id, h.nights);
     }
@@ -489,7 +483,8 @@
                 <span class="label">📅 入住日期（可多晚）</span>
                 <div class="nights-edit-list" id="nights-edit-${h.id}">${nightEditTagsHtml}</div>
                 <div class="add-night-row">
-                  <input type="date" id="night-input-${h.id}" min="2026-09-23" max="2026-10-02">
+                  <input type="date" id="night-input-${h.id}">
+
                   <button class="btn primary" style="font-size:12px;padding:6px 12px;" onclick="addNight('${h.id}')"><i class="fa-solid fa-plus"></i> 加入</button>
                 </div>
               </div>

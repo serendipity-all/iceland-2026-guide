@@ -10,6 +10,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="app.js"></script>
+
   <style>
     .page-hero {
       background: linear-gradient(135deg, #0d1f35 0%, #1a3050 50%, #0d2530 100%);
@@ -21,10 +28,9 @@
 
     .timeline-section {
       padding: 40px clamp(18px,5vw,78px) 60px;
-      max-width: 860px;
+      max-width: 880px;
     }
 
-    /* Timeline stem */
     .timeline { position:relative; }
     .timeline::before {
       content:'';
@@ -54,13 +60,11 @@
       z-index: 1;
       border: 3px solid var(--bg);
       box-shadow: 0 0 0 2px var(--line);
+      color: white;
     }
     .icon-flight { background: linear-gradient(135deg, #1565c0, #42a5f5); }
     .icon-car    { background: linear-gradient(135deg, #2e7d32, #66bb6a); }
-    .icon-ferry  { background: linear-gradient(135deg, #00838f, #26c6da); }
-    .icon-bus    { background: linear-gradient(135deg, #e65100, #ffa726); }
 
-    /* Boarding pass card */
     .boarding-pass {
       flex: 1;
       background: var(--surface);
@@ -93,7 +97,7 @@
 
     .bp-body {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
       gap: 0;
     }
     .bp-field {
@@ -102,46 +106,59 @@
       border-bottom: 1px solid var(--line);
     }
     .bp-field:last-child { border-right: none; }
-    .bp-field .label { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: var(--muted); display:block; margin-bottom:3px; text-transform: uppercase; }
-    .bp-field .val { font-size: 15px; font-weight: 700; }
-    .bp-field .val.pending { color: var(--muted); font-style: italic; font-weight: 400; font-size:13px; }
+    .bp-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 2px; }
+    .bp-val { font-size: 14px; font-weight: 800; color: var(--ink); }
+    .bp-val.pending { color: var(--muted); font-weight: 400; font-style: italic; }
 
-    .bp-notes {
-      padding: 10px 16px;
+    .bp-footer {
+      padding: 12px 20px;
+      background: var(--bg);
       font-size: 12px;
       color: var(--muted);
-      border-top: 1px solid var(--line);
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
-    .bp-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 999px;
+    /* Edit Form */
+    .tp-edit-area {
+      display: none;
+      padding: 18px 20px;
+      background: var(--bg);
+      border-top: 1px solid var(--line);
     }
-    .status-pending { background: rgba(224,123,32,0.12); color: #c05a10; }
-    .status-confirmed { background: rgba(47,174,132,0.12); color: #1a7a5a; }
+    .tp-edit-area.active { display: block; }
 
-    /* Add transport CTA */
-    .add-transport-cta {
-      margin: 0 clamp(18px,5vw,78px) 40px;
-      border: 2px dashed var(--line);
-      border-radius: 16px;
-      padding: 24px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 14px;
+    .edit-form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
     }
-    .add-transport-cta h3 { margin: 0 0 8px; font-size: 15px; color: var(--ink); }
+    .edit-field label {
+      font-size: 10px; font-weight: 800; letter-spacing: 0.06em;
+      color: var(--muted); display: block; margin-bottom: 4px; text-transform: uppercase;
+    }
+    .edit-field input, .edit-field textarea {
+      width: 100%; box-sizing: border-box; padding: 7px 10px;
+      border: 1px solid var(--line); border-radius: 8px;
+      background: var(--surface); color: var(--ink); font-size: 13px; font-family: inherit;
+    }
+    .edit-field input:focus, .edit-field textarea:focus { outline: none; border-color: var(--accent); }
 
-    body.dark .icon-flight { background: linear-gradient(135deg, #0d47a1, #1976d2); }
-    body.dark .icon-car    { background: linear-gradient(135deg, #1b5e20, #388e3c); }
+    /* Toast */
+    .save-toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #1a7a5a; color: white; padding: 12px 20px;
+      border-radius: 12px; font-size: 14px; font-weight: 700;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2); transform: translateY(80px);
+      opacity: 0; transition: all 0.3s ease; z-index: 999;
+    }
+    .save-toast.show { transform: translateY(0); opacity: 1; }
+
+    body.dark .bp-footer { background: rgba(0,0,0,0.2); }
   </style>
 </head>
 <body>
@@ -170,6 +187,7 @@
     <nav class="mobile-drawer-nav">
       <a href="index.html#today" class="drawer-link">⚡ 今日模式 <span>↗</span></a>
       <a href="index.html#days" class="drawer-link">📅 每日行程 <span>↗</span></a>
+      <a href="itinerary.html" class="drawer-link">📋 簡易行程表 <span>↗</span></a>
       <a href="accommodation.html" class="drawer-link">🏠 住宿資訊 <span>↗</span></a>
       <a href="transport.html" class="drawer-link" style="color:var(--accent);">✈️ 交通票 <span>↗</span></a>
       <a href="shopping.html" class="drawer-link">🛋️ 伴手禮清單 <span>↗</span></a>
@@ -177,106 +195,16 @@
     </nav>
   </div>
 
+  <div class="save-toast" id="saveToast">✅ 交通票資訊已儲存</div>
+
   <main>
     <div class="page-hero">
-      <h1>✈️ 交通票資訊</h1>
-      <p>機票 · 租車 · 接駁 · 渡輪 — 全程交通一覽</p>
+      <h1>✈️ 交通票 &amp; 租車資訊</h1>
+      <p>航班時間 · 登機證資料 · 租車車型與取車點 — 點擊「編輯」填入細節</p>
     </div>
 
     <div class="timeline-section">
-      <div class="timeline" id="transport-timeline">
-
-        <!-- Outbound Flight -->
-        <div class="timeline-item">
-          <div class="timeline-icon icon-flight">✈️</div>
-          <div class="boarding-pass">
-            <div class="bp-header">
-              <div class="bp-route">
-                <span class="bp-city">TPE</span>
-                <span class="bp-arrow">──────▶</span>
-                <span class="bp-city">KEF</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                <span class="bp-carrier">去程 · 2026-09-23</span>
-                <span class="bp-status status-pending">⏳ 待填</span>
-              </div>
-            </div>
-            <div class="bp-body">
-              <div class="bp-field"><span class="label">出發時間</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">抵達時間</span><span class="val">15:25</span></div>
-              <div class="bp-field"><span class="label">航空公司</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">航班號</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">座位</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">航廈</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">訂位代號</span><span class="val pending">待填</span></div>
-            </div>
-            <div class="bp-notes"><i class="fa-solid fa-circle-info"></i> 去程機票資訊（航班號、座位等待填入）</div>
-          </div>
-        </div>
-
-        <!-- Car Rental -->
-        <div class="timeline-item">
-          <div class="timeline-icon icon-car">🚗</div>
-          <div class="boarding-pass">
-            <div class="bp-header">
-              <div class="bp-route">
-                <span class="bp-city" style="font-size:15px;">凱夫拉維克機場 KEF</span>
-                <span class="bp-arrow">──▶</span>
-                <span class="bp-city" style="font-size:15px;">環島行程</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                <span class="bp-carrier">包車 / 租車 · 2026-09-23 起</span>
-                <span class="bp-status status-pending">⏳ 待填</span>
-              </div>
-            </div>
-            <div class="bp-body">
-              <div class="bp-field"><span class="label">租車公司</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">車牌 / 車款</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">取車時間</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">還車時間</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">司機姓名</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">司機電話</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">訂單號</span><span class="val pending">待填</span></div>
-            </div>
-            <div class="bp-notes"><i class="fa-solid fa-circle-info"></i> 包車司機聯絡資訊待確認後填入</div>
-          </div>
-        </div>
-
-        <!-- Return Flight -->
-        <div class="timeline-item">
-          <div class="timeline-icon icon-flight">✈️</div>
-          <div class="boarding-pass">
-            <div class="bp-header">
-              <div class="bp-route">
-                <span class="bp-city">KEF</span>
-                <span class="bp-arrow">──────▶</span>
-                <span class="bp-city">TPE</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                <span class="bp-carrier">回程 · 2026-10-03</span>
-                <span class="bp-status status-pending">⏳ 待填</span>
-              </div>
-            </div>
-            <div class="bp-body">
-              <div class="bp-field"><span class="label">出發時間</span><span class="val">07:40</span></div>
-              <div class="bp-field"><span class="label">抵達時間</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">航空公司</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">航班號</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">座位</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">航廈</span><span class="val pending">待填</span></div>
-              <div class="bp-field"><span class="label">訂位代號</span><span class="val pending">待填</span></div>
-            </div>
-            <div class="bp-notes"><i class="fa-solid fa-circle-info"></i> 07:40 清晨班機，建議前一晚確認接送時間</div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Add more transport CTA -->
-    <div class="add-transport-cta">
-      <h3>➕ 新增其他交通段</h3>
-      <p>如果有額外的接駁車、渡輪、巴士等交通資訊，可以告訴 Gemini 幫你加入。</p>
+      <div class="timeline" id="transport-timeline"></div>
     </div>
 
     <div style="padding: 0 clamp(18px,5vw,78px) 60px; display:flex; gap:12px; flex-wrap:wrap;">
@@ -286,24 +214,186 @@
   </main>
 
   <footer>
-    <span>ICELAND 2026 · 交通票資訊</span>
-    <span>2026/09/23 出發 · 10/03 返回</span>
+    <span>ICELAND 2026 · 交通票管理</span>
+    <span>機票 + 租車</span>
   </footer>
 
   <script>
-    const themeBtn = document.getElementById('themeBtn');
-    if (themeBtn) themeBtn.onclick = () => {
+    // Theme & mobile menu
+    document.getElementById('themeBtn').onclick = () => {
       document.body.classList.toggle('dark');
-      themeBtn.textContent = document.body.classList.contains('dark') ? '☀' : '☾';
+      document.getElementById('themeBtn').textContent = document.body.classList.contains('dark') ? '☀' : '☾';
     };
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileDrawer = document.getElementById('mobileDrawer');
-    if (mobileMenuBtn) mobileMenuBtn.onclick = () => {
+    mobileMenuBtn.onclick = () => {
       mobileDrawer.classList.toggle('active');
       mobileMenuBtn.innerHTML = mobileDrawer.classList.contains('active')
         ? '<i class="fa-solid fa-xmark"></i> <span>關閉</span>'
         : '<i class="fa-solid fa-bars"></i> <span>選單</span>';
     };
+
+    // ── Transport Data ────────────────────────────────────────────────
+    const BASE_TRANSPORTS = [
+      {
+        id: 'tp-flight-outbound',
+        type: 'flight',
+        icon: 'fa-plane-departure',
+        iconCls: 'icon-flight',
+        routeFrom: 'TPE 台北',
+        routeTo: 'KEF 雷克雅維克',
+        carrier: '航班（去程）',
+        date: '2026-09-23',
+        depTime: '待填',
+        arrTime: '15:25',
+        flightNo: '待填 Flight #',
+        booking: '待填 訂單號',
+        seat: '待填 座位',
+        notes: '抵達後前往藍湖溫泉，再進雷克雅維克市區。'
+      },
+      {
+        id: 'tp-car-rental',
+        type: 'car',
+        icon: 'fa-car',
+        iconCls: 'icon-car',
+        routeFrom: 'KEF 機場取車',
+        routeTo: 'KEF 機場還車',
+        carrier: '租車專案 / 包車',
+        date: '2026-09-23 – 10-03',
+        depTime: '取車：16:30',
+        arrTime: '還車：12:00',
+        flightNo: '4WD SUV 四輪傳動車型',
+        booking: '待填 租車訂單號',
+        seat: '含全險 + 零自負額',
+        notes: '冰島車況與路況受天候影響大；確認配有防滑胎與雪鏈備用。'
+      },
+      {
+        id: 'tp-flight-inbound',
+        type: 'flight',
+        icon: 'fa-plane-arrival',
+        iconCls: 'icon-flight',
+        routeFrom: 'KEF 雷克雅維克',
+        routeTo: 'TPE 台北',
+        carrier: '航班（回程）',
+        date: '2026-10-03',
+        depTime: '待填 Departure',
+        arrTime: '待填 Arrival',
+        flightNo: '待填 Flight #',
+        booking: '待填 訂單號',
+        seat: '待填 座位',
+        notes: '離境前提前 3 小時抵達 KEF 機場退稅與逛免稅店。'
+      }
+    ];
+
+    const STORAGE_KEY = 'iceland_transport_data';
+
+    function loadTransports() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        return BASE_TRANSPORTS.map(base => {
+          const s = saved.find(x => x.id === base.id);
+          return s ? { ...base, ...s } : { ...base };
+        });
+      } catch(e) { return BASE_TRANSPORTS.map(x => ({...x})); }
+    }
+
+    function saveTransports(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      const toast = document.getElementById('saveToast');
+      if (toast) {
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+      }
+    }
+
+    let transports = loadTransports();
+
+    function renderTimeline() {
+      const container = document.getElementById('transport-timeline');
+      container.innerHTML = '';
+
+      transports.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'timeline-item';
+        el.id = 'tp-item-' + item.id;
+
+        el.innerHTML = `
+          <div class="timeline-icon ${item.iconCls}"><i class="fa-solid ${item.icon}"></i></div>
+          <div class="boarding-pass">
+            <div class="bp-header">
+              <div class="bp-route">
+                <span class="bp-city">${item.routeFrom}</span>
+                <span class="bp-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                <span class="bp-city">${item.routeTo}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="bp-carrier">${item.carrier}</span>
+                <button class="btn primary" style="font-size:12px;padding:5px 12px;" onclick="toggleEdit('${item.id}', true)"><i class="fa-solid fa-pen"></i> 編輯</button>
+              </div>
+            </div>
+            <div class="bp-body">
+              <div class="bp-field"><div class="bp-label">日期 DATE</div><div class="bp-val">${item.date}</div></div>
+              <div class="bp-field"><div class="bp-label">出發 / 取車</div><div class="bp-val ${item.depTime.includes('待填')?'pending':''}">${item.depTime}</div></div>
+              <div class="bp-field"><div class="bp-label">抵達 / 還車</div><div class="bp-val ${item.arrTime.includes('待填')?'pending':''}">${item.arrTime}</div></div>
+              <div class="bp-field"><div class="bp-label">班次 / 車型</div><div class="bp-val ${item.flightNo.includes('待填')?'pending':''}">${item.flightNo}</div></div>
+              <div class="bp-field"><div class="bp-label">訂單號 / PNR</div><div class="bp-val ${item.booking.includes('待填')?'pending':''}">${item.booking}</div></div>
+              <div class="bp-field"><div class="bp-label">座位 / 備註</div><div class="bp-val ${item.seat.includes('待填')?'pending':''}">${item.seat}</div></div>
+            </div>
+            <div class="bp-footer">
+              <span><i class="fa-solid fa-circle-info" style="margin-right:6px;color:var(--accent);"></i>${item.notes}</span>
+            </div>
+
+            <!-- Edit Area -->
+            <div class="tp-edit-area" id="edit-area-${item.id}">
+              <div class="edit-form-grid">
+                <div class="edit-field"><label>起點 / 取車處</label><input type="text" id="ef-from-${item.id}" value="${item.routeFrom}"></div>
+                <div class="edit-field"><label>終點 / 還車處</label><input type="text" id="ef-to-${item.id}" value="${item.routeTo}"></div>
+                <div class="edit-field"><label>日期</label><input type="text" id="ef-date-${item.id}" value="${item.date}"></div>
+                <div class="edit-field"><label>出發 / 取車時間</label><input type="text" id="ef-deptime-${item.id}" value="${item.depTime}"></div>
+                <div class="edit-field"><label>抵達 / 還車時間</label><input type="text" id="ef-arrtime-${item.id}" value="${item.arrTime}"></div>
+                <div class="edit-field"><label>航班號 / 車型</label><input type="text" id="ef-flightno-${item.id}" value="${item.flightNo}"></div>
+                <div class="edit-field"><label>訂單號 / PNR</label><input type="text" id="ef-booking-${item.id}" value="${item.booking}"></div>
+                <div class="edit-field"><label>座位 / 保險</label><input type="text" id="ef-seat-${item.id}" value="${item.seat}"></div>
+                <div class="edit-field" style="grid-column:1/-1;"><label>備註說明</label><textarea id="ef-notes-${item.id}">${item.notes}</textarea></div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn primary" style="font-size:12px;padding:6px 14px;" onclick="saveEdit('${item.id}')"><i class="fa-solid fa-check"></i> 儲存</button>
+                <button class="btn secondary" style="font-size:12px;padding:6px 14px;" onclick="toggleEdit('${item.id}', false)">取消</button>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    function toggleEdit(id, show) {
+      const area = document.getElementById('edit-area-' + id);
+      if (area) area.classList.toggle('active', show);
+    }
+
+    function saveEdit(id) {
+      const item = transports.find(x => x.id === id);
+      if (!item) return;
+      item.routeFrom = document.getElementById('ef-from-' + id).value.trim();
+      item.routeTo   = document.getElementById('ef-to-' + id).value.trim();
+      item.date      = document.getElementById('ef-date-' + id).value.trim();
+      item.depTime   = document.getElementById('ef-deptime-' + id).value.trim();
+      item.arrTime   = document.getElementById('ef-arrtime-' + id).value.trim();
+      item.flightNo  = document.getElementById('ef-flightno-' + id).value.trim();
+      item.booking   = document.getElementById('ef-booking-' + id).value.trim();
+      item.seat      = document.getElementById('ef-seat-' + id).value.trim();
+      item.notes     = document.getElementById('ef-notes-' + id).value.trim();
+
+      saveTransports(transports);
+      renderTimeline();
+    }
+
+    // Init
+    initAuthListener(() => {
+      renderTimeline();
+    });
+    renderTimeline();
   </script>
 </body>
 </html>

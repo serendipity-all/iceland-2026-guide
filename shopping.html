@@ -40,13 +40,16 @@
     .budget-stat .lbl { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: 0.06em; margin-top: 2px; }
     .budget-divider { width: 1px; height: 40px; background: var(--line); }
 
-    /* Filter tabs */
-    .filter-bar {
+    /* Filter tabs & Add bar */
+    .filter-bar-wrap {
       display: flex;
-      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
       padding: 20px clamp(18px,5vw,78px) 0;
       flex-wrap: wrap;
     }
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; }
     .filter-btn {
       background: var(--surface);
       border: 1px solid var(--line);
@@ -60,6 +63,20 @@
     }
     .filter-btn:hover { background: var(--line); }
     .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    .add-item-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 6px 4px 14px;
+    }
+    .add-item-bar input {
+      border: none; background: transparent; color: var(--ink);
+      font-size: 13px; outline: none; font-family: inherit; width: 160px;
+    }
 
     /* Shopping grid */
     .shopping-grid {
@@ -106,9 +123,10 @@
       padding: 3px 9px; border-radius: 999px;
       letter-spacing: 0.04em;
     }
-    .cat-food  { background: rgba(224,123,32,0.12); color: #9b4a0a; border:1px solid rgba(224,123,32,0.25); }
-    .cat-craft { background: rgba(108,52,131,0.12); color: #5a2076; border:1px solid rgba(108,52,131,0.25); }
-    .cat-store { background: rgba(47,174,132,0.12); color: #1a7a5a; border:1px solid rgba(47,174,132,0.25); }
+    .cat-food   { background: rgba(224,123,32,0.12); color: #9b4a0a; border:1px solid rgba(224,123,32,0.25); }
+    .cat-craft  { background: rgba(108,52,131,0.12); color: #5a2076; border:1px solid rgba(108,52,131,0.25); }
+    .cat-store  { background: rgba(47,174,132,0.12); color: #1a7a5a; border:1px solid rgba(47,174,132,0.25); }
+    .cat-custom { background: rgba(255,90,54,0.12); color: #c03818; border:1px solid rgba(255,90,54,0.25); }
 
     .shop-name { font-size: 15px; font-weight: 800; margin: 0 0 4px; }
     .shop-name-en { font-size: 11px; color: var(--muted); margin: 0 0 8px; }
@@ -139,7 +157,6 @@
     }
     .day-link-btn:hover { background: rgba(224,123,32,0.2); }
 
-    /* Done banner */
     .done-banner {
       display: none;
       position: absolute;
@@ -153,21 +170,27 @@
     }
     .shop-card.bought .done-banner { display: block; }
 
-    /* section headers */
-    .section-header {
-      padding: 24px clamp(18px,5vw,78px) 0;
-      font-size: 20px;
-      font-weight: 900;
-      color: var(--ink);
+    .delete-item-btn {
+      position: absolute;
+      top: 12px; right: 14px;
+      background: none; border: none;
+      color: var(--muted); cursor: pointer;
+      font-size: 16px; padding: 2px 6px;
+      border-radius: 4px; display: none;
     }
+    .shop-card:hover .delete-item-btn { display: block; }
+    .delete-item-btn:hover { color: #e03030; background: rgba(224,48,48,0.1); }
 
-    body.dark .cat-food  { background: rgba(224,123,32,0.2); color: #f0a060; }
-    body.dark .cat-craft { background: rgba(108,52,131,0.2); color: #c39bd3; }
-    body.dark .cat-store { background: rgba(47,174,132,0.2); color: #6fcfb0; }
+    body.dark .cat-food   { background: rgba(224,123,32,0.2); color: #f0a060; }
+    body.dark .cat-craft  { background: rgba(108,52,131,0.2); color: #c39bd3; }
+    body.dark .cat-store  { background: rgba(47,174,132,0.2); color: #6fcfb0; }
+    body.dark .cat-custom { background: rgba(255,90,54,0.2); color: #ff8a70; }
     body.dark .shop-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.3); }
 
     @media (max-width:600px) {
       .shopping-grid { grid-template-columns: 1fr; }
+      .filter-bar-wrap { flex-direction: column; align-items: stretch; }
+      .add-item-bar input { width: 100%; }
     }
   </style>
 </head>
@@ -197,6 +220,7 @@
     <nav class="mobile-drawer-nav">
       <a href="index.html#today" class="drawer-link">⚡ 今日模式 <span>↗</span></a>
       <a href="index.html#days" class="drawer-link">📅 每日行程 <span>↗</span></a>
+      <a href="itinerary.html" class="drawer-link">📋 簡易行程表 <span>↗</span></a>
       <a href="accommodation.html" class="drawer-link">🏠 住宿資訊 <span>↗</span></a>
       <a href="transport.html" class="drawer-link">✈️ 交通票 <span>↗</span></a>
       <a href="shopping.html" class="drawer-link" style="color:var(--accent);">🛋️ 伴手禮清單 <span>↗</span></a>
@@ -207,7 +231,7 @@
   <main>
     <div class="page-hero">
       <h1>🛋️ 伴手禮 &amp; 必買清單</h1>
-      <p>食品 · 手工藝品 · 必逛店家 — 勾選已購買，自動計算進度</p>
+      <p>食品 · 手工藝品 · 必逛店家 · 自訂項目 — 點擊勾選，手動新增/刪除個人清單</p>
     </div>
 
     <!-- Budget / Progress bar -->
@@ -228,12 +252,21 @@
       </div>
     </div>
 
-    <!-- Filter buttons -->
-    <div class="filter-bar">
-      <button class="filter-btn active" data-cat="all" onclick="filterCards('all', this)">🛒 全部</button>
-      <button class="filter-btn" data-cat="food" onclick="filterCards('food', this)">🍫 食品</button>
-      <button class="filter-btn" data-cat="craft" onclick="filterCards('craft', this)">🧣 紀念品</button>
-      <button class="filter-btn" data-cat="store" onclick="filterCards('store', this)">🏪 必逛店家</button>
+    <!-- Filter buttons and Add bar -->
+    <div class="filter-bar-wrap">
+      <div class="filter-bar">
+        <button class="filter-btn active" data-cat="all" onclick="filterCards('all', this)">🛒 全部</button>
+        <button class="filter-btn" data-cat="food" onclick="filterCards('food', this)">🍫 食品</button>
+        <button class="filter-btn" data-cat="craft" onclick="filterCards('craft', this)">🧣 紀念品</button>
+        <button class="filter-btn" data-cat="store" onclick="filterCards('store', this)">🏪 必逛店家</button>
+        <button class="filter-btn" data-cat="custom" onclick="filterCards('custom', this)">✨ 自訂必買</button>
+      </div>
+
+      <div class="add-item-bar">
+        <i class="fa-solid fa-plus" style="color:var(--accent);font-size:12px;"></i>
+        <input type="text" id="custom-item-name" placeholder="新增個人自訂必買..." onkeydown="if(event.key==='Enter') addCustomItem()">
+        <button class="btn primary" style="font-size:12px;padding:5px 12px;border-radius:999px;" onclick="addCustomItem()">加入</button>
+      </div>
     </div>
 
     <!-- Shopping grid (rendered by JS) -->
@@ -251,23 +284,22 @@
   </footer>
 
   <script>
-    // Theme / mobile menu
-    const themeBtn = document.getElementById('themeBtn');
-    if (themeBtn) themeBtn.onclick = () => {
+    // Theme & mobile menu
+    document.getElementById('themeBtn').onclick = () => {
       document.body.classList.toggle('dark');
-      themeBtn.textContent = document.body.classList.contains('dark') ? '☀' : '☾';
+      document.getElementById('themeBtn').textContent = document.body.classList.contains('dark') ? '☀' : '☾';
     };
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileDrawer = document.getElementById('mobileDrawer');
-    if (mobileMenuBtn) mobileMenuBtn.onclick = () => {
+    mobileMenuBtn.onclick = () => {
       mobileDrawer.classList.toggle('active');
       mobileMenuBtn.innerHTML = mobileDrawer.classList.contains('active')
         ? '<i class="fa-solid fa-xmark"></i> <span>關閉</span>'
         : '<i class="fa-solid fa-bars"></i> <span>選單</span>';
     };
 
-    // Shopping data
-    const shoppingItems = [
+    // Base default items
+    const DEFAULT_ITEMS = [
       { id:'sh-skyr',      cat:'food',  name:'Skyr 冰島優格',        nameEn:'Skyr',                              desc:'冰島國民食品，高蛋白低脂，在地口感版本台灣買不到。',                        price:'300–600 ISK',    where:'Bonus 超市、10-11 便利商店',          dayLink:1  },
       { id:'sh-hardfiskur',cat:'food',  name:'魚乾 Harðfiskur',      nameEn:'Harðfiskur (dried fish)',           desc:'冰島傳統零食，高蛋白風乾魚片，通常搭奶油吃。',                           price:'800–1500 ISK',   where:'Bonus 超市、機場免稅區',              dayLink:11 },
       { id:'sh-licorice',  cat:'food',  name:'甘草糖 / 海鹽巧克力',  nameEn:'Licorice & Sea Salt Chocolate',    desc:'冰島人超愛甘草味；Nói Síríus 海鹽巧克力是必帶伴手禮。',                   price:'500–1200 ISK',   where:'Rammagerðin、Bonus 超市、機場',      dayLink:8  },
@@ -282,47 +314,101 @@
       { id:'sh-dutyfree',  cat:'store', name:'機場免稅商店',          nameEn:'Keflavík Airport Duty Free',       desc:'回程時間充裕就多逛；酒類、巧克力、魚乾在這比市區便宜。',                  price:'依購買',         where:'Keflavík 機場出境後',                dayLink:11 }
     ];
 
-    // Category labels
     const catInfo = {
-      food:  { label:'🍫 食品',   cls:'cat-food'  },
-      craft: { label:'🧣 紀念品', cls:'cat-craft' },
-      store: { label:'🏪 店家',   cls:'cat-store' }
+      food:   { label:'🍫 食品',   cls:'cat-food'   },
+      craft:  { label:'🧣 紀念品', cls:'cat-craft'  },
+      store:  { label:'🏪 店家',   cls:'cat-store'  },
+      custom: { label:'✨ 自訂',   cls:'cat-custom' }
     };
 
-    // LocalStorage state
-    const STORAGE_KEY = 'iceland_shopping_bought';
-    let boughtSet = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+    const BOUGHT_KEY = 'iceland_shopping_bought';
+    const CUSTOM_KEY = 'iceland_shopping_custom';
 
-    function saveBought() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...boughtSet]));
+    let boughtSet = new Set(JSON.parse(localStorage.getItem(BOUGHT_KEY) || '[]'));
+    let customItems = JSON.parse(localStorage.getItem(CUSTOM_KEY) || '[]');
+
+    function saveState() {
+      localStorage.setItem(BOUGHT_KEY, JSON.stringify([...boughtSet]));
+      localStorage.setItem(CUSTOM_KEY, JSON.stringify(customItems));
+    }
+
+    function getAllItems() {
+      return [...DEFAULT_ITEMS, ...customItems];
     }
 
     function updateStats() {
-      const total = shoppingItems.length;
-      const bought = boughtSet.size;
+      const all = getAllItems();
+      const total = all.length;
+      const bought = all.filter(i => boughtSet.has(i.id)).length;
       document.getElementById('stat-bought').textContent = bought;
       document.getElementById('stat-total').textContent = total;
-      document.getElementById('stat-pct').textContent = Math.round(bought / total * 100) + '%';
+      document.getElementById('stat-pct').textContent = total ? Math.round(bought / total * 100) + '%' : '0%';
     }
 
     function toggleBought(id) {
       if (boughtSet.has(id)) boughtSet.delete(id);
       else boughtSet.add(id);
-      saveBought();
+      saveState();
+      renderGrid(document.querySelector('.filter-btn.active')?.dataset.cat || 'all');
+    }
+
+    function addCustomItem() {
+      const input = document.getElementById('custom-item-name');
+      const name = input.value.trim();
+      if (!name) { input.focus(); return; }
+
+      const newItem = {
+        id: 'sh-custom-' + Date.now(),
+        cat: 'custom',
+        name: name,
+        nameEn: 'Custom Item',
+        desc: '個人新增的自訂必買與購物項目。',
+        price: '自訂項目',
+        where: '自行安排',
+        isCustom: true
+      };
+
+      customItems.push(newItem);
+      saveState();
+      input.value = '';
+      renderGrid('custom');
+      // Switch filter tab to custom
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.cat === 'custom');
+      });
+    }
+
+    function deleteCustomItem(id, event) {
+      event.stopPropagation();
+      if (!confirm('確定要刪除這個自訂必買項目嗎？')) return;
+      customItems = customItems.filter(i => i.id !== id);
+      boughtSet.delete(id);
+      saveState();
       renderGrid(document.querySelector('.filter-btn.active')?.dataset.cat || 'all');
     }
 
     function renderGrid(catFilter) {
       const grid = document.getElementById('shopping-grid');
       grid.innerHTML = '';
-      const items = catFilter === 'all' ? shoppingItems : shoppingItems.filter(i => i.cat === catFilter);
+
+      const all = getAllItems();
+      const items = catFilter === 'all' ? all : all.filter(i => i.cat === catFilter);
+
+      if (items.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted);">此分類尚無項目，可在右上角「＋ 新增個人自訂必買」加入！</div>`;
+        updateStats();
+        return;
+      }
+
       items.forEach(item => {
         const bought = boughtSet.has(item.id);
-        const cat = catInfo[item.cat];
+        const cat = catInfo[item.cat] || catInfo.custom;
         const card = document.createElement('div');
         card.className = 'shop-card' + (bought ? ' bought' : '');
         card.onclick = () => toggleBought(item.id);
+
         card.innerHTML = `
+          ${!bought && item.isCustom ? `<button class="delete-item-btn" title="刪除項目" onclick="deleteCustomItem('${item.id}', event)"><i class="fa-solid fa-trash-can"></i></button>` : ''}
           <div class="done-banner">✓ 已購買</div>
           <div class="shop-card-top">
             <span class="cat-badge ${cat.cls}">${cat.label}</span>
@@ -362,4 +448,3 @@
   </script>
 </body>
 </html>
-

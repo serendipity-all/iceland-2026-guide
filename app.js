@@ -74,13 +74,16 @@ function initAuthListener(onApprovedCallback) {
 
     try {
       const userRef = db.collection('iceland_2026_members').doc(user.uid);
-      const doc = await userRef.get().catch(() => null);
+      const doc = await userRef.get().catch(err => {
+        showNotification('📡 網路或雲端連線不穩定，已切換至本機暫存模式', 'warning');
+        return null;
+      });
 
       if (doc && doc.exists) {
         const data = doc.data();
         window.AppState.userStatus = data.status || 'approved';
       } else {
-        window.AppState.userStatus = 'approved'; // Default allow if database uninitialized
+        window.AppState.userStatus = 'approved';
         if (doc) {
           userRef.set({
             uid: user.uid,
@@ -95,6 +98,7 @@ function initAuthListener(onApprovedCallback) {
       }
     } catch (e) {
       window.AppState.userStatus = 'approved';
+      showNotification('📡 目前處於離線狀態，顯示離線暫存行程', 'warning');
     }
 
     if (window.AppState.userStatus === 'pending') {
@@ -109,6 +113,46 @@ function initAuthListener(onApprovedCallback) {
     }
   });
 }
+
+// ── Non-intrusive Toast Notification System ──────────────────────────────────
+
+function showNotification(message, type = 'info') {
+  let container = document.getElementById('toast-notification-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-notification-container';
+    container.style.cssText = `
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      z-index: 999999; display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none; max-width: 90vw; width: max-content;
+    `;
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  const bg = type === 'warning' ? '#c05a10' : (type === 'error' ? '#e03030' : '#1a7a5a');
+  toast.style.cssText = `
+    background: ${bg}; color: white; padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    backdrop-filter: blur(8px); opacity: 0; transform: translateY(12px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: auto;
+    display: flex; align-items: center; gap: 8px; font-family: sans-serif;
+  `;
+  toast.innerHTML = `<span>${message}</span>`;
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+  });
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(12px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
 
 
 // ── UI Overlay for Auth/Pending ──────────────────────────────────────────────

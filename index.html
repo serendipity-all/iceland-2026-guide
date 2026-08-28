@@ -1468,9 +1468,10 @@
     try {
       // 1. Try Firestore first
       if (typeof db !== 'undefined') {
-        const doc = await db.collection('iceland_2026_shared').doc('trip').get();
-        if (doc.exists && doc.data().tripData) {
+        const doc = await db.collection('iceland_2026_shared').doc('trip').get().catch(e => null);
+        if (doc && doc.exists && doc.data().tripData) {
           const parsed = doc.data().tripData;
+
           if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
             tripData.days = parsed.days;
             if (parsed.hotels) tripData.hotels = parsed.hotels;

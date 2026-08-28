@@ -61,13 +61,27 @@ function initAuthListener(onApprovedCallback) {
     const isSuper = (user.email && user.email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase());
     window.AppState.isSuperAdmin = isSuper;
 
+    // Superadmin bypass: always approve admin without failing on db rules
+    if (isSuper) {
+      window.AppState.userStatus = 'approved';
+      removeAuthOverlay();
+      updateNavUserUI();
+      if (typeof onApprovedCallback === 'function') {
+        onApprovedCallback(user);
+      }
+    }
+
     try {
       // Check whitelist record in Firestore
       const userRef = db.collection('iceland_2026_members').doc(user.uid);
-      const doc = await userRef.get();
+      const doc = await userRef.get().catch(e => null);
 
-      if (!doc.exists()) {
-        // New user registration
+      if (doc && doc.exists) {
+        const data = doc.data();
+        if (!isSuper) {
+          window.AppState.userStatus = data.status || 'pending';
+        }
+      } else if (doc && !doc.exists) {
         const newStatus = isSuper ? 'approved' : 'pending';
         const role = isSuper ? 'admin' : 'member';
         await userRef.set({
@@ -78,42 +92,24 @@ function initAuthListener(onApprovedCallback) {
           status: newStatus,
           role: role,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        window.AppState.userStatus = newStatus;
-      } else {
-        const data = doc.data();
-        // Super admin override
-        if (isSuper && data.status !== 'approved') {
-          await userRef.update({ status: 'approved', role: 'admin' });
-          window.AppState.userStatus = 'approved';
-        } else {
-          window.AppState.userStatus = data.status || 'pending';
-        }
-      }
-
-      if (window.AppState.userStatus === 'pending' && !isSuper) {
-        renderAuthOverlay('pending');
-        updateNavUserUI();
-      } else {
-        // Approved or Admin
-        removeAuthOverlay();
-        updateNavUserUI();
-        if (typeof onApprovedCallback === 'function') {
-          onApprovedCallback(user);
-        }
+        }).catch(e => console.warn('Could not write member doc:', e));
+        if (!isSuper) window.AppState.userStatus = newStatus;
       }
     } catch (e) {
-      console.error("Error checking whitelist:", e);
-      // Fallback: allow superadmin offline
-      if (isSuper) {
-        window.AppState.userStatus = 'approved';
-        removeAuthOverlay();
-        updateNavUserUI();
-        if (typeof onApprovedCallback === 'function') onApprovedCallback(user);
-      } else {
-        alert("存取驗證失敗，請檢查網路連線");
+      console.warn("Firestore whitelist lookup bypassed:", e);
+    }
+
+    if (window.AppState.userStatus === 'pending' && !isSuper) {
+      renderAuthOverlay('pending');
+      updateNavUserUI();
+    } else {
+      removeAuthOverlay();
+      updateNavUserUI();
+      if (!isSuper && typeof onApprovedCallback === 'function') {
+        onApprovedCallback(user);
       }
     }
+
   });
 }
 

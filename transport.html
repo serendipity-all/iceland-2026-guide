@@ -243,9 +243,10 @@
         routeFrom: 'TPE 台北',
         routeTo: 'KEF 雷克雅維克',
         carrier: '航班（去程）',
-        date: '2026-09-23',
-        depTime: '待填',
-        arrTime: '15:25',
+        startDate: '2026-09-22',
+        endDate: '2026-09-23',
+        depTime: '待填 Departure',
+        arrTime: '15:25 Arrival',
         flightNo: '待填 Flight #',
         booking: '待填 訂單號',
         seat: '待填 座位',
@@ -259,7 +260,8 @@
         routeFrom: 'KEF 機場取車',
         routeTo: 'KEF 機場還車',
         carrier: '租車專案 / 包車',
-        date: '2026-09-23 – 10-03',
+        startDate: '2026-09-23',
+        endDate: '2026-10-03',
         depTime: '取車：16:30',
         arrTime: '還車：12:00',
         flightNo: '4WD SUV 四輪傳動車型',
@@ -275,7 +277,8 @@
         routeFrom: 'KEF 雷克雅維克',
         routeTo: 'TPE 台北',
         carrier: '航班（回程）',
-        date: '2026-10-03',
+        startDate: '2026-10-03',
+        endDate: '2026-10-04',
         depTime: '待填 Departure',
         arrTime: '待填 Arrival',
         flightNo: '待填 Flight #',
@@ -284,6 +287,7 @@
         notes: '離境前提前 3 小時抵達 KEF 機場退稅與逛免稅店。'
       }
     ];
+
 
     function getStorageKey() {
       const uid = window.AppState && window.AppState.currentUser ? window.AppState.currentUser.uid : 'guest';
@@ -321,6 +325,12 @@
         el.className = 'timeline-item';
         el.id = 'tp-item-' + item.id;
 
+        const startDateStr = item.startDate || item.date || '';
+        const endDateStr = item.endDate || '';
+        const displayDate = endDateStr && endDateStr !== startDateStr
+          ? `${startDateStr} ～ ${endDateStr}`
+          : startDateStr;
+
         el.innerHTML = `
           <div class="timeline-icon ${item.iconCls}"><i class="fa-solid ${item.icon}"></i></div>
           <div class="boarding-pass">
@@ -336,7 +346,7 @@
               </div>
             </div>
             <div class="bp-body">
-              <div class="bp-field"><div class="bp-label">日期 DATE</div><div class="bp-val">${item.date}</div></div>
+              <div class="bp-field"><div class="bp-label">日期 DATE</div><div class="bp-val">${displayDate}</div></div>
               <div class="bp-field"><div class="bp-label">出發 / 取車</div><div class="bp-val ${item.depTime.includes('待填')?'pending':''}">${item.depTime}</div></div>
               <div class="bp-field"><div class="bp-label">抵達 / 還車</div><div class="bp-val ${item.arrTime.includes('待填')?'pending':''}">${item.arrTime}</div></div>
               <div class="bp-field"><div class="bp-label">班次 / 車型</div><div class="bp-val ${item.flightNo.includes('待填')?'pending':''}">${item.flightNo}</div></div>
@@ -352,12 +362,13 @@
               <div class="edit-form-grid">
                 <div class="edit-field"><label>起點 / 取車處</label><input type="text" id="ef-from-${item.id}" value="${item.routeFrom}"></div>
                 <div class="edit-field"><label>終點 / 還車處</label><input type="text" id="ef-to-${item.id}" value="${item.routeTo}"></div>
-                <div class="edit-field"><label>日期</label><input type="text" id="ef-date-${item.id}" value="${item.date}"></div>
+                <div class="edit-field"><label>出發 / 開始日期</label><input type="date" id="ef-startdate-${item.id}" value="${startDateStr}"></div>
+                <div class="edit-field"><label>抵達 / 結束日期（跨日選填）</label><input type="date" id="ef-enddate-${item.id}" value="${endDateStr}"></div>
                 <div class="edit-field"><label>出發 / 取車時間</label><input type="text" id="ef-deptime-${item.id}" value="${item.depTime}"></div>
                 <div class="edit-field"><label>抵達 / 還車時間</label><input type="text" id="ef-arrtime-${item.id}" value="${item.arrTime}"></div>
                 <div class="edit-field"><label>航班號 / 車型</label><input type="text" id="ef-flightno-${item.id}" value="${item.flightNo}"></div>
                 <div class="edit-field"><label>訂單號 / PNR</label><input type="text" id="ef-booking-${item.id}" value="${item.booking}"></div>
-                <div class="edit-field"><label>座位 / 保險</label><input type="text" id="ef-seat-${item.id}" value="${item.seat}"></div>
+                <div class="edit-field" style="grid-column:1/-1;"><label>座位 / 保險</label><input type="text" id="ef-seat-${item.id}" value="${item.seat}"></div>
                 <div class="edit-field" style="grid-column:1/-1;"><label>備註說明</label><textarea id="ef-notes-${item.id}">${item.notes}</textarea></div>
               </div>
               <div style="display:flex;gap:8px;">
@@ -381,7 +392,8 @@
       if (!item) return;
       item.routeFrom = document.getElementById('ef-from-' + id).value.trim();
       item.routeTo   = document.getElementById('ef-to-' + id).value.trim();
-      item.date      = document.getElementById('ef-date-' + id).value.trim();
+      item.startDate = document.getElementById('ef-startdate-' + id).value.trim();
+      item.endDate   = document.getElementById('ef-enddate-' + id).value.trim();
       item.depTime   = document.getElementById('ef-deptime-' + id).value.trim();
       item.arrTime   = document.getElementById('ef-arrtime-' + id).value.trim();
       item.flightNo  = document.getElementById('ef-flightno-' + id).value.trim();
@@ -392,6 +404,7 @@
       saveTransports(transports);
       renderTimeline();
     }
+
 
     // Init
     initAuthListener(() => {

@@ -226,10 +226,16 @@
       <p>三大住宿地點 · 點擊「編輯」填入入住日期、訂單號等資訊</p>
     </div>
 
-    <div class="info-bar">
-      <i class="fa-solid fa-circle-info" style="color:#e07b20;flex-shrink:0;"></i>
-      <span>點擊各住宿卡片的「✏️ 編輯」按鈕可填入入住日期、訂單號、電話等資訊，資料自動儲存在瀏覽器。</span>
+    <div class="info-bar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-circle-info" style="color:#e07b20;flex-shrink:0;"></i>
+        <span>全體預設顯示 3 大經典住宿點。點擊「✏️ 編輯」可進行個人修改，隨時可一鍵還原預設。</span>
+      </div>
+      <button class="btn secondary" id="resetDefaultAccomBtn" style="font-size:12px;padding:6px 14px;white-space:nowrap;border-radius:999px;">
+        <i class="fa-solid fa-rotate-left"></i> ↺ 重置為全體預設住宿
+      </button>
     </div>
+
 
     <!-- Hotel Cards (rendered by JS) -->
     <div class="hotel-grid" id="hotel-grid"></div>
@@ -316,7 +322,11 @@
       }
     ];
 
-    const META_KEY = 'iceland_hotels_data';       // hotel name/booking/phone/notes
+    function getUserHotelKey() {
+      const uid = window.AppState && window.AppState.currentUser ? window.AppState.currentUser.uid : 'guest';
+      return 'iceland_hotels_user_' + uid;
+    }
+
     const TRIP_KEY = 'iceland_2026_trip_data';    // hotelId per day (shared with index.html)
 
     // ── Read trip days from shared key → derive nights per hotel ─────
@@ -349,18 +359,18 @@
     // ── Load merged hotel data ────────────────────────────────────────
     async function loadHotels() {
       try {
-        let savedMeta = JSON.parse(localStorage.getItem(META_KEY) || '[]');
-        if (window.db) {
-          try {
-            const doc = await db.collection('iceland_2026_shared').doc('hotels').get();
-            if (doc.exists && doc.data().meta) {
-              savedMeta = doc.data().meta;
-              localStorage.setItem(META_KEY, JSON.stringify(savedMeta));
-            }
-          } catch(err) { console.log('Firestore load hotels error, using local fallback', err); }
+        const key = getUserHotelKey();
+        let savedMeta = JSON.parse(localStorage.getItem(key) || 'null');
+        if (!savedMeta) {
+          // Fallback to legacy global or BASE_HOTELS
+          savedMeta = JSON.parse(localStorage.getItem('iceland_hotels_data') || 'null');
         }
+        if (!savedMeta) {
+          savedMeta = BASE_HOTELS;
+        }
+
         return BASE_HOTELS.map(base => {
-          const meta = savedMeta.find(x => x.id === base.id) || {};
+          const meta = (savedMeta || []).find(x => x.id === base.id) || {};
           const tripNights = getNightsFromTrip(base.id);
           const metaNights = meta.nights || base.nights || [];
           const combinedNights = [...new Set([...tripNights, ...metaNights])].sort();
@@ -373,18 +383,33 @@
     async function saveMeta(hotels) {
       const meta = hotels.map(({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }) =>
         ({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }));
-      localStorage.setItem(META_KEY, JSON.stringify(meta));
-      if (window.db) {
-        try {
-          await db.collection('iceland_2026_shared').doc('hotels').set({ meta, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-        } catch(e) { console.warn('Firestore save hotels warning:', e); }
-      }
+      localStorage.setItem(getUserHotelKey(), JSON.stringify(meta));
+      
       const toast = document.getElementById('saveToast');
       if (toast) {
+        toast.innerText = '✅ 住宿資訊已儲存 (個人設定)';
         toast.classList.add('show');
         setTimeout(() => toast.classList.remove('show'), 2500);
       }
     }
+
+    // ── Reset to 全體預設住宿 ───────────────────────────────────────
+    async function resetToDefaultAccom() {
+      if (confirm('確定要還原為全體預設的 3 大經典住宿資訊嗎？您個人修改的細節將重置。')) {
+        localStorage.removeItem(getUserHotelKey());
+        localStorage.removeItem('iceland_hotels_data');
+        hotels = await loadHotels();
+        renderCards();
+        setTimeout(initFullMap, 100);
+        const toast = document.getElementById('saveToast');
+        if (toast) {
+          toast.innerText = '↺ 已成功還原為全體預設住宿';
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+      }
+    }
+
 
 
     // ── Mini maps ─────────────────────────────────────────────────────
@@ -605,6 +630,9 @@
     }
 
     // ── Init ──────────────────────────────────────────────────────────
+    const resetAccomBtn = document.getElementById('resetDefaultAccomBtn');
+    if (resetAccomBtn) resetAccomBtn.onclick = resetToDefaultAccom;
+
     initAuthListener(async () => {
       hotels = await loadHotels();
       renderCards();
@@ -613,6 +641,7 @@
     renderCards();
     setTimeout(initFullMap, 100);
   </script>
+
 </body>
 </html>
 

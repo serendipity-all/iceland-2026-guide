@@ -226,27 +226,13 @@
       <p>三大住宿地點 · 點擊「編輯」填入入住日期、訂單號等資訊</p>
     </div>
 
-    <div class="info-bar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <i class="fa-solid fa-circle-info" style="color:#e07b20;flex-shrink:0;"></i>
-        <span>預設顯示全體 3 大經典住宿點。點擊「✏️ 編輯」可進行個人修改。若頁面未顯示卡片，請點擊右側按鈕修復。</span>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn primary" id="forceFixCacheBtn" style="font-size:12px;padding:6px 14px;border-radius:999px;background:#e07b20;border-color:#e07b20;">
-          <i class="fa-solid fa-broom"></i> 🧹 一鍵清除快取並顯示飯店
-        </button>
-        <button class="btn secondary" id="resetAccomBtn" style="font-size:12px;padding:6px 14px;border-radius:999px;">
-          <i class="fa-solid fa-rotate-left"></i> ↺ 重置預設
-        </button>
-      </div>
+    <div class="info-bar">
+      <i class="fa-solid fa-circle-info" style="color:#e07b20;flex-shrink:0;"></i>
+      <span>點擊各住宿卡片的「✏️ 編輯」按鈕可填入入住日期、訂單號、電話等資訊，資料自動儲存在瀏覽器。</span>
     </div>
 
-
-
-    <!-- Hotel Cards (Data-Driven Dynamic Container) -->
+    <!-- Hotel Cards (rendered by JS) -->
     <div class="hotel-grid" id="hotel-grid"></div>
-
-
 
     <!-- Full Iceland Map -->
     <div class="map-section">
@@ -283,53 +269,10 @@
 
     // ── Hotel base data ─────────────────────────────────────────────
     const BASE_HOTELS = [
-      {
-        id: 'h-rvk',
-        nameZh: '雷克雅維克公寓酒店 (Reykjavik Residence Hotel)',
-        city: '雷克雅維克 Reykjavik',
-        address: 'Skólavörðustígur 21A, 101 Reykjavík, Iceland',
-        lat: 64.1458,
-        lng: -21.9317,
-        checkIn: '15:00',
-        checkOut: '11:00',
-        booking: '確認號：#RRH-20260923',
-        phone: '+354 561 1155',
-        website: 'https://www.rrhotel.is',
-        notes: '位於雷克雅維克市中心，鄰近哈爾格林姆教堂與彩虹步道。附廚房設備與免費 Wi-Fi，方便自煮。',
-        nights: ['2026-09-23', '2026-09-30', '2026-10-01', '2026-10-02']
-      },
-      {
-        id: 'h-aku',
-        nameZh: '基亞大飯店 (Hotel Kea by Keahotels)',
-        city: '阿克雷里 Akureyri',
-        address: 'Hafnarstræti 87-89, 600 Akureyri, Iceland',
-        lat: 65.6811,
-        lng: -18.0898,
-        checkIn: '15:00',
-        checkOut: '11:00',
-        booking: '確認號：#KEA-20260925',
-        phone: '+354 460 2000',
-        website: 'https://www.keahotels.is/hotel-kea',
-        notes: '北部阿克雷里核心地標飯店，緊鄰愛心紅綠燈與地標大教堂。周邊生活機能好，含每日早餐。',
-        nights: ['2026-09-25', '2026-09-26', '2026-09-27']
-      },
-      {
-        id: 'h-egs',
-        nameZh: '埃伊爾斯塔德莊園民宿 (Guesthouse Egilsstaðir)',
-        city: '埃伊爾斯塔德 Egilsstaðir',
-        address: 'Egilsstaðanes, 700 Egilsstaðir, Iceland',
-        lat: 65.2635,
-        lng: -14.4075,
-        checkIn: '15:00',
-        checkOut: '11:00',
-        booking: '確認號：#EGS-20260928',
-        phone: '+354 471 1114',
-        website: 'https://egilsstadir.is',
-        notes: '東部狹長拉加爾湖畔（Lagarfljót）溫馨莊園民宿。遠離光害，極適合夜晚在湖畔花園等待極光。',
-        nights: ['2026-09-28', '2026-09-29']
-      }
+      { id:'h-rvk', nameZh:'雷克雅維克住宿', city:'雷克雅維克 Reykjavik', address:'Skálaförðustigur 21A, 101 Reykjavik, Iceland', lat:64.1381, lng:-21.9317, checkIn:'15:00', checkOut:'11:00', booking:'', phone:'', website:'', notes:'' },
+      { id:'h-aku', nameZh:'阿克雷里住宿',   city:'阿克雷里 Akureyri',     address:'Munkaþverárstræti, 600 Akureyri, Iceland',      lat:65.6843, lng:-18.0962, checkIn:'15:00', checkOut:'11:00', booking:'', phone:'', website:'', notes:'' },
+      { id:'h-egs', nameZh:'埃伊爾斯塔德住宿', city:'埃伊爾斯塔德 Egilsstaðir', address:'Lyngási 5-7, 700 Egilsstaðir, Iceland', lat:65.2719, lng:-14.3948, checkIn:'15:00', checkOut:'11:00', booking:'', phone:'', website:'', notes:'' }
     ];
-
 
     const META_KEY = 'iceland_hotels_data';       // hotel name/booking/phone/notes
     const TRIP_KEY = 'iceland_2026_trip_data';    // hotelId per day (shared with index.html)
@@ -361,53 +304,47 @@
       } catch(e) { console.warn('setDayHotelInTrip failed', e); return true; }
     }
 
-    // ── Load merged hotel data (Auto-Healing Data-Driven Engine) ──────
-    function loadHotels() {
+    // ── Load merged hotel data (Cloud Firestore + Local Fallback) ──────
+    async function loadHotels() {
       try {
-        let savedMeta = JSON.parse(localStorage.getItem(META_KEY) || 'null');
-        if (!savedMeta || !Array.isArray(savedMeta) || savedMeta.length === 0) {
-          // Auto-heal corrupted storage by resetting to BASE_HOTELS
-          savedMeta = BASE_HOTELS;
-          localStorage.setItem(META_KEY, JSON.stringify(BASE_HOTELS));
+        let savedMeta = JSON.parse(localStorage.getItem(META_KEY) || '[]');
+        if (typeof db !== 'undefined') {
+          const doc = await db.collection('iceland_2026_shared').doc('hotels').get().catch(() => null);
+          if (doc && doc.exists && doc.data().meta) {
+            savedMeta = doc.data().meta;
+            localStorage.setItem(META_KEY, JSON.stringify(savedMeta));
+          }
         }
-
         return BASE_HOTELS.map(base => {
-          const meta = (savedMeta || []).find(x => x && x.id === base.id) || {};
+          const meta = savedMeta.find(x => x.id === base.id) || {};
           const tripNights = getNightsFromTrip(base.id);
-          const metaNights = (meta.nights && meta.nights.length) ? meta.nights : base.nights;
+          const metaNights = meta.nights || [];
           const combinedNights = [...new Set([...tripNights, ...metaNights])].sort();
-          return {
-            ...base,
-            ...meta,
-            nameZh: meta.nameZh || base.nameZh,
-            address: meta.address || base.address,
-            checkIn: meta.checkIn || base.checkIn,
-            checkOut: meta.checkOut || base.checkOut,
-            booking: meta.booking !== undefined ? meta.booking : base.booking,
-            phone: meta.phone !== undefined ? meta.phone : base.phone,
-            website: meta.website !== undefined ? meta.website : base.website,
-            notes: meta.notes !== undefined ? meta.notes : base.notes,
-            nights: combinedNights.length ? combinedNights : base.nights
-          };
+          return { ...base, ...meta, nights: combinedNights };
         });
-      } catch(e) {
-        console.warn('loadHotels auto-heal fallback', e);
-        return BASE_HOTELS.map(h => ({ ...h }));
-      }
+      } catch(e) { return BASE_HOTELS.map(h => ({ ...h, nights: [] })); }
     }
 
-
     // ── Save metadata and nights ──────────────────────────────────────
-    function saveMeta(hotels) {
+    async function saveMeta(hotels) {
       const meta = hotels.map(({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }) =>
         ({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }));
       localStorage.setItem(META_KEY, JSON.stringify(meta));
+
+      if (window.AppState && window.AppState.isSuperAdmin && typeof db !== 'undefined') {
+        await db.collection('iceland_2026_shared').doc('hotels').set({
+          meta: meta,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(() => null);
+      }
+
       const toast = document.getElementById('saveToast');
       if (toast) {
         toast.classList.add('show');
         setTimeout(() => toast.classList.remove('show'), 2500);
       }
     }
+
 
     // ── Mini maps ─────────────────────────────────────────────────────
     const miniMaps = {};
@@ -627,43 +564,15 @@
     }
 
     // ── Init ──────────────────────────────────────────────────────────
-    function forceClearAndReload() {
-      Object.keys(localStorage).forEach(k => {
-        if (k.startsWith('iceland_hotels_')) localStorage.removeItem(k);
-      });
-      localStorage.removeItem('iceland_hotels_data');
-      hotels = BASE_HOTELS.map(h => ({ ...h }));
-      saveMeta(hotels);
-      renderCards();
-      setTimeout(initFullMap, 100);
-    }
-
-    const forceFixBtn = document.getElementById('forceFixCacheBtn');
-    if (forceFixBtn) forceFixBtn.onclick = forceClearAndReload;
-
-    const resetBtn = document.getElementById('resetAccomBtn');
-    if (resetBtn) resetBtn.onclick = forceClearAndReload;
-
-    renderCards();
-    setTimeout(initFullMap, 100);
-
-    // Auto-check: If rendered grid is empty, auto trigger forceClearAndReload once
-    setTimeout(() => {
-      const grid = document.getElementById('hotel-grid');
-      if (grid && grid.children.length === 0) {
-        console.warn('Empty hotel grid detected, auto fixing...');
-        forceClearAndReload();
-      }
-    }, 200);
-
-    initAuthListener(() => {
-      hotels = loadHotels();
+    initAuthListener(async () => {
+      hotels = await loadHotels();
       renderCards();
       setTimeout(initFullMap, 100);
     });
-
-
+    renderCards();
+    setTimeout(initFullMap, 100);
   </script>
 </body>
 </html>
+
 

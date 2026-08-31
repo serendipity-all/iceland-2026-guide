@@ -229,9 +229,9 @@
     <div class="info-bar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <i class="fa-solid fa-circle-info" style="color:#e07b20;flex-shrink:0;"></i>
-        <span>全體預設顯示 3 大經典住宿點。點擊「✏️ 編輯」可進行個人修改，隨時可一鍵還原預設。</span>
+        <span>預設顯示全體 3 大經典住宿點。點擊「✏️ 編輯」可進行個人修改，隨時可一鍵還原預設。</span>
       </div>
-      <button class="btn secondary" id="resetDefaultAccomBtn" style="font-size:12px;padding:6px 14px;white-space:nowrap;border-radius:999px;">
+      <button class="btn secondary" id="resetAccomBtn" style="font-size:12px;padding:6px 14px;border-radius:999px;">
         <i class="fa-solid fa-rotate-left"></i> ↺ 重置為全體預設住宿
       </button>
     </div>
@@ -279,7 +279,7 @@
         id: 'h-rvk',
         nameZh: '雷克雅維克公寓酒店 (Reykjavik Residence Hotel)',
         city: '雷克雅維克 Reykjavik',
-        address: 'Skolavordustigur 21A, 101 Reykjavik, Iceland',
+        address: 'Skólavörðustígur 21A, 101 Reykjavík, Iceland',
         lat: 64.1458,
         lng: -21.9317,
         checkIn: '15:00',
@@ -294,7 +294,7 @@
         id: 'h-aku',
         nameZh: '基亞大飯店 (Hotel Kea by Keahotels)',
         city: '阿克雷里 Akureyri',
-        address: 'Hafnarstraeti 87-89, 600 Akureyri, Iceland',
+        address: 'Hafnarstræti 87-89, 600 Akureyri, Iceland',
         lat: 65.6811,
         lng: -18.0898,
         checkIn: '15:00',
@@ -307,9 +307,9 @@
       },
       {
         id: 'h-egs',
-        nameZh: '埃伊爾斯塔德莊園民宿 (Guesthouse Egilsstadir)',
-        city: '埃伊爾斯塔德 Egilsstadir',
-        address: 'Egilsstadanes, 700 Egilsstadir, Iceland',
+        nameZh: '埃伊爾斯塔德莊園民宿 (Guesthouse Egilsstaðir)',
+        city: '埃伊爾斯塔德 Egilsstaðir',
+        address: 'Egilsstaðanes, 700 Egilsstaðir, Iceland',
         lat: 65.2635,
         lng: -14.4075,
         checkIn: '15:00',
@@ -317,17 +317,13 @@
         booking: '確認號：#EGS-20260928',
         phone: '+354 471 1114',
         website: 'https://egilsstadir.is',
-        notes: '東部狹長拉加爾湖畔（Lagarfljot）溫馨莊園民宿。遠離光害，極適合夜晚在湖畔花園等待極光。',
+        notes: '東部狹長拉加爾湖畔（Lagarfljót）溫馨莊園民宿。遠離光害，極適合夜晚在湖畔花園等待極光。',
         nights: ['2026-09-28', '2026-09-29']
       }
     ];
 
 
-    function getUserHotelKey() {
-      const uid = window.AppState && window.AppState.currentUser ? window.AppState.currentUser.uid : 'guest';
-      return 'iceland_hotels_user_' + uid;
-    }
-
+    const META_KEY = 'iceland_hotels_data';       // hotel name/booking/phone/notes
     const TRIP_KEY = 'iceland_2026_trip_data';    // hotelId per day (shared with index.html)
 
     // ── Read trip days from shared key → derive nights per hotel ─────
@@ -357,78 +353,32 @@
       } catch(e) { console.warn('setDayHotelInTrip failed', e); return true; }
     }
 
-    // ── Load merged hotel data (Synchronous & Rock Solid) ────────────
+    // ── Load merged hotel data ────────────────────────────────────────
     function loadHotels() {
       try {
-        const key = getUserHotelKey();
-        let savedMeta = JSON.parse(localStorage.getItem(key) || 'null');
-        if (!savedMeta || !Array.isArray(savedMeta) || savedMeta.length === 0) {
-          savedMeta = JSON.parse(localStorage.getItem('iceland_hotels_data') || 'null');
-        }
-        if (!savedMeta || !Array.isArray(savedMeta) || savedMeta.length === 0) {
-          savedMeta = BASE_HOTELS;
-        }
-
+        const savedMeta = JSON.parse(localStorage.getItem(META_KEY) || '[]');
         return BASE_HOTELS.map(base => {
-          const meta = (savedMeta || []).find(x => x && x.id === base.id) || {};
+          const meta = savedMeta.find(x => x.id === base.id) || {};
           const tripNights = getNightsFromTrip(base.id);
           const metaNights = (meta.nights && meta.nights.length) ? meta.nights : base.nights;
           const combinedNights = [...new Set([...tripNights, ...metaNights])].sort();
-          return {
-            ...base,
-            ...meta,
-            nameZh: meta.nameZh || base.nameZh,
-            address: meta.address || base.address,
-            checkIn: meta.checkIn || base.checkIn,
-            checkOut: meta.checkOut || base.checkOut,
-            booking: meta.booking !== undefined ? meta.booking : base.booking,
-            phone: meta.phone !== undefined ? meta.phone : base.phone,
-            website: meta.website !== undefined ? meta.website : base.website,
-            notes: meta.notes !== undefined ? meta.notes : base.notes,
-            nights: combinedNights.length ? combinedNights : base.nights
-          };
+          return { ...base, ...meta, nights: combinedNights };
         });
-      } catch(e) {
-        console.warn('loadHotels error, using fallback BASE_HOTELS', e);
-        return BASE_HOTELS.map(h => ({ ...h }));
-      }
+      } catch(e) { return BASE_HOTELS.map(h => ({ ...h })); }
+
     }
 
-
     // ── Save metadata and nights ──────────────────────────────────────
-    function saveMeta(hotelsList) {
-      if (!Array.isArray(hotelsList)) return;
-      const meta = hotelsList.map(({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }) =>
+    function saveMeta(hotels) {
+      const meta = hotels.map(({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }) =>
         ({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }));
-      localStorage.setItem(getUserHotelKey(), JSON.stringify(meta));
-      
+      localStorage.setItem(META_KEY, JSON.stringify(meta));
       const toast = document.getElementById('saveToast');
       if (toast) {
-        toast.innerText = '✅ 住宿資訊已儲存 (個人設定)';
         toast.classList.add('show');
         setTimeout(() => toast.classList.remove('show'), 2500);
       }
     }
-
-    // ── Reset to 全體預設住宿 ───────────────────────────────────────
-    function resetToDefaultAccom() {
-      if (confirm('確定要還原為全體預設的 3 大經典住宿資訊嗎？您個人修改的細節將重置。')) {
-        localStorage.removeItem(getUserHotelKey());
-        localStorage.removeItem('iceland_hotels_data');
-        hotels = loadHotels();
-        renderCards();
-        setTimeout(initFullMap, 100);
-        const toast = document.getElementById('saveToast');
-        if (toast) {
-          toast.innerText = '↺ 已成功還原為全體預設住宿';
-          toast.classList.add('show');
-          setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-      }
-    }
-
-
-
 
     // ── Mini maps ─────────────────────────────────────────────────────
     const miniMaps = {};
@@ -444,7 +394,7 @@
     }
 
     // ── Render ────────────────────────────────────────────────────────
-
+    let hotels = loadHotels();
 
     function fmtNight(dateStr) {
       try {
@@ -469,7 +419,12 @@
       h.nights.sort();
       saveMeta(hotels);
       input.value = '';
+      refreshNightsList(id, h.nights);
+    }
 
+      input.value = '';
+      refreshNightsList(id, h.nights);
+    }
 
     function removeNight(id, dateStr) {
       const h = hotels.find(x => x.id === id);
@@ -624,49 +579,46 @@
 
     // ── Full Iceland map ───────────────────────────────────────────────
     function initFullMap() {
-      if (typeof L === 'undefined') return;
-      const el = document.getElementById('accom-map');
-      if (!el) return;
-      try {
-        const accomMap = L.map(el, { zoomControl:true, attributionControl:true });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }).addTo(accomMap);
-        accomMap.setView([65.0, -18.5], 5);
-        hotels.forEach(h => {
-          const icon = L.divIcon({
-            className: '',
-            html: `<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🏠</div>`,
-            iconSize:[32,32], iconAnchor:[16,16]
-          });
-          const nightsLabel = h.nights && h.nights.length
-            ? h.nights.map(n => fmtNight(n)).join('、')
-            : '入住日期待填';
-          L.marker([h.lat, h.lng], {icon})
-            .bindPopup(`<strong>${h.nameZh}</strong><br><span style="font-size:12px;">${h.address}</span><br><span style="font-size:12px;">入住 ${h.checkIn} · 退房 ${h.checkOut}</span><br><span style="font-size:12px;">📅 ${nightsLabel}</span>`)
-            .addTo(accomMap);
+      const accomMap = L.map('accom-map', { zoomControl:true, attributionControl:true });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }).addTo(accomMap);
+      accomMap.setView([65.0, -18.5], 5);
+      hotels.forEach(h => {
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🏠</div>`,
+          iconSize:[32,32], iconAnchor:[16,16]
         });
-      } catch(e) { console.warn('Full map init warning', e); }
+        const nightsLabel = h.nights && h.nights.length
+          ? h.nights.map(n => fmtNight(n)).join('、')
+          : '入住日期待填';
+        L.marker([h.lat, h.lng], {icon})
+          .bindPopup(`<strong>${h.nameZh}</strong><br><span style="font-size:12px;">${h.address}</span><br><span style="font-size:12px;">入住 ${h.checkIn} · 退房 ${h.checkOut}</span><br><span style="font-size:12px;">📅 ${nightsLabel}</span>`)
+          .addTo(accomMap);
+      });
     }
 
-
     // ── Init ──────────────────────────────────────────────────────────
-    let hotels = loadHotels();
-
-    const resetAccomBtn = document.getElementById('resetDefaultAccomBtn');
-    if (resetAccomBtn) resetAccomBtn.onclick = resetToDefaultAccom;
-
-    renderCards();
-    setTimeout(initFullMap, 100);
+    const resetBtn = document.getElementById('resetAccomBtn');
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        if (confirm('確定要還原為全體預設的 3 大經典住宿資訊嗎？')) {
+          localStorage.removeItem('iceland_hotels_data');
+          hotels = BASE_HOTELS.map(h => ({ ...h }));
+          renderCards();
+          setTimeout(initFullMap, 100);
+        }
+      };
+    }
 
     initAuthListener(() => {
       hotels = loadHotels();
       renderCards();
       setTimeout(initFullMap, 100);
     });
-
+    renderCards();
+    setTimeout(initFullMap, 100);
 
   </script>
-
 </body>
 </html>
-
 

@@ -357,21 +357,25 @@
               <span><i class="fa-solid fa-circle-info" style="margin-right:6px;color:var(--accent);"></i>${item.notes}</span>
             </div>
 
-            <!-- Edit Area -->
+            <!-- Edit Area (Paired Departure & Arrival Date/Time Inputs) -->
             <div class="tp-edit-area" id="edit-area-${item.id}">
+              <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;">📍 路線與出發 / 抵達時間設定</div>
               <div class="edit-form-grid">
-                <div class="edit-field"><label>起點 / 取車處</label><input type="text" id="ef-from-${item.id}" value="${item.routeFrom}"></div>
-                <div class="edit-field"><label>終點 / 還車處</label><input type="text" id="ef-to-${item.id}" value="${item.routeTo}"></div>
-                <div class="edit-field"><label>出發 / 開始日期</label><input type="date" id="ef-startdate-${item.id}" value="${startDateStr}"></div>
-                <div class="edit-field"><label>抵達 / 結束日期（跨日選填）</label><input type="date" id="ef-enddate-${item.id}" value="${endDateStr}"></div>
-                <div class="edit-field"><label>出發 / 取車時間</label><input type="text" id="ef-deptime-${item.id}" value="${item.depTime}"></div>
-                <div class="edit-field"><label>抵達 / 還車時間</label><input type="text" id="ef-arrtime-${item.id}" value="${item.arrTime}"></div>
+                <div class="edit-field"><label>起點 / 取車地點</label><input type="text" id="ef-from-${item.id}" value="${item.routeFrom}"></div>
+                <div class="edit-field"><label>終點 / 還車地點</label><input type="text" id="ef-to-${item.id}" value="${item.routeTo}"></div>
+                
+                <div class="edit-field"><label>🛫 出發 / 取車日期</label><input type="date" id="ef-startdate-${item.id}" value="${startDateStr}"></div>
+                <div class="edit-field"><label>🛫 出發 / 取車時間</label><input type="text" id="ef-deptime-${item.id}" value="${item.depTime}" placeholder="例如 23:30 (TPE)"></div>
+
+                <div class="edit-field"><label>🛬 抵達 / 還車日期</label><input type="date" id="ef-enddate-${item.id}" value="${endDateStr}"></div>
+                <div class="edit-field"><label>🛬 抵達 / 還車時間</label><input type="text" id="ef-arrtime-${item.id}" value="${item.arrTime}" placeholder="例如 15:25 (KEF)"></div>
+
                 <div class="edit-field"><label>航班號 / 車型</label><input type="text" id="ef-flightno-${item.id}" value="${item.flightNo}"></div>
                 <div class="edit-field"><label>訂單號 / PNR</label><input type="text" id="ef-booking-${item.id}" value="${item.booking}"></div>
-                <div class="edit-field" style="grid-column:1/-1;"><label>座位 / 保險</label><input type="text" id="ef-seat-${item.id}" value="${item.seat}"></div>
+                <div class="edit-field" style="grid-column:1/-1;"><label>座位 / 保險說明</label><input type="text" id="ef-seat-${item.id}" value="${item.seat}"></div>
                 <div class="edit-field" style="grid-column:1/-1;"><label>備註說明</label><textarea id="ef-notes-${item.id}">${item.notes}</textarea></div>
               </div>
-              <div style="display:flex;gap:8px;">
+              <div style="display:flex;gap:8px;margin-top:12px;">
                 <button class="btn primary" style="font-size:12px;padding:6px 14px;" onclick="saveEdit('${item.id}')"><i class="fa-solid fa-check"></i> 儲存</button>
                 <button class="btn secondary" style="font-size:12px;padding:6px 14px;" onclick="toggleEdit('${item.id}', false)">取消</button>
               </div>
@@ -404,6 +408,7 @@
       saveTransports(transports);
       renderTimeline();
     }
+
 
 
     // Init

@@ -356,32 +356,35 @@
       } catch(e) { console.warn('setDayHotelInTrip failed', e); return true; }
     }
 
-    // ── Load merged hotel data ────────────────────────────────────────
-    async function loadHotels() {
+    // ── Load merged hotel data (Synchronous & Rock Solid) ────────────
+    function loadHotels() {
       try {
         const key = getUserHotelKey();
         let savedMeta = JSON.parse(localStorage.getItem(key) || 'null');
         if (!savedMeta) {
-          // Fallback to legacy global or BASE_HOTELS
           savedMeta = JSON.parse(localStorage.getItem('iceland_hotels_data') || 'null');
         }
-        if (!savedMeta) {
+        if (!savedMeta || !Array.isArray(savedMeta)) {
           savedMeta = BASE_HOTELS;
         }
 
         return BASE_HOTELS.map(base => {
-          const meta = (savedMeta || []).find(x => x.id === base.id) || {};
+          const meta = (savedMeta || []).find(x => x && x.id === base.id) || {};
           const tripNights = getNightsFromTrip(base.id);
           const metaNights = meta.nights || base.nights || [];
           const combinedNights = [...new Set([...tripNights, ...metaNights])].sort();
           return { ...base, ...meta, nights: combinedNights };
         });
-      } catch(e) { return BASE_HOTELS.map(h => ({ ...h })); }
+      } catch(e) {
+        console.warn('loadHotels error, using fallback BASE_HOTELS', e);
+        return BASE_HOTELS.map(h => ({ ...h }));
+      }
     }
 
     // ── Save metadata and nights ──────────────────────────────────────
-    async function saveMeta(hotels) {
-      const meta = hotels.map(({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }) =>
+    function saveMeta(hotelsList) {
+      if (!Array.isArray(hotelsList)) return;
+      const meta = hotelsList.map(({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }) =>
         ({ id, nameZh, checkIn, checkOut, booking, phone, website, notes, nights }));
       localStorage.setItem(getUserHotelKey(), JSON.stringify(meta));
       
@@ -394,11 +397,11 @@
     }
 
     // ── Reset to 全體預設住宿 ───────────────────────────────────────
-    async function resetToDefaultAccom() {
+    function resetToDefaultAccom() {
       if (confirm('確定要還原為全體預設的 3 大經典住宿資訊嗎？您個人修改的細節將重置。')) {
         localStorage.removeItem(getUserHotelKey());
         localStorage.removeItem('iceland_hotels_data');
-        hotels = await loadHotels();
+        hotels = loadHotels();
         renderCards();
         setTimeout(initFullMap, 100);
         const toast = document.getElementById('saveToast');
@@ -409,6 +412,7 @@
         }
       }
     }
+
 
 
 
@@ -625,22 +629,20 @@
     }
 
     // ── Init ──────────────────────────────────────────────────────────
-    let hotels = BASE_HOTELS.map(h => ({ ...h }));
+    let hotels = loadHotels();
 
     const resetAccomBtn = document.getElementById('resetDefaultAccomBtn');
     if (resetAccomBtn) resetAccomBtn.onclick = resetToDefaultAccom;
 
-    (async () => {
-      hotels = await loadHotels();
-      renderCards();
-      setTimeout(initFullMap, 100);
-    })();
+    renderCards();
+    setTimeout(initFullMap, 100);
 
-    initAuthListener(async () => {
-      hotels = await loadHotels();
+    initAuthListener(() => {
+      hotels = loadHotels();
       renderCards();
       setTimeout(initFullMap, 100);
     });
+
 
   </script>
 

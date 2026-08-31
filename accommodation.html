@@ -630,16 +630,23 @@
     }
 
     // ── Init ──────────────────────────────────────────────────────────
+    let hotels = BASE_HOTELS.map(h => ({ ...h }));
+
     const resetAccomBtn = document.getElementById('resetDefaultAccomBtn');
     if (resetAccomBtn) resetAccomBtn.onclick = resetToDefaultAccom;
+
+    (async () => {
+      hotels = await loadHotels();
+      renderCards();
+      setTimeout(initFullMap, 100);
+    })();
 
     initAuthListener(async () => {
       hotels = await loadHotels();
       renderCards();
       setTimeout(initFullMap, 100);
     });
-    renderCards();
-    setTimeout(initFullMap, 100);
+
   </script>
 
 </body>

@@ -229,12 +229,18 @@
     <div class="info-bar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <i class="fa-solid fa-circle-info" style="color:#e07b20;flex-shrink:0;"></i>
-        <span>預設顯示全體 3 大經典住宿點。點擊「✏️ 編輯」可進行個人修改，隨時可一鍵還原預設。</span>
+        <span>預設顯示全體 3 大經典住宿點。點擊「✏️ 編輯」可進行個人修改。若頁面未顯示卡片，請點擊右側按鈕修復。</span>
       </div>
-      <button class="btn secondary" id="resetAccomBtn" style="font-size:12px;padding:6px 14px;border-radius:999px;">
-        <i class="fa-solid fa-rotate-left"></i> ↺ 重置為全體預設住宿
-      </button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn primary" id="forceFixCacheBtn" style="font-size:12px;padding:6px 14px;border-radius:999px;background:#e07b20;border-color:#e07b20;">
+          <i class="fa-solid fa-broom"></i> 🧹 一鍵清除快取並顯示飯店
+        </button>
+        <button class="btn secondary" id="resetAccomBtn" style="font-size:12px;padding:6px 14px;border-radius:999px;">
+          <i class="fa-solid fa-rotate-left"></i> ↺ 重置預設
+        </button>
+      </div>
     </div>
+
 
 
     <!-- Hotel Cards (Data-Driven Dynamic Container) -->
@@ -621,25 +627,41 @@
     }
 
     // ── Init ──────────────────────────────────────────────────────────
-    const resetBtn = document.getElementById('resetAccomBtn');
-    if (resetBtn) {
-      resetBtn.onclick = () => {
-        if (confirm('確定要還原為全體預設的 3 大經典住宿資訊嗎？')) {
-          localStorage.removeItem('iceland_hotels_data');
-          hotels = BASE_HOTELS.map(h => ({ ...h }));
-          renderCards();
-          setTimeout(initFullMap, 100);
-        }
-      };
+    function forceClearAndReload() {
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('iceland_hotels_')) localStorage.removeItem(k);
+      });
+      localStorage.removeItem('iceland_hotels_data');
+      hotels = BASE_HOTELS.map(h => ({ ...h }));
+      saveMeta(hotels);
+      renderCards();
+      setTimeout(initFullMap, 100);
     }
+
+    const forceFixBtn = document.getElementById('forceFixCacheBtn');
+    if (forceFixBtn) forceFixBtn.onclick = forceClearAndReload;
+
+    const resetBtn = document.getElementById('resetAccomBtn');
+    if (resetBtn) resetBtn.onclick = forceClearAndReload;
+
+    renderCards();
+    setTimeout(initFullMap, 100);
+
+    // Auto-check: If rendered grid is empty, auto trigger forceClearAndReload once
+    setTimeout(() => {
+      const grid = document.getElementById('hotel-grid');
+      if (grid && grid.children.length === 0) {
+        console.warn('Empty hotel grid detected, auto fixing...');
+        forceClearAndReload();
+      }
+    }, 200);
 
     initAuthListener(() => {
       hotels = loadHotels();
       renderCards();
       setTimeout(initFullMap, 100);
     });
-    renderCards();
-    setTimeout(initFullMap, 100);
+
 
   </script>
 </body>

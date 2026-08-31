@@ -361,25 +361,38 @@
       try {
         const key = getUserHotelKey();
         let savedMeta = JSON.parse(localStorage.getItem(key) || 'null');
-        if (!savedMeta) {
+        if (!savedMeta || !Array.isArray(savedMeta) || savedMeta.length === 0) {
           savedMeta = JSON.parse(localStorage.getItem('iceland_hotels_data') || 'null');
         }
-        if (!savedMeta || !Array.isArray(savedMeta)) {
+        if (!savedMeta || !Array.isArray(savedMeta) || savedMeta.length === 0) {
           savedMeta = BASE_HOTELS;
         }
 
         return BASE_HOTELS.map(base => {
           const meta = (savedMeta || []).find(x => x && x.id === base.id) || {};
           const tripNights = getNightsFromTrip(base.id);
-          const metaNights = meta.nights || base.nights || [];
+          const metaNights = (meta.nights && meta.nights.length) ? meta.nights : base.nights;
           const combinedNights = [...new Set([...tripNights, ...metaNights])].sort();
-          return { ...base, ...meta, nights: combinedNights };
+          return {
+            ...base,
+            ...meta,
+            nameZh: meta.nameZh || base.nameZh,
+            address: meta.address || base.address,
+            checkIn: meta.checkIn || base.checkIn,
+            checkOut: meta.checkOut || base.checkOut,
+            booking: meta.booking !== undefined ? meta.booking : base.booking,
+            phone: meta.phone !== undefined ? meta.phone : base.phone,
+            website: meta.website !== undefined ? meta.website : base.website,
+            notes: meta.notes !== undefined ? meta.notes : base.notes,
+            nights: combinedNights.length ? combinedNights : base.nights
+          };
         });
       } catch(e) {
         console.warn('loadHotels error, using fallback BASE_HOTELS', e);
         return BASE_HOTELS.map(h => ({ ...h }));
       }
     }
+
 
     // ── Save metadata and nights ──────────────────────────────────────
     function saveMeta(hotelsList) {
@@ -610,23 +623,29 @@
 
     // ── Full Iceland map ───────────────────────────────────────────────
     function initFullMap() {
-      const accomMap = L.map('accom-map', { zoomControl:true, attributionControl:true });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }).addTo(accomMap);
-      accomMap.setView([65.0, -18.5], 5);
-      hotels.forEach(h => {
-        const icon = L.divIcon({
-          className: '',
-          html: `<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🏠</div>`,
-          iconSize:[32,32], iconAnchor:[16,16]
+      if (typeof L === 'undefined') return;
+      const el = document.getElementById('accom-map');
+      if (!el) return;
+      try {
+        const accomMap = L.map(el, { zoomControl:true, attributionControl:true });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }).addTo(accomMap);
+        accomMap.setView([65.0, -18.5], 5);
+        hotels.forEach(h => {
+          const icon = L.divIcon({
+            className: '',
+            html: `<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🏠</div>`,
+            iconSize:[32,32], iconAnchor:[16,16]
+          });
+          const nightsLabel = h.nights && h.nights.length
+            ? h.nights.map(n => fmtNight(n)).join('、')
+            : '入住日期待填';
+          L.marker([h.lat, h.lng], {icon})
+            .bindPopup(`<strong>${h.nameZh}</strong><br><span style="font-size:12px;">${h.address}</span><br><span style="font-size:12px;">入住 ${h.checkIn} · 退房 ${h.checkOut}</span><br><span style="font-size:12px;">📅 ${nightsLabel}</span>`)
+            .addTo(accomMap);
         });
-        const nightsLabel = h.nights && h.nights.length
-          ? h.nights.map(n => fmtNight(n)).join('、')
-          : '入住日期待填';
-        L.marker([h.lat, h.lng], {icon})
-          .bindPopup(`<strong>${h.nameZh}</strong><br><span style="font-size:12px;">${h.address}</span><br><span style="font-size:12px;">入住 ${h.checkIn} · 退房 ${h.checkOut}</span><br><span style="font-size:12px;">📅 ${nightsLabel}</span>`)
-          .addTo(accomMap);
-      });
+      } catch(e) { console.warn('Full map init warning', e); }
     }
+
 
     // ── Init ──────────────────────────────────────────────────────────
     let hotels = loadHotels();

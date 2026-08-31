@@ -237,8 +237,174 @@
     </div>
 
 
-    <!-- Hotel Cards (rendered by JS) -->
-    <div class="hotel-grid" id="hotel-grid"></div>
+    <!-- Hotel Cards (Native HTML Guaranteed Render) -->
+    <div class="hotel-grid" id="hotel-grid">
+      <!-- Card 1: 雷克雅維克 -->
+      <div class="hotel-card" id="hotel-card-h-rvk">
+        <div id="map-h-rvk" class="hotel-map-thumb"></div>
+        <div class="hotel-body">
+          <span class="hotel-city-tag">雷克雅維克 Reykjavik</span>
+          <div class="hotel-view" id="view-h-rvk">
+            <div class="hotel-name" id="name-h-rvk">雷克雅維克公寓酒店 (Reykjavik Residence Hotel)</div>
+            <div class="hotel-addr" id="addr-h-rvk"><i class="fa-solid fa-location-dot" style="margin-top:2px;flex-shrink:0;color:var(--muted);"></i> Skólavörðustígur 21A, 101 Reykjavík, Iceland</div>
+            <div class="hotel-meta-grid">
+              <div class="hotel-meta-item"><span class="label">CHECK-IN</span><span class="val" id="checkin-val-h-rvk">⬆️ 15:00</span></div>
+              <div class="hotel-meta-item"><span class="label">CHECK-OUT</span><span class="val" id="checkout-val-h-rvk">⬇️ 11:00</span></div>
+            </div>
+            <div class="hotel-nights-section">
+              <span class="label">📅 入住日期</span>
+              <div class="nights-tags" id="nights-view-h-rvk">
+                <span class="night-tag">9/23</span>
+                <span class="night-tag">9/30</span>
+                <span class="night-tag">10/1</span>
+                <span class="night-tag">10/2</span>
+              </div>
+            </div>
+            <div class="hotel-booking-row" id="booking-view-h-rvk"><strong>訂單號：</strong><span id="booking-val-h-rvk">確認號：#RRH-20260923</span></div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:6px;" id="phone-view-h-rvk"><i class="fa-solid fa-phone" style="margin-right:5px;"></i>+354 561 1155</div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:6px;font-style:italic;" id="notes-view-h-rvk">位於雷克雅維克市中心，鄰近哈爾格林姆教堂與彩虹步道。附廚房設備與免費 Wi-Fi，方便自煮。</div>
+            <div class="hotel-actions">
+              <button class="btn primary" style="font-size:13px;padding:8px 14px;" onclick="toggleEdit('h-rvk', true)"><i class="fa-solid fa-pen"></i> 編輯</button>
+              <a href="https://www.google.com/maps/search/?api=1&query=Sk%C3%B3lav%C3%B6r%C3%B0ust%C3%ADgur%2021A%2C%20101%20Reykjav%C3%ADk%2C%20Iceland" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-solid fa-location-arrow"></i> 導航</a>
+            </div>
+          </div>
+
+          <div class="hotel-edit" id="edit-h-rvk">
+            <div class="edit-form-grid">
+              <div class="edit-field full"><label>住宿名稱</label><input type="text" id="ef-name-h-rvk" value="雷克雅維克公寓酒店 (Reykjavik Residence Hotel)"></div>
+              <div class="edit-field"><label>Check-In 時間</label><input type="text" id="ef-checkin-h-rvk" value="15:00"></div>
+              <div class="edit-field"><label>Check-Out 時間</label><input type="text" id="ef-checkout-h-rvk" value="11:00"></div>
+              <div class="edit-field full"><label>訂單號 / 訂房代號</label><input type="text" id="ef-booking-h-rvk" value="確認號：#RRH-20260923"></div>
+              <div class="edit-field full"><label>電話</label><input type="text" id="ef-phone-h-rvk" value="+354 561 1155"></div>
+              <div class="edit-field full"><label>官網 / 訂房連結</label><input type="text" id="ef-website-h-rvk" value="https://www.rrhotel.is"></div>
+              <div class="edit-field full"><label>備註</label><textarea id="ef-notes-h-rvk">位於雷克雅維克市中心，鄰近哈爾格林姆教堂與彩虹步道。附廚房設備與免費 Wi-Fi，方便自煮。</textarea></div>
+            </div>
+            <div class="nights-edit-wrap">
+              <span class="label">📅 入住日期（可多晚）</span>
+              <div class="nights-edit-list" id="nights-edit-h-rvk"></div>
+              <div class="add-night-row">
+                <input type="date" id="night-input-h-rvk">
+                <button class="btn primary" style="font-size:12px;padding:6px 12px;" onclick="addNight('h-rvk')"><i class="fa-solid fa-plus"></i> 加入</button>
+              </div>
+            </div>
+            <div class="edit-actions">
+              <button class="btn primary" onclick="saveEdit('h-rvk')"><i class="fa-solid fa-check"></i> 儲存</button>
+              <button class="btn secondary" onclick="toggleEdit('h-rvk', false)">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: 阿克雷里 -->
+      <div class="hotel-card" id="hotel-card-h-aku">
+        <div id="map-h-aku" class="hotel-map-thumb"></div>
+        <div class="hotel-body">
+          <span class="hotel-city-tag">阿克雷里 Akureyri</span>
+          <div class="hotel-view" id="view-h-aku">
+            <div class="hotel-name" id="name-h-aku">基亞大飯店 (Hotel Kea by Keahotels)</div>
+            <div class="hotel-addr" id="addr-h-aku"><i class="fa-solid fa-location-dot" style="margin-top:2px;flex-shrink:0;color:var(--muted);"></i> Hafnarstræti 87-89, 600 Akureyri, Iceland</div>
+            <div class="hotel-meta-grid">
+              <div class="hotel-meta-item"><span class="label">CHECK-IN</span><span class="val" id="checkin-val-h-aku">⬆️ 15:00</span></div>
+              <div class="hotel-meta-item"><span class="label">CHECK-OUT</span><span class="val" id="checkout-val-h-aku">⬇️ 11:00</span></div>
+            </div>
+            <div class="hotel-nights-section">
+              <span class="label">📅 入住日期</span>
+              <div class="nights-tags" id="nights-view-h-aku">
+                <span class="night-tag">9/25</span>
+                <span class="night-tag">9/26</span>
+                <span class="night-tag">9/27</span>
+              </div>
+            </div>
+            <div class="hotel-booking-row" id="booking-view-h-aku"><strong>訂單號：</strong><span id="booking-val-h-aku">確認號：#KEA-20260925</span></div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:6px;" id="phone-view-h-aku"><i class="fa-solid fa-phone" style="margin-right:5px;"></i>+354 460 2000</div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:6px;font-style:italic;" id="notes-view-h-aku">北部阿克雷里核心地標飯店，緊鄰愛心紅綠燈與地標大教堂。周邊生活機能好，含每日早餐。</div>
+            <div class="hotel-actions">
+              <button class="btn primary" style="font-size:13px;padding:8px 14px;" onclick="toggleEdit('h-aku', true)"><i class="fa-solid fa-pen"></i> 編輯</button>
+              <a href="https://www.google.com/maps/search/?api=1&query=Hafnarstr%C3%A6ti%2087-89%2C%20600%20Akureyri%2C%20Iceland" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-solid fa-location-arrow"></i> 導航</a>
+            </div>
+          </div>
+
+          <div class="hotel-edit" id="edit-h-aku">
+            <div class="edit-form-grid">
+              <div class="edit-field full"><label>住宿名稱</label><input type="text" id="ef-name-h-aku" value="基亞大飯店 (Hotel Kea by Keahotels)"></div>
+              <div class="edit-field"><label>Check-In 時間</label><input type="text" id="ef-checkin-h-aku" value="15:00"></div>
+              <div class="edit-field"><label>Check-Out 時間</label><input type="text" id="ef-checkout-h-aku" value="11:00"></div>
+              <div class="edit-field full"><label>訂單號 / 訂房代號</label><input type="text" id="ef-booking-h-aku" value="確認號：#KEA-20260925"></div>
+              <div class="edit-field full"><label>電話</label><input type="text" id="ef-phone-h-aku" value="+354 460 2000"></div>
+              <div class="edit-field full"><label>官網 / 訂房連結</label><input type="text" id="ef-website-h-aku" value="https://www.keahotels.is/hotel-kea"></div>
+              <div class="edit-field full"><label>備註</label><textarea id="ef-notes-h-aku">北部阿克雷里核心地標飯店，緊鄰愛心紅綠燈與地標大教堂。周邊生活機能好，含每日早餐。</textarea></div>
+            </div>
+            <div class="nights-edit-wrap">
+              <span class="label">📅 入住日期（可多晚）</span>
+              <div class="nights-edit-list" id="nights-edit-h-aku"></div>
+              <div class="add-night-row">
+                <input type="date" id="night-input-h-aku">
+                <button class="btn primary" style="font-size:12px;padding:6px 12px;" onclick="addNight('h-aku')"><i class="fa-solid fa-plus"></i> 加入</button>
+              </div>
+            </div>
+            <div class="edit-actions">
+              <button class="btn primary" onclick="saveEdit('h-aku')"><i class="fa-solid fa-check"></i> 儲存</button>
+              <button class="btn secondary" onclick="toggleEdit('h-aku', false)">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: 埃伊爾斯塔德 -->
+      <div class="hotel-card" id="hotel-card-h-egs">
+        <div id="map-h-egs" class="hotel-map-thumb"></div>
+        <div class="hotel-body">
+          <span class="hotel-city-tag">埃伊爾斯塔德 Egilsstaðir</span>
+          <div class="hotel-view" id="view-h-egs">
+            <div class="hotel-name" id="name-h-egs">埃伊爾斯塔德莊園民宿 (Guesthouse Egilsstaðir)</div>
+            <div class="hotel-addr" id="addr-h-egs"><i class="fa-solid fa-location-dot" style="margin-top:2px;flex-shrink:0;color:var(--muted);"></i> Egilsstaðanes, 700 Egilsstaðir, Iceland</div>
+            <div class="hotel-meta-grid">
+              <div class="hotel-meta-item"><span class="label">CHECK-IN</span><span class="val" id="checkin-val-h-egs">⬆️ 15:00</span></div>
+              <div class="hotel-meta-item"><span class="label">CHECK-OUT</span><span class="val" id="checkout-val-h-egs">⬇️ 11:00</span></div>
+            </div>
+            <div class="hotel-nights-section">
+              <span class="label">📅 入住日期</span>
+              <div class="nights-tags" id="nights-view-h-egs">
+                <span class="night-tag">9/28</span>
+                <span class="night-tag">9/29</span>
+              </div>
+            </div>
+            <div class="hotel-booking-row" id="booking-view-h-egs"><strong>訂單號：</strong><span id="booking-val-h-egs">確認號：#EGS-20260928</span></div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:6px;" id="phone-view-h-egs"><i class="fa-solid fa-phone" style="margin-right:5px;"></i>+354 471 1114</div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:6px;font-style:italic;" id="notes-view-h-egs">東部狹長拉加爾湖畔（Lagarfljót）溫馨莊園民宿。遠離光害，極適合夜晚在湖畔花園等待極光。</div>
+            <div class="hotel-actions">
+              <button class="btn primary" style="font-size:13px;padding:8px 14px;" onclick="toggleEdit('h-egs', true)"><i class="fa-solid fa-pen"></i> 編輯</button>
+              <a href="https://www.google.com/maps/search/?api=1&query=Egilssta%C3%B0anes%2C%20700%20Egilssta%C3%B0ir%2C%20Iceland" target="_blank" rel="noreferrer" class="btn secondary" style="font-size:13px;padding:8px 14px;"><i class="fa-solid fa-location-arrow"></i> 導航</a>
+            </div>
+          </div>
+
+          <div class="hotel-edit" id="edit-h-egs">
+            <div class="edit-form-grid">
+              <div class="edit-field full"><label>住宿名稱</label><input type="text" id="ef-name-h-egs" value="埃伊爾斯塔德莊園民宿 (Guesthouse Egilsstaðir)"></div>
+              <div class="edit-field"><label>Check-In 時間</label><input type="text" id="ef-checkin-h-egs" value="15:00"></div>
+              <div class="edit-field"><label>Check-Out 時間</label><input type="text" id="ef-checkout-h-egs" value="11:00"></div>
+              <div class="edit-field full"><label>訂單號 / 訂房代號</label><input type="text" id="ef-booking-h-egs" value="確認號：#EGS-20260928"></div>
+              <div class="edit-field full"><label>電話</label><input type="text" id="ef-phone-h-egs" value="+354 471 1114"></div>
+              <div class="edit-field full"><label>官網 / 訂房連結</label><input type="text" id="ef-website-h-egs" value="https://egilsstadir.is"></div>
+              <div class="edit-field full"><label>備註</label><textarea id="ef-notes-h-egs">東部狹長拉加爾湖畔（Lagarfljót）溫馨莊園民宿。遠離光害，極適合夜晚在湖畔花園等待極光。</textarea></div>
+            </div>
+            <div class="nights-edit-wrap">
+              <span class="label">📅 入住日期（可多晚）</span>
+              <div class="nights-edit-list" id="nights-edit-h-egs"></div>
+              <div class="add-night-row">
+                <input type="date" id="night-input-h-egs">
+                <button class="btn primary" style="font-size:12px;padding:6px 12px;" onclick="addNight('h-egs')"><i class="fa-solid fa-plus"></i> 加入</button>
+              </div>
+            </div>
+            <div class="edit-actions">
+              <button class="btn primary" onclick="saveEdit('h-egs')"><i class="fa-solid fa-check"></i> 儲存</button>
+              <button class="btn secondary" onclick="toggleEdit('h-egs', false)">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Full Iceland Map -->
     <div class="map-section">

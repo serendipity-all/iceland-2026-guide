@@ -426,7 +426,7 @@
     }
 
     // ── Render ────────────────────────────────────────────────────────
-    let hotels = loadHotels();
+
 
     function fmtNight(dateStr) {
       try {
@@ -451,12 +451,7 @@
       h.nights.sort();
       saveMeta(hotels);
       input.value = '';
-      refreshNightsList(id, h.nights);
-    }
 
-      input.value = '';
-      refreshNightsList(id, h.nights);
-    }
 
     function removeNight(id, dateStr) {
       const h = hotels.find(x => x.id === id);

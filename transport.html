@@ -219,8 +219,15 @@
     </div>
 
     <div class="timeline-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <div style="font-size:14px;font-weight:700;color:var(--ink);">📋 交通行程列表</div>
+        <button class="btn primary" id="addTransportBtn" style="font-size:13px;padding:8px 16px;border-radius:999px;">
+          <i class="fa-solid fa-plus" style="margin-right:6px;"></i> ＋ 新增交通項目
+        </button>
+      </div>
       <div class="timeline" id="transport-timeline"></div>
     </div>
+
 
     <div style="padding: 0 clamp(18px,5vw,78px) 60px; display:flex; gap:12px; flex-wrap:wrap;">
       <a href="index.html" class="btn secondary" style="font-size:13px;padding:10px 20px;"><i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i> 回到完整手冊</a>
@@ -240,7 +247,18 @@
       document.getElementById('themeBtn').textContent = document.body.classList.contains('dark') ? '☀' : '☾';
     };
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const mobileDrawer = document.getElement    // ── Transport Data ────────────────────────────────────────────────
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    if (mobileMenuBtn && mobileDrawer) {
+      mobileMenuBtn.onclick = () => {
+        mobileDrawer.classList.toggle('active');
+        mobileMenuBtn.innerHTML = mobileDrawer.classList.contains('active')
+          ? '<i class="fa-solid fa-xmark"></i> <span>關閉</span>'
+          : '<i class="fa-solid fa-bars"></i> <span>選單</span>';
+      };
+    }
+
+    // ── Transport Data ────────────────────────────────────────────────
+
     const CATEGORY_MAP = {
       flight: { name: '飛機', icon: 'fa-plane-departure', iconCls: 'icon-flight' },
       train:  { name: '火車', icon: 'fa-train', iconCls: 'icon-flight' },
@@ -413,9 +431,14 @@
                 <div class="edit-field" style="grid-column:1/-1;"><label>訂單號</label><input type="text" id="ef-booking-${item.id}" value="${item.booking || ''}"></div>
                 <div class="edit-field" style="grid-column:1/-1;"><label>備註</label><textarea id="ef-notes-${item.id}">${item.notes || ''}</textarea></div>
               </div>
-              <div style="display:flex;gap:8px;margin-top:14px;">
-                <button class="btn primary" style="font-size:12px;padding:6px 14px;" onclick="saveEdit('${item.id}')"><i class="fa-solid fa-check"></i> 儲存</button>
-                <button class="btn secondary" style="font-size:12px;padding:6px 14px;" onclick="toggleEdit('${item.id}', false)">取消</button>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:8px;">
+                <div style="display:flex;gap:8px;">
+                  <button class="btn primary" style="font-size:12px;padding:6px 14px;" onclick="saveEdit('${item.id}')"><i class="fa-solid fa-check"></i> 儲存</button>
+                  <button class="btn secondary" style="font-size:12px;padding:6px 14px;" onclick="toggleEdit('${item.id}', false)">取消</button>
+                </div>
+                <button class="btn secondary" style="font-size:12px;padding:6px 14px;color:#e74c3c;border-color:#e74c3c;" onclick="deleteTransport('${item.id}')">
+                  <i class="fa-solid fa-trash"></i> 刪除此交通
+                </button>
               </div>
             </div>
           </div>
@@ -448,10 +471,42 @@
       renderTimeline();
     }
 
+    function deleteTransport(id) {
+      if (confirm('確定要刪除此筆交通行程嗎？')) {
+        transports = transports.filter(x => x.id !== id);
+        saveTransports(transports);
+        renderTimeline();
+      }
+    }
 
-
+    function addTransport() {
+      const newId = 'tp-' + Date.now();
+      const newTransport = {
+        id: newId,
+        type: 'flight',
+        routeFrom: '新起站',
+        routeTo: '新目的地',
+        startDate: '',
+        depTime: '',
+        endDate: '',
+        arrTime: '',
+        flightNo: '新航班 / 車型',
+        seat: '',
+        booking: '',
+        notes: ''
+      };
+      transports.push(newTransport);
+      saveTransports(transports);
+      renderTimeline();
+      toggleEdit(newId, true);
+      const newEl = document.getElementById('tp-item-' + newId);
+      if (newEl) newEl.scrollIntoView({ behavior: 'smooth' });
+    }
 
     // Init
+    const addBtn = document.getElementById('addTransportBtn');
+    if (addBtn) addBtn.onclick = addTransport;
+
     initAuthListener(() => {
       transports = loadTransports();
       renderTimeline();

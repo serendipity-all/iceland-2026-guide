@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
@@ -179,7 +179,7 @@
     <!-- Edit hint bar -->
     <div class="edit-hint">
       <i class="fa-solid fa-pen" style="color:var(--accent);flex-shrink:0;"></i>
-      <span>編輯模式已開啟！點每張卡片上的「✏️ 編輯」可新增、刪除或修改項目，完成後點「✓ 儲存」。</span>
+      <span>編輯模式已開啟！點卡片上的「✏️ 編輯」可增删項目；每個面板下方的「＋ 新增類別」可新增一張分類卡片。</span>
     </div>
 
     <!-- ── Tab: 行前準備 ───────────────────────────────────────────── -->
@@ -201,6 +201,9 @@
         </div>
 
         <div id="prepGrid" class="packing-grid"></div>
+        <div class="edit-only" style="display:none;padding:0 0 20px;">
+          <button class="btn secondary" id="addPrepCategoryBtn" style="font-size:13px;padding:9px 18px;"><i class="fa-solid fa-plus"></i> 新增類別</button>
+        </div>
       </div>
     </div>
 
@@ -216,6 +219,9 @@
         </div>
 
         <div id="packingGrid" class="packing-grid"></div>
+        <div class="edit-only" style="display:none;padding:0 0 20px;">
+          <button class="btn secondary" id="addPackingCategoryBtn" style="font-size:13px;padding:9px 18px;"><i class="fa-solid fa-plus"></i> 新增類別</button>
+        </div>
 
         <div class="packing-note">
           <strong>🧳 夫妻／旅伴分裝技巧</strong>
@@ -268,6 +274,9 @@
         btn.style.color = editActive ? 'white' : '';
         btn.style.borderColor = editActive ? 'var(--accent)' : '';
       });
+      document.querySelectorAll('.edit-only').forEach(el => {
+        el.style.display = editActive ? '' : 'none';
+      });
     }
     if (editModeBtn)   editModeBtn.onclick   = toggleEdit;
     if (mobileEditBtn) mobileEditBtn.onclick = toggleEdit;
@@ -275,7 +284,6 @@
     // ── Load tripData from localStorage ───────────────────────────────
     const TRIP_KEY = 'iceland_2026_trip_data';
 
-    // Default prep/packing in case no localStorage data exists yet
     const DEFAULT_TRIP_PREP = {
       admin: [
         '確認護照效期（至少 6 個月）',
@@ -344,6 +352,13 @@
       ]
     };
 
+    const DEFAULT_PREP_GROUPS    = ['admin','bookings','gear','tech'];
+    const DEFAULT_PREP_LABELS    = { admin:'📄 證件與手續', bookings:'🎟️ 預約與訂單', gear:'🧥 裝備與衣物採購', tech:'🔌 電源、通網與藥品' };
+    const DEFAULT_PREP_SUBS      = { admin:'3–6 個月前確認', bookings:'1–3 個月前預訂', gear:'1 個月前試穿磨合', tech:'2 週前確認' };
+    const DEFAULT_PACKING_GROUPS = ['carry','cabin','checked','shared'];
+    const DEFAULT_PACKING_LABELS = { carry:'隨身包包', cabin:'手提行李', checked:'托運行李', shared:'共用／分裝' };
+    const DEFAULT_PACKING_SUBS   = { carry:'證件、貴重物品與途中隨時會用到', cabin:'托運延誤時仍能撐 1–2 天', checked:'主要衣物與旅行用品', shared:'夫妻或旅伴一起準備' };
+
     let tripData = null;
     try {
       const raw = localStorage.getItem(TRIP_KEY);
@@ -355,6 +370,17 @@
     }
     if (!tripData.prep)    tripData.prep    = DEFAULT_TRIP_PREP;
     if (!tripData.packing) tripData.packing = DEFAULT_TRIP_PACKING;
+
+    const CAT_KEY = 'iceland_checklist_cats_v12';
+    let catData = null;
+    try { catData = JSON.parse(localStorage.getItem(CAT_KEY) || 'null'); } catch(e) {}
+    if (!catData) {
+      catData = {
+        prepGroups:    DEFAULT_PREP_GROUPS.map(k => ({ key:k, label: DEFAULT_PREP_LABELS[k], sub: DEFAULT_PREP_SUBS[k] })),
+        packingGroups: DEFAULT_PACKING_GROUPS.map(k => ({ key:k, label: DEFAULT_PACKING_LABELS[k], sub: DEFAULT_PACKING_SUBS[k] }))
+      };
+    }
+    function saveCats() { localStorage.setItem(CAT_KEY, JSON.stringify(catData)); }
 
     function saveItineraryToLocal() {
       try { localStorage.setItem(TRIP_KEY, JSON.stringify(tripData)); } catch(e) {}
@@ -370,11 +396,10 @@
       history.replaceState(null, '', '#' + tab);
     }
 
-    // Read hash on load
     if (location.hash === '#packing') switchTab('packing');
 
     // ── Helpers ───────────────────────────────────────────────────────
-    function addEditRow(text, container, removeHandler) {
+    function addEditRow(text, container) {
       const row = document.createElement('div');
       row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
       row.innerHTML = `
@@ -395,7 +420,7 @@
           <div><h3>${title}</h3><p>${sub}</p></div>
           <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
             <span class="cl-count">${items.length} 項</span>
-            <button class="small-btn edit-only cl-edit-btn" style="font-size:11px;padding:4px 10px;">✏️ 編輯</button>
+            <button class="small-btn edit-only cl-edit-btn" style="font-size:11px;padding:4px 10px;display:none;">✏️ 編輯</button>
           </div>
         </div>
         <div class="check-list"></div>
@@ -425,8 +450,7 @@
 
       const renderCheckRows = () => {
         checkList.innerHTML = '';
-        const curItems = items; // reference
-        curItems.forEach((item, i) => {
+        items.forEach((item, i) => {
           const id = `${prefix}-${key}-${i}`;
           const row = document.createElement('label');
           row.className = 'check-row';
@@ -437,9 +461,11 @@
           };
           checkList.appendChild(row);
         });
-        countEl.textContent = `${curItems.length} 項`;
+        countEl.textContent = `${items.length} 項`;
       };
+      renderCheckRows();
 
+      editBtn.style.display = editActive ? '' : 'none';
       editBtn.onclick = () => {
         editList.innerHTML = '';
         items.forEach(item => addEditRow(item, editList));
@@ -447,7 +473,6 @@
         editArea.style.display = 'block';
         newInput.focus();
       };
-
       const doAdd = () => {
         const val = newInput.value.trim();
         if (!val) return;
@@ -457,26 +482,20 @@
       };
       addBtn.onclick = doAdd;
       newInput.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); doAdd(); } };
-
       saveBtn.onclick = () => {
         const newItems = [...editList.querySelectorAll('input[type=text]')]
           .map(inp => inp.value.trim()).filter(Boolean);
-        // Clear old checkbox states for this group
-        Object.keys(localStorage).filter(k => k.startsWith(`${prefix}-${key}-`)).forEach(k => localStorage.removeItem(k));
-        items.splice(0, items.length, ...newItems); // mutate in place
+        items.splice(0, items.length, ...newItems);
         saveItineraryToLocal();
-        if (onSave) onSave();
-        checkList.style.display = '';
+        checkList.style.display = 'block';
         editArea.style.display = 'none';
         renderCheckRows();
+        if (onSave) onSave();
       };
-
       cancelBtn.onclick = () => {
-        checkList.style.display = '';
+        checkList.style.display = 'block';
         editArea.style.display = 'none';
       };
-
-      renderCheckRows();
       return card;
     }
 
@@ -486,19 +505,12 @@
       if (!grid) return;
       grid.innerHTML = '';
 
-      const groups = [
-        ['admin',    '📄 證件與手續',      '3–6 個月前確認'],
-        ['bookings', '🎟️ 預約與訂單',       '1–3 個月前預訂'],
-        ['gear',     '🧥 裝備與衣物採購',   '1 個月前試穿磨合'],
-        ['tech',     '🔌 電源、通網與藥品', '2 週前確認']
-      ];
-
       const updateProgress = () => {
         let total = 0, done = 0;
-        groups.forEach(([key]) => {
-          (tripData.prep[key] || []).forEach((_, i) => {
+        catData.prepGroups.forEach(g => {
+          (tripData.prep[g.key] || []).forEach((_, i) => {
             total++;
-            if (localStorage.getItem(`prep-${key}-${i}`)) done++;
+            if (localStorage.getItem(`prep-${g.key}-${i}`)) done++;
           });
         });
         const pct = total ? Math.round(done / total * 100) : 0;
@@ -506,17 +518,29 @@
         const text = document.getElementById('prepProgressText');
         if (fill) fill.style.width = `${pct}%`;
         if (text) text.textContent = `${done} / ${total} 已完成 (${pct}%)`;
-        // Update tab count
         const tc = document.getElementById('tab-prep-count');
         if (tc) tc.textContent = `${done}/${total}`;
       };
 
-      groups.forEach(([key, title, sub]) => {
-        if (!tripData.prep[key]) tripData.prep[key] = [];
+      catData.prepGroups.forEach((g, gIdx) => {
+        if (!tripData.prep[g.key]) tripData.prep[g.key] = [];
         const card = buildChecklistCard(
-          title, sub, tripData.prep[key], key, 'prep',
+          g.label, g.sub, tripData.prep[g.key], g.key, 'prep',
           updateProgress, updateProgress
         );
+        const head = card.querySelector('.packing-head > div:first-child');
+        const delBtn = document.createElement('button');
+        delBtn.className = 'small-btn edit-only';
+        delBtn.style.cssText = 'font-size:11px;padding:3px 9px;color:#e74c3c;border-color:#e74c3c;display:none;margin-top:4px;';
+        delBtn.innerHTML = '<i class="fa-solid fa-trash"></i> 刪除此類別';
+        delBtn.onclick = () => {
+          if (!confirm(`確定刪除「${g.label}」類別及其所有項目？`)) return;
+          catData.prepGroups.splice(gIdx, 1);
+          delete tripData.prep[g.key];
+          saveCats(); saveItineraryToLocal(); renderPrep();
+        };
+        head.appendChild(delBtn);
+        if (editActive) delBtn.style.display = '';
         grid.appendChild(card);
       });
 
@@ -530,6 +554,19 @@
           updateProgress();
         };
       }
+
+      const addBtn = document.getElementById('addPrepCategoryBtn');
+      if (addBtn) {
+        addBtn.style.display = editActive ? '' : 'none';
+        addBtn.onclick = () => {
+          const label = prompt('新類別名稱：');
+          if (!label || !label.trim()) return;
+          const key = 'prep_custom_' + Date.now();
+          catData.prepGroups.push({ key, label: label.trim(), sub: '' });
+          tripData.prep[key] = [];
+          saveCats(); saveItineraryToLocal(); renderPrep();
+        };
+      }
     }
 
     // ── renderPacking ──────────────────────────────────────────────────
@@ -538,31 +575,37 @@
       if (!grid) return;
       grid.innerHTML = '';
 
-      const groups = [
-        ['carry',   '隨身包包',   '證件、貴重物品與途中隨時會用到'],
-        ['cabin',   '手提行李',   '托運延誤時仍能撐 1–2 天'],
-        ['checked', '托運行李',   '主要衣物與旅行用品'],
-        ['shared',  '共用／分裝', '夫妻或旅伴一起準備']
-      ];
-
       const updateCount = () => {
         let total = 0, done = 0;
-        groups.forEach(([key]) => {
-          (tripData.packing[key] || []).forEach((_, i) => {
+        catData.packingGroups.forEach(g => {
+          (tripData.packing[g.key] || []).forEach((_, i) => {
             total++;
-            if (localStorage.getItem(`pack-${key}-${i}`)) done++;
+            if (localStorage.getItem(`pack-${g.key}-${i}`)) done++;
           });
         });
         const tc = document.getElementById('tab-packing-count');
         if (tc) tc.textContent = `${done}/${total}`;
       };
 
-      groups.forEach(([key, title, sub]) => {
-        if (!tripData.packing[key]) tripData.packing[key] = [];
+      catData.packingGroups.forEach((g, gIdx) => {
+        if (!tripData.packing[g.key]) tripData.packing[g.key] = [];
         const card = buildChecklistCard(
-          title, sub, tripData.packing[key], key, 'pack',
+          g.label, g.sub, tripData.packing[g.key], g.key, 'pack',
           updateCount, updateCount
         );
+        const head = card.querySelector('.packing-head > div:first-child');
+        const delBtn = document.createElement('button');
+        delBtn.className = 'small-btn edit-only';
+        delBtn.style.cssText = 'font-size:11px;padding:3px 9px;color:#e74c3c;border-color:#e74c3c;display:none;margin-top:4px;';
+        delBtn.innerHTML = '<i class="fa-solid fa-trash"></i> 刪除此類別';
+        delBtn.onclick = () => {
+          if (!confirm(`確定刪除「${g.label}」類別及其所有項目？`)) return;
+          catData.packingGroups.splice(gIdx, 1);
+          delete tripData.packing[g.key];
+          saveCats(); saveItineraryToLocal(); renderPacking();
+        };
+        head.appendChild(delBtn);
+        if (editActive) delBtn.style.display = '';
         grid.appendChild(card);
       });
 
@@ -574,6 +617,18 @@
           Object.keys(localStorage).filter(k => k.startsWith('pack-')).forEach(k => localStorage.removeItem(k));
           grid.querySelectorAll('input[type=checkbox]').forEach(x => x.checked = false);
           updateCount();
+        };
+      }
+
+      const addBtn = document.getElementById('addPackingCategoryBtn');
+      if (addBtn) {
+        addBtn.onclick = () => {
+          const label = prompt('新類別名稱：');
+          if (!label || !label.trim()) return;
+          const key = 'pack_custom_' + Date.now();
+          catData.packingGroups.push({ key, label: label.trim(), sub: '' });
+          tripData.packing[key] = [];
+          saveCats(); saveItineraryToLocal(); renderPacking();
         };
       }
     }

@@ -220,9 +220,12 @@
       <p>三大住宿地點 · 點擊「編輯」填入入住日期、訂單號等資訊</p>
     </div>
 
-    <div class="info-bar">
-      <i class="fa-solid fa-circle-info" style="color:#e07b20;flex-shrink:0;"></i>
-      <span>點擊各住宿卡片的「✏️ 編輯」按鈕可填入入住日期、訂單號、電話等資訊，資料自動儲存在瀏覽器。</span>
+    <div class="info-bar" style="justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-circle-info" style="color:#e07b20;flex-shrink:0;"></i>
+        <span>點擊各住宿卡片的「✏️ 編輯」按鈕可填入入住日期、訂單號、電話等資訊，資料自動儲存在瀏覽器。</span>
+      </div>
+      <button class="btn secondary" id="resetHotelsBtn" style="font-size:12px;padding:7px 14px;white-space:nowrap;flex-shrink:0;"><i class="fa-solid fa-rotate-left"></i> 回復預設</button>
     </div>
 
     <!-- Hotel Cards (rendered by JS) -->
@@ -546,9 +549,23 @@
       });
     }
 
+    // ── Reset to default ──────────────────────────────────────────────
+    function resetHotels() {
+      if (!confirm('確定要清除所有個人住宿資訊並回復為預設狀態嗎？\n（此操作無法復原）')) return;
+      localStorage.removeItem(META_KEY);
+      hotels = loadHotels();
+      renderCards();
+      setTimeout(() => { Object.keys(miniMaps).forEach(id => { miniMaps[id].remove(); delete miniMaps[id]; }); hotels.forEach(h => initMiniMap(h.id, h.lat, h.lng)); }, 80);
+      const toast = document.getElementById('saveToast');
+      toast.textContent = '🔄 已回復為預設住宿資訊';
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); toast.textContent = '✅ 住宿資訊已儲存'; }, 2500);
+    }
+
     // ── Init ──────────────────────────────────────────────────────────
     renderCards();
     setTimeout(initFullMap, 100);
+    document.getElementById('resetHotelsBtn').onclick = resetHotels;
   </script>
 </body>
 </html>

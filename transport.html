@@ -341,7 +341,7 @@
       const container = document.getElementById('transport-timeline');
       container.innerHTML = '';
 
-      transports.forEach(item => {
+      transports.forEach((item, index) => {
         const catInfo = CATEGORY_MAP[item.type] || CATEGORY_MAP.flight;
         const el = document.createElement('div');
         el.className = 'timeline-item';
@@ -357,6 +357,9 @@
 
         const flightNoVal = item.flightNo || '待填';
 
+        const isFirst = index === 0;
+        const isLast = index === transports.length - 1;
+
         el.innerHTML = `
           <div class="timeline-icon ${catInfo.iconCls}"><i class="fa-solid ${catInfo.icon}"></i></div>
           <div class="boarding-pass">
@@ -366,11 +369,16 @@
                 <span class="bp-arrow"><i class="fa-solid fa-arrow-right"></i></span>
                 <span class="bp-city">${item.routeTo || '終點'}</span>
               </div>
-              <div style="display:flex;align-items:center;gap:10px;">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                 <span class="bp-carrier">${catInfo.name}</span>
-                <button class="btn primary" style="font-size:12px;padding:5px 12px;" onclick="toggleEdit('${item.id}', true)"><i class="fa-solid fa-pen"></i> 編輯</button>
+                <div style="display:inline-flex;gap:4px;margin-left:4px;">
+                  ${!isFirst ? `<button class="btn secondary" style="font-size:11px;padding:3px 8px;" onclick="moveTransport(${index}, -1)" title="向上移動"><i class="fa-solid fa-arrow-up"></i></button>` : ''}
+                  ${!isLast ? `<button class="btn secondary" style="font-size:11px;padding:3px 8px;" onclick="moveTransport(${index}, 1)" title="向下移動"><i class="fa-solid fa-arrow-down"></i></button>` : ''}
+                </div>
+                <button class="btn primary" style="font-size:12px;padding:5px 12px;margin-left:4px;" onclick="toggleEdit('${item.id}', true)"><i class="fa-solid fa-pen"></i> 編輯</button>
               </div>
             </div>
+
 
             <!-- Top 3 Grid Cards -->
             <div class="bp-body">
@@ -471,7 +479,18 @@
       renderTimeline();
     }
 
+    function moveTransport(index, direction) {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= transports.length) return;
+      const temp = transports[index];
+      transports[index] = transports[targetIndex];
+      transports[targetIndex] = temp;
+      saveTransports(transports);
+      renderTimeline();
+    }
+
     function deleteTransport(id) {
+
       if (confirm('確定要刪除此筆交通行程嗎？')) {
         transports = transports.filter(x => x.id !== id);
         saveTransports(transports);

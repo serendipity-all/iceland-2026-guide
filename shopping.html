@@ -39,6 +39,7 @@
       gap: 8px;
       padding: 20px clamp(18px,5vw,78px) 0;
       flex-wrap: wrap;
+      align-items: center;
     }
     .filter-btn {
       background: var(--surface);
@@ -53,6 +54,33 @@
     }
     .filter-btn:hover { background: var(--line); }
     .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* Add item form */
+    .add-item-form {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin: 16px clamp(18px,5vw,78px) 0;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .add-item-form.open { display: flex; }
+    .add-item-form input, .add-item-form select, .add-item-form textarea {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--ink);
+      font-family: inherit;
+    }
+    .add-item-form input { flex: 1; min-width: 140px; }
+    .add-item-form select { min-width: 110px; }
+    .add-item-form textarea { flex: 1 1 100%; min-width: 200px; resize: vertical; min-height: 56px; }
+    .add-item-form .form-row { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; }
+    .add-item-form .form-actions { display: flex; gap: 8px; width: 100%; }
 
     /* Shopping grid */
     .shopping-grid {
@@ -79,53 +107,71 @@
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 12px;
       margin-bottom: 10px;
+      gap: 6px;
     }
+    .shop-card-top-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .cat-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .cat-food  { background: rgba(224,123,32,0.12); color: #c06010; }
+    .cat-craft { background: rgba(108,52,131,0.12); color: #7b3d99; }
+    .cat-store { background: rgba(47,174,132,0.12); color: #2a9e76; }
 
     .shop-check {
       width: 24px; height: 24px;
       border-radius: 50%;
       border: 2px solid var(--line);
       display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
       flex-shrink: 0;
       transition: all 0.15s;
-      font-size: 12px;
+      background: var(--bg);
     }
     .shop-check.checked { background: #2fae84; border-color: #2fae84; color: white; }
 
-    .cat-badge {
-      font-size: 11px; font-weight: 800;
-      padding: 3px 9px; border-radius: 999px;
-      letter-spacing: 0.04em;
+    .shop-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
     }
-    .cat-food  { background: rgba(224,123,32,0.12); color: #9b4a0a; border:1px solid rgba(224,123,32,0.25); }
-    .cat-craft { background: rgba(108,52,131,0.12); color: #5a2076; border:1px solid rgba(108,52,131,0.25); }
-    .cat-store { background: rgba(47,174,132,0.12); color: #1a7a5a; border:1px solid rgba(47,174,132,0.25); }
-
-    .shop-name { font-size: 15px; font-weight: 800; margin: 0 0 4px; }
-    .shop-name-en { font-size: 11px; color: var(--muted); margin: 0 0 8px; }
-    .shop-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0 0 12px; }
-
-    .shop-meta { display: flex; flex-direction: column; gap: 5px; }
-    .shop-meta-row {
-      display: flex; align-items: flex-start; gap: 7px;
-      font-size: 12px; color: var(--muted);
+    .shop-del-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 3px 5px;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+      line-height: 1;
     }
-    .shop-meta-row i { flex-shrink: 0; margin-top: 1px; width: 14px; text-align: center; }
-    .shop-meta-row .price { font-weight: 700; color: var(--accent); }
+    .shop-del-btn:hover { color: #e03030; background: rgba(224,48,48,0.08); }
+
+    .shop-name { font-size: 16px; font-weight: 800; color: var(--ink); margin-bottom: 2px; }
+    .shop-name-en { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .shop-desc { font-size: 13px; color: var(--ink); line-height: 1.55; margin-bottom: 12px; }
+    .shop-meta { display: flex; flex-direction: column; gap: 4px; }
+    .shop-meta-row { display: flex; align-items: flex-start; gap: 6px; font-size: 12px; color: var(--muted); }
+    .shop-meta-row i { width: 14px; flex-shrink: 0; margin-top: 2px; }
+    .price { font-weight: 700; color: var(--accent); }
 
     .day-link-btn {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--accent);
+      gap: 5px;
       background: rgba(224,123,32,0.1);
-      border: 1px solid rgba(224,123,32,0.2);
+      color: var(--accent);
       border-radius: 999px;
-      padding: 2px 9px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 700;
       text-decoration: none;
       margin-top: 8px;
       transition: all 0.15s;
@@ -200,7 +246,7 @@
   <main>
     <div class="page-hero">
       <h1>🛋️ 伴手禮 &amp; 必買清單</h1>
-      <p>食品 · 手工藝品 · 必逛店家 — 勾選已購買，自動計算進度</p>
+      <p>食品 · 手工藝品 · 必逛店家 — 勾選已購買，＋新增自訂項目</p>
     </div>
 
     <!-- Budget / Progress bar -->
@@ -211,7 +257,7 @@
       </div>
       <div class="budget-divider"></div>
       <div class="budget-stat">
-        <div class="num" id="stat-total">12</div>
+        <div class="num" id="stat-total">0</div>
         <div class="lbl">清單總數</div>
       </div>
       <div class="budget-divider"></div>
@@ -221,12 +267,37 @@
       </div>
     </div>
 
-    <!-- Filter buttons -->
+    <!-- Filter buttons + Add button -->
     <div class="filter-bar">
       <button class="filter-btn active" data-cat="all" onclick="filterCards('all', this)">🛒 全部</button>
       <button class="filter-btn" data-cat="food" onclick="filterCards('food', this)">🍫 食品</button>
       <button class="filter-btn" data-cat="craft" onclick="filterCards('craft', this)">🧣 紀念品</button>
       <button class="filter-btn" data-cat="store" onclick="filterCards('store', this)">🏪 必逛店家</button>
+      <button class="btn primary" id="addItemToggle" style="font-size:12px;padding:7px 14px;margin-left:auto;white-space:nowrap;"><i class="fa-solid fa-plus"></i> 新增項目</button>
+    </div>
+
+    <!-- Add item inline form -->
+    <div class="add-item-form" id="addItemForm">
+      <div class="form-row">
+        <input id="fi-name" type="text" placeholder="品名（必填）" style="min-width:160px;" />
+        <input id="fi-name-en" type="text" placeholder="英文名" style="min-width:120px;" />
+        <select id="fi-cat">
+          <option value="food">🍫 食品</option>
+          <option value="craft">🧣 紀念品</option>
+          <option value="store">🏪 店家</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <textarea id="fi-desc" placeholder="說明（選填）"></textarea>
+      </div>
+      <div class="form-row">
+        <input id="fi-price" type="text" placeholder="參考價格（選填）" style="min-width:140px;" />
+        <input id="fi-where" type="text" placeholder="購買地點（選填）" style="min-width:160px;" />
+      </div>
+      <div class="form-actions">
+        <button class="btn primary" id="addItemSave" style="font-size:13px;padding:8px 18px;">＋ 加入清單</button>
+        <button class="btn secondary" id="addItemCancel" style="font-size:13px;padding:8px 16px;">取消</button>
+      </div>
     </div>
 
     <!-- Shopping grid (rendered by JS) -->
@@ -259,20 +330,24 @@
         : '<i class="fa-solid fa-bars"></i> <span>選單</span>';
     };
 
-    // Shopping data
-    const shoppingItems = [
-      { id:'sh-skyr',      cat:'food',  name:'Skyr 冰島優格',        nameEn:'Skyr',                              desc:'冰島國民食品，高蛋白低脂，在地口感版本台灣買不到。',                        price:'300–600 ISK',    where:'Bonus 超市、10-11 便利商店',          dayLink:1  },
-      { id:'sh-hardfiskur',cat:'food',  name:'魚乾 Harðfiskur',      nameEn:'Harðfiskur (dried fish)',           desc:'冰島傳統零食，高蛋白風乾魚片，通常搭奶油吃。',                           price:'800–1500 ISK',   where:'Bonus 超市、機場免稅區',              dayLink:11 },
-      { id:'sh-licorice',  cat:'food',  name:'甘草糖 / 海鹽巧克力',  nameEn:'Licorice & Sea Salt Chocolate',    desc:'冰島人超愛甘草味；Nói Síríus 海鹽巧克力是必帶伴手禮。',                   price:'500–1200 ISK',   where:'Rammagerðin、Bonus 超市、機場',      dayLink:8  },
-      { id:'sh-brenniv',   cat:'food',  name:'冰島燒酒 Brennivín',   nameEn:'Brennivín',                        desc:'黑標冰島傳統烈酒，綽號「黑色死亡」，葛縷子風味。',                        price:'3000–5000 ISK',  where:'State Alcohol Stores (Vínbúðin)',     dayLink:8  },
-      { id:'sh-lopapeysa', cat:'craft', name:'冰島羊毛衣 Lopapeysa', nameEn:'Lopapeysa Wool Sweater',           desc:'冰島傳統幾何花紋羊毛衫，保暖又有型，真品在 Rammagerðin。',               price:'15000–30000 ISK',where:'Rammagerðin 手工藝品店 (Laugavegur 12)', dayLink:8  },
-      { id:'sh-woolblanket',cat:'craft',name:'羊毛毯 / 羊毛帽',     nameEn:'Wool Blanket / Hat',                desc:'比羊毛衣輕巧，方便攜帶，選購手工款更有質感。',                           price:'5000–15000 ISK', where:'Rammagerðin、Handprjónasambandið',    dayLink:8  },
-      { id:'sh-puffin',    cat:'craft', name:'海鸚玩偶 Puffin',      nameEn:'Puffin Stuffed Toy',               desc:'冰島標誌性鳥類，毛絨玩具質感差異大，建議選中高端版。',                    price:'2000–5000 ISK',  where:'各景點紀念品店、市區禮品店',           dayLink:8  },
-      { id:'sh-lavasalt',  cat:'craft', name:'冰島火山熔岩鹽',       nameEn:'Icelandic Lava Salt',              desc:'以冰島海鹽加入熔岩礦物提煉，料理送禮兩相宜。',                           price:'1500–3000 ISK',  where:'Bonus 超市、紀念品店',                dayLink:9  },
-      { id:'sh-bonus',     cat:'store', name:'Bonus 超市 🐷',        nameEn:'Bonus Supermarket',                desc:'粉紅豬圖標的冰島最大平價超市，食品伴手禮首選，比機場便宜很多。',          price:'依購買',         where:'雷克雅維克多點；建議離境前一天補貨',  dayLink:8  },
-      { id:'sh-ramma',     cat:'store', name:'Rammagerðin 手工藝品', nameEn:'Rammagerðin',                      desc:'冰島最知名的傳統手工藝品專賣店，羊毛衣、皮革、珠寶、陶藝都有。',         price:'依購買',         where:'Laugavegur 12, Reykjavik（步行街核心）', dayLink:8  },
-      { id:'sh-kronborg',  cat:'store', name:'Kraum 設計品店',       nameEn:'Kraum',                            desc:'冰島當代設計師聯合展售，質感比紀念品店高很多。',                         price:'依購買',         where:'Harpa 音樂廳旁邊',                    dayLink:8  },
-      { id:'sh-dutyfree',  cat:'store', name:'機場免稅商店',          nameEn:'Keflavík Airport Duty Free',       desc:'回程時間充裕就多逛；酒類、巧克力、魚乾在這比市區便宜。',                  price:'依購買',         where:'Keflavík 機場出境後',                dayLink:11 }
+    // ── Storage keys ─────────────────────────────────────────────────────
+    const ITEMS_KEY  = 'iceland_shopping_v13';
+    const BOUGHT_KEY = 'iceland_shopping_bought';
+
+    // ── Default items ────────────────────────────────────────────────────
+    const DEFAULT_ITEMS = [
+      { id:'sh-skyr',      cat:'food',  name:'Skyr 冰島優格',        nameEn:'Skyr',                           desc:'冰島國民食品，高蛋白低脂，在地口感版本台灣買不到。',                    price:'300–600 ISK',    where:'Bonus 超市、10-11 便利商店',             dayLink:1  },
+      { id:'sh-hardfiskur',cat:'food',  name:'魚乾 Harðfiskur',      nameEn:'Harðfiskur (dried fish)',        desc:'冰島傳統零食，高蛋白風乾魚片，通常搭奶油吃。',                         price:'800–1500 ISK',   where:'Bonus 超市、機場免稅區',                 dayLink:11 },
+      { id:'sh-licorice',  cat:'food',  name:'甘草糖 / 海鹽巧克力',  nameEn:'Licorice & Sea Salt Chocolate', desc:'冰島人超愛甘草味；Nói Síríus 海鹽巧克力是必帶伴手禮。',                  price:'500–1200 ISK',   where:'Rammagerðin、Bonus 超市、機場',          dayLink:8  },
+      { id:'sh-brenniv',   cat:'food',  name:'冰島燒酒 Brennivín',   nameEn:'Brennivín',                     desc:'黑標冰島傳統烈酒，綽號「黑色死亡」，葛縷子風味。',                       price:'3000–5000 ISK',  where:'State Alcohol Stores (Vínbúðin)',        dayLink:8  },
+      { id:'sh-lopapeysa', cat:'craft', name:'冰島羊毛衣 Lopapeysa', nameEn:'Lopapeysa Wool Sweater',        desc:'冰島傳統幾何花紋羊毛衫，保暖又有型，真品在 Rammagerðin。',              price:'15000–30000 ISK',where:'Rammagerðin 手工藝品店 (Laugavegur 12)', dayLink:8  },
+      { id:'sh-woolblanket',cat:'craft',name:'羊毛毯 / 羊毛帽',      nameEn:'Wool Blanket / Hat',             desc:'比羊毛衣輕巧，方便攜帶，選購手工款更有質感。',                          price:'5000–15000 ISK', where:'Rammagerðin、Handprjónasambandið',        dayLink:8  },
+      { id:'sh-puffin',    cat:'craft', name:'海鸚玩偶 Puffin',      nameEn:'Puffin Stuffed Toy',            desc:'冰島標誌性鳥類，毛絨玩具質感差異大，建議選中高端版。',                   price:'2000–5000 ISK',  where:'各景點紀念品店、市區禮品店',              dayLink:8  },
+      { id:'sh-lavasalt',  cat:'craft', name:'冰島火山熔岩鹽',       nameEn:'Icelandic Lava Salt',           desc:'以冰島海鹽加入熔岩礦物提煉，料理送禮兩相宜。',                          price:'1500–3000 ISK',  where:'Bonus 超市、紀念品店',                   dayLink:9  },
+      { id:'sh-bonus',     cat:'store', name:'Bonus 超市 🐷',        nameEn:'Bonus Supermarket',             desc:'粉紅豬圖標的冰島最大平價超市，食品伴手禮首選，比機場便宜很多。',         price:'依購買',         where:'雷克雅維克多點；建議離境前一天補貨',     dayLink:8  },
+      { id:'sh-ramma',     cat:'store', name:'Rammagerðin 手工藝品', nameEn:'Rammagerðin',                   desc:'冰島最知名的傳統手工藝品專賣店，羊毛衣、皮革、珠寶、陶藝都有。',        price:'依購買',         where:'Laugavegur 12, Reykjavik（步行街核心）', dayLink:8  },
+      { id:'sh-kronborg',  cat:'store', name:'Kraum 設計品店',       nameEn:'Kraum',                         desc:'冰島當代設計師聯合展售，質感比紀念品店高很多。',                         price:'依購買',         where:'Harpa 音樂廳旁邊',                       dayLink:8  },
+      { id:'sh-dutyfree',  cat:'store', name:'機場免稅商店',          nameEn:'Keflavík Airport Duty Free',    desc:'回程時間充裕就多逛；酒類、巧克力、魚乾在這比市區便宜。',                 price:'依購買',         where:'Keflavík 機場出境後',                    dayLink:11 }
     ];
 
     // Category labels
@@ -282,25 +357,46 @@
       store: { label:'🏪 店家',   cls:'cat-store' }
     };
 
-    // LocalStorage state
-    const STORAGE_KEY = 'iceland_shopping_bought';
-    let boughtSet = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+    // ── Load / Save ──────────────────────────────────────────────────────
+    function loadItems() {
+      try {
+        const raw = localStorage.getItem(ITEMS_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch(e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_ITEMS)); // deep copy
+    }
+
+    function saveItems() {
+      localStorage.setItem(ITEMS_KEY, JSON.stringify(shoppingItems));
+    }
+
+    let shoppingItems = loadItems();
+    let boughtSet = new Set(JSON.parse(localStorage.getItem(BOUGHT_KEY) || '[]'));
 
     function saveBought() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...boughtSet]));
+      localStorage.setItem(BOUGHT_KEY, JSON.stringify([...boughtSet]));
     }
 
     function updateStats() {
-      const total = shoppingItems.length;
-      const bought = boughtSet.size;
+      const visible = shoppingItems;
+      const bought = visible.filter(i => boughtSet.has(i.id)).length;
       document.getElementById('stat-bought').textContent = bought;
-      document.getElementById('stat-total').textContent = total;
-      document.getElementById('stat-pct').textContent = Math.round(bought / total * 100) + '%';
+      document.getElementById('stat-total').textContent = visible.length;
+      document.getElementById('stat-pct').textContent = visible.length ? Math.round(bought / visible.length * 100) + '%' : '0%';
     }
 
     function toggleBought(id) {
       if (boughtSet.has(id)) boughtSet.delete(id);
       else boughtSet.add(id);
+      saveBought();
+      renderGrid(document.querySelector('.filter-btn.active')?.dataset.cat || 'all');
+    }
+
+    function deleteItem(id) {
+      if (!confirm('確定刪除此伴手禮項目？')) return;
+      shoppingItems = shoppingItems.filter(i => i.id !== id);
+      boughtSet.delete(id);
+      saveItems();
       saveBought();
       renderGrid(document.querySelector('.filter-btn.active')?.dataset.cat || 'all');
     }
@@ -311,31 +407,39 @@
       const items = catFilter === 'all' ? shoppingItems : shoppingItems.filter(i => i.cat === catFilter);
       items.forEach(item => {
         const bought = boughtSet.has(item.id);
-        const cat = catInfo[item.cat];
+        const cat = catInfo[item.cat] || { label: item.cat, cls: 'cat-store' };
         const card = document.createElement('div');
         card.className = 'shop-card' + (bought ? ' bought' : '');
-        card.onclick = () => toggleBought(item.id);
         card.innerHTML = `
           <div class="done-banner">✓ 已購買</div>
           <div class="shop-card-top">
-            <span class="cat-badge ${cat.cls}">${cat.label}</span>
-            <div class="shop-check ${bought ? 'checked' : ''}">${bought ? '✓' : ''}</div>
+            <div class="shop-card-top-left">
+              <span class="cat-badge ${cat.cls}">${cat.label}</span>
+            </div>
+            <div class="shop-card-actions">
+              <div class="shop-check ${bought ? 'checked' : ''}">${bought ? '✓' : ''}</div>
+              <button class="shop-del-btn" data-id="${item.id}" title="刪除此項目"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
           </div>
           <div class="shop-name">${item.name}</div>
-          <div class="shop-name-en">${item.nameEn}</div>
-          <div class="shop-desc">${item.desc}</div>
+          <div class="shop-name-en">${item.nameEn || ''}</div>
+          <div class="shop-desc">${item.desc || ''}</div>
           <div class="shop-meta">
-            <div class="shop-meta-row">
-              <i class="fa-solid fa-tag"></i>
-              <span class="price">${item.price}</span>
-            </div>
-            <div class="shop-meta-row">
-              <i class="fa-solid fa-location-dot"></i>
-              <span>${item.where}</span>
-            </div>
+            ${item.price ? `<div class="shop-meta-row"><i class="fa-solid fa-tag"></i><span class="price">${item.price}</span></div>` : ''}
+            ${item.where ? `<div class="shop-meta-row"><i class="fa-solid fa-location-dot"></i><span>${item.where}</span></div>` : ''}
           </div>
           ${item.dayLink ? `<a class="day-link-btn" href="index.html#day-${item.dayLink}" onclick="event.stopPropagation()"><i class="fa-solid fa-calendar-day"></i> Day ${item.dayLink} 行程</a>` : ''}
         `;
+        // Toggle bought on card click (not delete btn)
+        card.onclick = (e) => {
+          if (e.target.closest('.shop-del-btn')) return;
+          toggleBought(item.id);
+        };
+        // Delete button
+        card.querySelector('.shop-del-btn').onclick = (e) => {
+          e.stopPropagation();
+          deleteItem(item.id);
+        };
         grid.appendChild(card);
       });
       updateStats();
@@ -346,6 +450,57 @@
       btn.classList.add('active');
       renderGrid(cat);
     }
+
+    // ── Add item form ─────────────────────────────────────────────────────
+    const addItemToggle = document.getElementById('addItemToggle');
+    const addItemForm   = document.getElementById('addItemForm');
+    const addItemSave   = document.getElementById('addItemSave');
+    const addItemCancel = document.getElementById('addItemCancel');
+
+    addItemToggle.onclick = () => {
+      addItemForm.classList.toggle('open');
+      addItemToggle.innerHTML = addItemForm.classList.contains('open')
+        ? '<i class="fa-solid fa-xmark"></i> 收起'
+        : '<i class="fa-solid fa-plus"></i> 新增項目';
+    };
+
+    addItemCancel.onclick = () => {
+      addItemForm.classList.remove('open');
+      addItemToggle.innerHTML = '<i class="fa-solid fa-plus"></i> 新增項目';
+      clearForm();
+    };
+
+    function clearForm() {
+      ['fi-name','fi-name-en','fi-desc','fi-price','fi-where'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      const cat = document.getElementById('fi-cat');
+      if (cat) cat.value = 'food';
+    }
+
+    addItemSave.onclick = () => {
+      const name = document.getElementById('fi-name').value.trim();
+      if (!name) { alert('請填入品名！'); return; }
+      const newItem = {
+        id:     'sh-custom-' + Date.now(),
+        cat:    document.getElementById('fi-cat').value,
+        name,
+        nameEn: document.getElementById('fi-name-en').value.trim(),
+        desc:   document.getElementById('fi-desc').value.trim(),
+        price:  document.getElementById('fi-price').value.trim(),
+        where:  document.getElementById('fi-where').value.trim(),
+        dayLink: 0
+      };
+      shoppingItems.push(newItem);
+      saveItems();
+      clearForm();
+      addItemForm.classList.remove('open');
+      addItemToggle.innerHTML = '<i class="fa-solid fa-plus"></i> 新增項目';
+      // Switch to that category filter
+      const targetBtn = document.querySelector(`.filter-btn[data-cat="${newItem.cat}"]`) || document.querySelector('.filter-btn[data-cat="all"]');
+      filterCards('all', document.querySelector('.filter-btn[data-cat="all"]'));
+    };
 
     // Init
     renderGrid('all');

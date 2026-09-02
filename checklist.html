@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
@@ -137,7 +137,6 @@
       <a href="checklist.html" style="color:var(--accent);font-weight:800;">✅ 清單</a>
     </nav>
     <div class="topbar-actions">
-      <button id="editModeBtn" class="edit-mode-btn"><i class="fa-solid fa-pen-to-square"></i> ✏️ 編輯模式</button>
       <button id="themeBtn" class="icon-btn" aria-label="切換深色模式">☾</button>
       <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="開啟選單"><i class="fa-solid fa-bars"></i> <span>選單</span></button>
     </div>
@@ -153,15 +152,12 @@
       <a href="shopping.html" class="drawer-link">🛋️ 伴手禮清單 <span>↗</span></a>
       <a href="checklist.html" class="drawer-link" style="color:var(--accent);">✅ 準備清單 <span>↗</span></a>
     </nav>
-    <div class="mobile-drawer-actions">
-      <button id="mobile-edit-btn" class="edit-mode-btn"><i class="fa-solid fa-pen-to-square"></i> ✏️ 編輯模式</button>
-    </div>
   </div>
 
   <main>
     <div class="page-hero">
       <h1>✅ 準備清單</h1>
-      <p>行前準備 · 行李打包 — 勾選進度自動儲存，編輯模式可增刪項目</p>
+      <p>行前準備 · 行李打包 — 點「✏️ 編輯」可增刪項目；「＋ 新增類別」可新增分類卡片</p>
     </div>
 
     <!-- Tab bar -->
@@ -176,11 +172,6 @@
       </button>
     </div>
 
-    <!-- Edit hint bar -->
-    <div class="edit-hint">
-      <i class="fa-solid fa-pen" style="color:var(--accent);flex-shrink:0;"></i>
-      <span>編輯模式已開啟！點卡片上的「✏️ 編輯」可增删項目；每個面板下方的「＋ 新增類別」可新增一張分類卡片。</span>
-    </div>
 
     <!-- ── Tab: 行前準備 ───────────────────────────────────────────── -->
     <div class="tab-panel active" id="panel-prep">
@@ -201,7 +192,7 @@
         </div>
 
         <div id="prepGrid" class="packing-grid"></div>
-        <div class="edit-only" style="display:none;padding:0 0 20px;">
+        <div style="padding:0 0 20px;">
           <button class="btn secondary" id="addPrepCategoryBtn" style="font-size:13px;padding:9px 18px;"><i class="fa-solid fa-plus"></i> 新增類別</button>
         </div>
       </div>
@@ -219,7 +210,7 @@
         </div>
 
         <div id="packingGrid" class="packing-grid"></div>
-        <div class="edit-only" style="display:none;padding:0 0 20px;">
+        <div style="padding:0 0 20px;">
           <button class="btn secondary" id="addPackingCategoryBtn" style="font-size:13px;padding:9px 18px;"><i class="fa-solid fa-plus"></i> 新增類別</button>
         </div>
 
@@ -258,28 +249,6 @@
         : '<i class="fa-solid fa-bars"></i> <span>選單</span>';
     };
 
-    // ── Edit mode ──────────────────────────────────────────────────────
-    let editActive = false;
-    const editModeBtn = document.getElementById('editModeBtn');
-    const mobileEditBtn = document.getElementById('mobile-edit-btn');
-    function toggleEdit() {
-      editActive = !editActive;
-      document.body.classList.toggle('edit-active', editActive);
-      [editModeBtn, mobileEditBtn].forEach(btn => {
-        if (!btn) return;
-        btn.innerHTML = editActive
-          ? '<i class="fa-solid fa-check"></i> ✅ 結束編輯'
-          : '<i class="fa-solid fa-pen-to-square"></i> ✏️ 編輯模式';
-        btn.style.background = editActive ? 'var(--accent)' : '';
-        btn.style.color = editActive ? 'white' : '';
-        btn.style.borderColor = editActive ? 'var(--accent)' : '';
-      });
-      document.querySelectorAll('.edit-only').forEach(el => {
-        el.style.display = editActive ? '' : 'none';
-      });
-    }
-    if (editModeBtn)   editModeBtn.onclick   = toggleEdit;
-    if (mobileEditBtn) mobileEditBtn.onclick = toggleEdit;
 
     // ── Load tripData from localStorage ───────────────────────────────
     const TRIP_KEY = 'iceland_2026_trip_data';
@@ -420,7 +389,7 @@
           <div><h3>${title}</h3><p>${sub}</p></div>
           <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
             <span class="cl-count">${items.length} 項</span>
-            <button class="small-btn edit-only cl-edit-btn" style="font-size:11px;padding:4px 10px;display:none;">✏️ 編輯</button>
+            <button class="small-btn cl-edit-btn" style="font-size:11px;padding:4px 10px;">✏️ 編輯</button>
           </div>
         </div>
         <div class="check-list"></div>
@@ -465,7 +434,6 @@
       };
       renderCheckRows();
 
-      editBtn.style.display = editActive ? '' : 'none';
       editBtn.onclick = () => {
         editList.innerHTML = '';
         items.forEach(item => addEditRow(item, editList));
@@ -528,19 +496,19 @@
           g.label, g.sub, tripData.prep[g.key], g.key, 'prep',
           updateProgress, updateProgress
         );
-        const head = card.querySelector('.packing-head > div:first-child');
+        const headRight = card.querySelector('.packing-head > div:last-child');
         const delBtn = document.createElement('button');
-        delBtn.className = 'small-btn edit-only';
-        delBtn.style.cssText = 'font-size:11px;padding:3px 9px;color:#e74c3c;border-color:#e74c3c;display:none;margin-top:4px;';
-        delBtn.innerHTML = '<i class="fa-solid fa-trash"></i> 刪除此類別';
+        delBtn.className = 'small-btn';
+        delBtn.style.cssText = 'font-size:11px;padding:3px 9px;color:#e74c3c;border-color:#e74c3c;margin-left:4px;';
+        delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+        delBtn.title = '刪除此類別';
         delBtn.onclick = () => {
           if (!confirm(`確定刪除「${g.label}」類別及其所有項目？`)) return;
           catData.prepGroups.splice(gIdx, 1);
           delete tripData.prep[g.key];
           saveCats(); saveItineraryToLocal(); renderPrep();
         };
-        head.appendChild(delBtn);
-        if (editActive) delBtn.style.display = '';
+        headRight.appendChild(delBtn);
         grid.appendChild(card);
       });
 
@@ -557,7 +525,6 @@
 
       const addBtn = document.getElementById('addPrepCategoryBtn');
       if (addBtn) {
-        addBtn.style.display = editActive ? '' : 'none';
         addBtn.onclick = () => {
           const label = prompt('新類別名稱：');
           if (!label || !label.trim()) return;
@@ -593,19 +560,19 @@
           g.label, g.sub, tripData.packing[g.key], g.key, 'pack',
           updateCount, updateCount
         );
-        const head = card.querySelector('.packing-head > div:first-child');
+        const headRight = card.querySelector('.packing-head > div:last-child');
         const delBtn = document.createElement('button');
-        delBtn.className = 'small-btn edit-only';
-        delBtn.style.cssText = 'font-size:11px;padding:3px 9px;color:#e74c3c;border-color:#e74c3c;display:none;margin-top:4px;';
-        delBtn.innerHTML = '<i class="fa-solid fa-trash"></i> 刪除此類別';
+        delBtn.className = 'small-btn';
+        delBtn.style.cssText = 'font-size:11px;padding:3px 9px;color:#e74c3c;border-color:#e74c3c;margin-left:4px;';
+        delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+        delBtn.title = '刪除此類別';
         delBtn.onclick = () => {
           if (!confirm(`確定刪除「${g.label}」類別及其所有項目？`)) return;
           catData.packingGroups.splice(gIdx, 1);
           delete tripData.packing[g.key];
           saveCats(); saveItineraryToLocal(); renderPacking();
         };
-        head.appendChild(delBtn);
-        if (editActive) delBtn.style.display = '';
+        headRight.appendChild(delBtn);
         grid.appendChild(card);
       });
 

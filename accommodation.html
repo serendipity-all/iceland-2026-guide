@@ -217,15 +217,18 @@
   <main>
     <div class="page-hero">
       <h1>🏠 住宿資訊</h1>
-      <p>三大住宿地點 · 點擊「編輯」填入入住日期、訂單號等資訊</p>
+      <p>住宿地點管理 · 點「✏️ 編輯」填入入住日期、訂單號等資訊</p>
     </div>
 
-    <div class="info-bar" style="justify-content:space-between;">
+    <div class="info-bar" style="justify-content:space-between;flex-wrap:wrap;gap:10px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <i class="fa-solid fa-circle-info" style="color:#e07b20;flex-shrink:0;"></i>
-        <span>點擊各住宿卡片的「✏️ 編輯」按鈕可填入入住日期、訂單號、電話等資訊，資料自動儲存在瀏覽器。</span>
+        <span>點擊各住宿卡片的「✏️ 編輯」可填入入住日期、訂單號、電話等資訊，資料自動儲存在瀏覽器。</span>
       </div>
-      <button class="btn secondary" id="resetHotelsBtn" style="font-size:12px;padding:7px 14px;white-space:nowrap;flex-shrink:0;"><i class="fa-solid fa-rotate-left"></i> 回復預設</button>
+      <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;">
+        <button class="btn primary" id="addHotelBtn" style="font-size:12px;padding:7px 14px;white-space:nowrap;"><i class="fa-solid fa-plus"></i> 新增住宿</button>
+        <button class="btn secondary" id="resetHotelsBtn" style="font-size:12px;padding:7px 14px;white-space:nowrap;"><i class="fa-solid fa-rotate-left"></i> 回復預設</button>
+      </div>
     </div>
 
     <!-- Hotel Cards (rendered by JS) -->
@@ -271,8 +274,8 @@
       { id:'h-egs', nameZh:'埃伊爾斯塔德住宿', city:'埃伊爾斯塔德 Egilsstaðir', address:'Lyngási 5-7, 700 Egilsstaðir, Iceland', lat:65.2719, lng:-14.3948, checkIn:'15:00', checkOut:'11:00', booking:'', phone:'', website:'', notes:'' }
     ];
 
-    const META_KEY = 'iceland_hotels_data';       // hotel name/booking/phone/notes
-    const TRIP_KEY = 'iceland_2026_trip_data';    // hotelId per day (shared with index.html)
+    const META_KEY = 'iceland_hotels_v13';         // full hotel list incl. custom
+    const TRIP_KEY = 'iceland_2026_trip_data';      // hotelId per day (shared with index.html)
 
     // ── Read trip days from shared key → derive nights per hotel ─────
     function getNightsFromTrip(hotelId) {
@@ -299,26 +302,29 @@
       } catch(e) { console.warn('setDayHotelInTrip failed', e); return false; }
     }
 
-    // ── Load merged hotel data ────────────────────────────────────────
+    // ── Load hotel list (base + custom from localStorage) ────────────
     function loadHotels() {
       try {
-        const savedMeta = JSON.parse(localStorage.getItem(META_KEY) || '[]');
-        return BASE_HOTELS.map(base => {
-          const meta = savedMeta.find(x => x.id === base.id) || {};
-          const nights = getNightsFromTrip(base.id);  // always from trip data
-          return { ...base, ...meta, nights };
-        });
-      } catch(e) { return BASE_HOTELS.map(h => ({ ...h, nights: [] })); }
+        const saved = JSON.parse(localStorage.getItem(META_KEY) || 'null');
+        if (saved && Array.isArray(saved) && saved.length > 0) {
+          return saved.map(h => ({ ...h, nights: getNightsFromTrip(h.id) }));
+        }
+      } catch(e) {}
+      return BASE_HOTELS.map(h => ({ ...h, nights: getNightsFromTrip(h.id) }));
     }
 
-    // ── Save only metadata (name/booking/phone/notes) ──────────────────
-    function saveMeta(hotels) {
-      const meta = hotels.map(({ id, nameZh, checkIn, checkOut, booking, phone, website, notes }) =>
-        ({ id, nameZh, checkIn, checkOut, booking, phone, website, notes }));
-      localStorage.setItem(META_KEY, JSON.stringify(meta));
-      const toast = document.getElementById('saveToast');
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2500);
+    // ── Save full hotel list to localStorage ──────────────────────────
+    function saveMeta(hotelsArr, silent) {
+      const toSave = hotelsArr.map(({ id, nameZh, city, address, lat, lng, checkIn, checkOut, booking, phone, website, notes }) =>
+        ({ id, nameZh: nameZh||'', city: city||'', address: address||'', lat: lat||0, lng: lng||0,
+           checkIn: checkIn||'', checkOut: checkOut||'', booking: booking||'', phone: phone||'', website: website||'', notes: notes||'' }));
+      localStorage.setItem(META_KEY, JSON.stringify(toSave));
+      if (!silent) {
+        const toast = document.getElementById('saveToast');
+        toast.textContent = '✅ 住宿資訊已儲存';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+      }
     }
 
     // ── Mini maps ─────────────────────────────────────────────────────
@@ -410,6 +416,7 @@
         const card = document.createElement('div');
         card.className = 'hotel-card';
         card.id = 'hotel-card-' + h.id;
+        card.dataset.hotelId = h.id;
 
         const nightTagsHtml = h.nights && h.nights.length
           ? h.nights.map(n => `<span class="night-tag">${fmtNight(n)}</span>`).join('')
@@ -456,6 +463,14 @@
                   <label>住宿名稱</label>
                   <input type="text" id="ef-name-${h.id}" value="${h.nameZh}" placeholder="住宿名稱">
                 </div>
+                <div class="edit-field full">
+                  <label>城市 / 地區</label>
+                  <input type="text" id="ef-city-${h.id}" value="${h.city||''}" placeholder="例：雷克雅維克 Reykjavik">
+                </div>
+                <div class="edit-field full">
+                  <label>地址</label>
+                  <input type="text" id="ef-addr-${h.id}" value="${h.address||''}" placeholder="例：Skálaförðustigur 21A, 101 Reykjavik">
+                </div>
                 <div class="edit-field">
                   <label>Check-In 時間</label>
                   <input type="text" id="ef-checkin-${h.id}" value="${h.checkIn}" placeholder="15:00">
@@ -494,6 +509,7 @@
               <div class="edit-actions">
                 <button class="btn primary" onclick="saveEdit('${h.id}')"><i class="fa-solid fa-check"></i> 儲存</button>
                 <button class="btn secondary" onclick="toggleEdit('${h.id}', false)">取消</button>
+                <button class="btn secondary" onclick="deleteHotel('${h.id}')" style="margin-left:auto;color:#e03030;border-color:#e03030;"><i class="fa-solid fa-trash"></i> 刪除此住宿</button>
               </div>
             </div>
 
@@ -515,17 +531,60 @@
       const h = hotels.find(x => x.id === id);
       if (!h) return;
       h.nameZh   = document.getElementById('ef-name-' + id).value.trim() || h.nameZh;
+      h.city     = (document.getElementById('ef-city-' + id) || {}).value?.trim() || h.city || '';
+      h.address  = (document.getElementById('ef-addr-' + id) || {}).value?.trim() || h.address || '';
       h.checkIn  = document.getElementById('ef-checkin-' + id).value.trim() || h.checkIn;
       h.checkOut = document.getElementById('ef-checkout-' + id).value.trim() || h.checkOut;
       h.booking  = document.getElementById('ef-booking-' + id).value.trim();
       h.phone    = document.getElementById('ef-phone-' + id).value.trim();
       h.website  = document.getElementById('ef-website-' + id).value.trim();
       h.notes    = document.getElementById('ef-notes-' + id).value.trim();
-      // nights are updated live via addNight/removeNight → no extra save needed for nights
-      saveMeta(hotels);       // save metadata only (not nights, those live in trip data)
-      renderCards();          // full re-render to reflect new data
-      toggleEdit(id, false);  // switch back to view mode
-      setTimeout(() => initMiniMap(id, h.lat, h.lng), 60);
+      saveMeta(hotels);
+      renderCards();
+      toggleEdit(id, false);
+      setTimeout(() => { if (h.lat && h.lng) initMiniMap(id, h.lat, h.lng); }, 60);
+    }
+
+    // ── Delete hotel ──────────────────────────────────────────────────
+    function deleteHotel(id) {
+      const h = hotels.find(x => x.id === id);
+      if (!confirm(`確定刪除「${h ? h.nameZh : id}」？（入住日期連結將一並清除）`)) return;
+      // Clear nights in trip data
+      if (h && h.nights) h.nights.forEach(d => setDayHotelInTrip(d, null));
+      // Remove from miniMaps
+      if (miniMaps[id]) { miniMaps[id].remove(); delete miniMaps[id]; }
+      hotels = hotels.filter(x => x.id !== id);
+      saveMeta(hotels, true);
+      renderCards();
+    }
+
+    // ── Add new hotel ──────────────────────────────────────────────────
+    function addHotel() {
+      const newId = 'h-custom-' + Date.now();
+      const newHotel = {
+        id: newId,
+        nameZh: '新住宿',
+        city: '',
+        address: '',
+        lat: 64.9631,
+        lng: -19.0208,
+        checkIn: '15:00',
+        checkOut: '11:00',
+        booking: '',
+        phone: '',
+        website: '',
+        notes: '',
+        nights: []
+      };
+      hotels.push(newHotel);
+      saveMeta(hotels, true);
+      renderCards();
+      // Scroll to new card and open edit
+      setTimeout(() => {
+        const card = document.querySelector(`[data-hotel-id="${newId}"]`);
+        if (card) card.scrollIntoView({ behavior:'smooth', block:'center' });
+        toggleEdit(newId, true);
+      }, 150);
     }
 
 
@@ -566,6 +625,7 @@
     renderCards();
     setTimeout(initFullMap, 100);
     document.getElementById('resetHotelsBtn').onclick = resetHotels;
+    document.getElementById('addHotelBtn').onclick = addHotel;
   </script>
 </body>
 </html>
